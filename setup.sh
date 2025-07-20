@@ -14,6 +14,14 @@ mkdir -p "$BACKUP_DIR"
 log()  { echo -e "\033[1;32m[+]\033[0m $*"; }
 warn() { echo -e "\033[1;33m[!]\033[0m $*"; }
 
+## check if using a compatible Bash version
+if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
+  warn "You're using an outdated Bash version ($BASH_VERSION)."
+  warn "This script requires Bash 4.0 or newer."
+  warn "Please re-run using a newer Bash interpreter if you encounter issues."
+  exit 1
+fi
+
 ## define source-target symlinks
 declare -A FILES=(
   ## bash
@@ -26,7 +34,8 @@ declare -A FILES=(
   ["$DOTFILES_DIR/tmux/tmux.conf"]="$HOME/.config/tmux/tmux.conf"
   ["$DOTFILES_DIR/tmux/bin"]="$HOME/.config/tmux/bin"
   ## ghostty
-  ["$DOTFILES_DIR/ghostty/config"]="$HOME/.ghostty/config"
+  # ["$DOTFILES_DIR/ghostty/config"]="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+  ["$DOTFILES_DIR/ghostty/config"]="$HOME/.config/ghostty/config"
 )
 
 ## create parent directories for target paths if they don't exist
