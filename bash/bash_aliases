@@ -1,19 +1,16 @@
 ## ======== FZF + FILE OPENING ========
 ## ====================================
 
-# Preview-selected file using bat or fallback to cat
 fzfs() {
   fzf --preview="bat --style=numbers --color=always {} || cat {}"
 }
 
-# Fuzzy file opener using nvim
 fzfn() {
   local file
   file=$(fzfs)
   [ -n "$file" ] && nvim "$file"
 }
 
-# Fuzzy file opener using VS Code
 fzfc() {
   local file
   file=$(fzfs)
@@ -36,3 +33,4 @@ alias dcodes='cd "$DHOME/Documents/Codes"'
 alias ddwn='cd "$DHOME/Downloads"'
 alias done='cd "$DHOME/OneDrive"'
 
+## .
