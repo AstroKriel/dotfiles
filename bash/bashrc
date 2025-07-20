@@ -1,0 +1,76 @@
+## ======== LOAD ALIASES ========
+## ==============================
+
+if [ -f ~/.bash_aliases ]; then
+  source ~/.bash_aliases
+fi
+
+## ======== OPENAI KEY ============
+## ================================
+
+export OPENAI_API_KEY=""
+
+## ======== CONFIGURE SHELL ENV ========
+## =====================================
+
+## silence macOS deprecation warning
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
+## terminal compatibility
+export TERM="xterm-256color"
+
+## enable command history
+HISTCONTROL=ignoredups
+
+## ======== CUSTOMISE SHELL PROMPT ========
+## ========================================
+
+lightblue="\033[38;5;232;48;5;45m"
+green="\e[32m"
+yellow="\033[38;5;232;48;5;220m"
+white_on_red="\033[38;5;255;48;5;160m"
+white="\e[00m"
+
+parse_git_branch() {
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || \
+             git describe --tags --exact-match 2>/dev/null || \
+             echo "detached")
+    echo "($branch)"
+  else
+    echo ""
+  fi
+}
+
+PS1=""
+PS1+="\n\[${lightblue}\] \w \[${white}\]"                  # full path
+PS1+="\n\[${green}\]\u\[${white}\]: "                      # username
+PS1+="\[${yellow}\] \W \[${white}\]"                       # current folder name
+PS1+="\[${white_on_red}\]\$(parse_git_branch)\[${white}\]" # git branch name
+PS1+="\[${white}\] -> "                                    # end symbol
+export PS1;
+
+## ======== INCLUDE HOMEBREW PATHS ========
+## ========================================
+
+CPATH=""
+CPATH+=:/opt/homebrew/include
+CPATH+=:/opt/homebrew/lib
+export CPATH
+
+LIBRARY_PATH=""
+LIBRARY_PATH+=:/opt/homebrew/lib
+export LIBRARY_PATH
+
+## ======== APPEND TO PATH ========
+## ================================
+
+PATH+=:/opt/homebrew/bin
+PATH+=:/Applications/VSCode.app/Contents/Resources/app/bin # for `code` command
+export PATH
+
+# PATH+=:AMReX_ROOT
+# PATH+=:/Library/TeX/texbin
+# PATH+=:/Users/necoturb/Library/Python/3.9/bin # for supermuc proxy
+
+## .

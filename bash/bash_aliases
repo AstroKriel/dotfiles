@@ -1,0 +1,38 @@
+## ======== FZF + FILE OPENING ========
+## ====================================
+
+# Preview-selected file using bat or fallback to cat
+fzfs() {
+  fzf --preview="bat --style=numbers --color=always {} || cat {}"
+}
+
+# Fuzzy file opener using nvim
+fzfn() {
+  local file
+  file=$(fzfs)
+  [ -n "$file" ] && nvim "$file"
+}
+
+# Fuzzy file opener using VS Code
+fzfc() {
+  local file
+  file=$(fzfs)
+  [ -n "$file" ] && code "$file"
+}
+
+## ======== LS ALIASES ========
+## ============================
+
+alias lsl='ls -lhF --color=auto'
+alias lst='ls -lt --color=auto'
+alias lsa='ls -alhF --color=auto'
+
+## ======== QUICK DIRECTORY SHORTCUTS (RELATIVE TO $HOME) ========
+## ===============================================================
+
+export DHOME="$HOME"
+alias dhome='cd "$DHOME"'
+alias dcodes='cd "$DHOME/Documents/Codes"'
+alias ddwn='cd "$DHOME/Downloads"'
+alias done='cd "$DHOME/OneDrive"'
+

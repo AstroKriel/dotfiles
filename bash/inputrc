@@ -1,0 +1,19 @@
+$include /etc/inputrc
+
+## Enable case-insensitive tab completion (e.g., 'git sta' matches 'GitStatus')
+## But still prioritize exact case matches when available
+set completion-map-case on
+set completion-ignore-case on
+
+## Move by word with Option+←/→ (VS Code & some emulators)
+"\e[1;3D": backward-word
+"\e[1;3C": forward-word
+
+## Allow up/down arrow to search history based on current line
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+## Make tab-completion nicer (e.g., show all matches immediately)
+set show-all-if-ambiguous on
+set menu-complete-display-prefix on
+
