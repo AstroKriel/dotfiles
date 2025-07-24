@@ -1,14 +1,11 @@
+alias reload_bash='source ~/.bashrc && echo "Reloaded .bashrc!"'
+
 ## ======== LOAD ALIASES ========
 ## ==============================
 
 if [ -f ~/.bash_aliases ]; then
   source ~/.bash_aliases
 fi
-
-## ======== OPENAI KEY ============
-## ================================
-
-export OPENAI_API_KEY=""
 
 ## ======== CONFIGURE SHELL ENV ========
 ## =====================================
@@ -22,6 +19,11 @@ export TERM="xterm-256color"
 ## enable command history
 HISTCONTROL=ignoredups
 
+## only check for updates once per day
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_AUTO_UPDATE_SECS=86400
+
+
 ## ======== CUSTOMISE SHELL PROMPT ========
 ## ========================================
 
@@ -33,9 +35,10 @@ white="\e[00m"
 
 parse_git_branch() {
   if git rev-parse --is-inside-work-tree &>/dev/null; then
-    branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || \
-             git describe --tags --exact-match 2>/dev/null || \
-             echo "detached")
+    branch=$(\
+      git symbolic-ref --quiet --short HEAD 2>/dev/null || \
+      git describe --tags --exact-match 2>/dev/null || \
+      echo "detached")
     echo "($branch)"
   else
     echo ""
@@ -50,27 +53,23 @@ PS1+="\[${white_on_red}\]\$(parse_git_branch)\[${white}\]" # git branch name
 PS1+="\[${white}\] -> "                                    # end symbol
 export PS1;
 
-## ======== INCLUDE HOMEBREW PATHS ========
-## ========================================
+## ======== APPEND TO PATHS ========
+## =================================
 
-CPATH=""
-CPATH+=:/opt/homebrew/include
-CPATH+=:/opt/homebrew/lib
-export CPATH
+add_to_path() {
+  local varname="$1"
+  local newpath="$2"
+  case ":${!varname}:" in
+    *":$newpath:"*) ;; # already in path, do nothing
+    *) export "$varname=${!varname:+${!varname}:}$newpath" ;;
+  esac
+}
 
-LIBRARY_PATH=""
-LIBRARY_PATH+=:/opt/homebrew/lib
-export LIBRARY_PATH
-
-## ======== APPEND TO PATH ========
-## ================================
-
-PATH+=:/opt/homebrew/bin
-PATH+=:/Applications/VSCode.app/Contents/Resources/app/bin # for `code` command
-export PATH
-
-# PATH+=:AMReX_ROOT
-# PATH+=:/Library/TeX/texbin
-# PATH+=:/Users/necoturb/Library/Python/3.9/bin # for supermuc proxy
+add_to_path CPATH /opt/homebrew/include
+add_to_path CPATH /opt/homebrew/lib
+add_to_path LIBRARY_PATH /opt/homebrew/lib
+add_to_path PATH /opt/homebrew/bin
+add_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin # for `code` command
+# add_to_path PATH /Users/necoturb/Library/Python/3.9/bin # for supermuc proxy
 
 ## .
