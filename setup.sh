@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-## exit if any unset variable is used
 set -u
+
+## check for dry-run mode
+DRY_RUN=false
+[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=true
+if $DRY_RUN; then
+  echo -e "\033[1;34m[~]\033[0m Running in DRY-RUN mode: no changes will be made\n"
+fi
 
 ## resolve absolute path to this script’s directory (your dotfiles repo root)
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-## create a timestamped backup directory in case any files need to be moved
-BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
-mkdir -p "$BACKUP_DIR"
 
 ## logging functions
 log()  { echo -e "\033[1;32m[+]\033[0m $*"; }
@@ -18,7 +20,6 @@ warn() { echo -e "\033[1;33m[!]\033[0m $*"; }
 if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
   warn "You're using an outdated Bash version ($BASH_VERSION)."
   warn "This script requires Bash 4.0 or newer."
-  warn "Please re-run using a newer Bash interpreter if you encounter issues."
   exit 1
 fi
 
@@ -34,8 +35,10 @@ declare -A FILES=(
   ["$DOTFILES_DIR/tmux/tmux.conf"]="$HOME/.config/tmux/tmux.conf"
   ["$DOTFILES_DIR/tmux/bin"]="$HOME/.config/tmux/bin"
   ## ghostty
-  # ["$DOTFILES_DIR/ghostty/config"]="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
   ["$DOTFILES_DIR/ghostty/config"]="$HOME/.config/ghostty/config"
+  ## vscode
+  ["$DOTFILES_DIR/vscode/settings.json"]="$HOME/Library/Application Support/Code/User/settings.json"
+  ["$DOTFILES_DIR/vscode/keybindings.json"]="$HOME/Library/Application Support/Code/User/keybindings.json"
 )
 
 ## create parent directories for target paths if they don't exist
@@ -46,7 +49,23 @@ create_parent_dir() {
   [[ -d "$parent" ]] || mkdir -p "$parent"
 }
 
-## counters for summary reporting
+## backup existing non-symlink files by renaming
+backup_existing() {
+  local path="$1"
+  local backup="${path}.pre-dotfiles"
+
+  if [[ -e "$backup" ]]; then
+    warn "Removing existing backup: $backup"
+    $DRY_RUN || rm -rf "$backup"
+  fi
+
+  if $DRY_RUN; then
+    log "[dry-run] Would rename $path -> $backup"
+  else
+    mv "$path" "$backup" && log "Renamed $path -> $backup"
+  fi
+}
+
 success_count=0
 fail_count=0
 failed_paths=()
@@ -68,45 +87,59 @@ for source_path in "${sorted_keys[@]}"; do
   target_path="${FILES[$source_path]}"
   log "Processing $source_path -> $target_path"
 
-  ## ensure target directory exists
   create_parent_dir "$target_path"
 
-  ## if a non-symlink file already exists, back it up
-  if [[ -e "$target_path" && ! -L "$target_path" ]]; then
-    warn "Backing up existing file: $target_path -> $BACKUP_DIR"
-    mv "$target_path" "$BACKUP_DIR/" || {
-      warn "Failed to backup $target_path"
-      ((fail_count++))
-      failed_paths+=("$target_path")
-      continue
-    }
-
-  ## if target is a symlink, remove it
-  elif [[ -L "$target_path" ]]; then
-    rm -f "$target_path" || {
-      warn "Failed to remove existing symlink $target_path"
-      ((fail_count++))
-      failed_paths+=("$target_path")
-      continue
-    }
+  ## skip if already correctly linked
+  if [[ -L "$target_path" && "$(readlink "$target_path")" == "$source_path" ]]; then
+    log "Already correctly linked: $target_path"
+    continue
   fi
 
-  ## ensure the source file actually exists
+  ## if existing file/dir, back it up
+  if [[ -e "$target_path" && ! -L "$target_path" ]]; then
+    warn "Backing up existing file: $target_path"
+    backup_existing "$target_path" || {
+      warn "Failed to back up $target_path"
+      ((fail_count++))
+      failed_paths+=("$target_path")
+      continue
+    }
+
+  ## if existing symlink, remove it
+  elif [[ -L "$target_path" ]]; then
+    if $DRY_RUN; then
+      log "[dry-run] Would remove existing symlink: $target_path"
+    else
+      rm -f "$target_path" || {
+        warn "Failed to remove symlink: $target_path"
+        ((fail_count++))
+        failed_paths+=("$target_path")
+        continue
+      }
+    fi
+  fi
+
+  ## ensure source exists
   if [[ ! -e "$source_path" ]]; then
-    warn "Source file does not exist: $source_path"
+    warn "Source does not exist: $source_path"
     ((fail_count++))
     failed_paths+=("$target_path")
     continue
   fi
 
-  ## attempt to create the symlink
-  log "Linking $source_path -> $target_path"
-  if ln -s "$source_path" "$target_path"; then
+  ## create the symlink
+  if $DRY_RUN; then
+    log "[dry-run] Would link $source_path -> $target_path"
     ((success_count++))
   else
-    warn "Failed to link $source_path -> $target_path"
-    ((fail_count++))
-    failed_paths+=("$target_path")
+    log "Linking $source_path -> $target_path"
+    if ln -s "$source_path" "$target_path"; then
+      ((success_count++))
+    else
+      warn "Failed to link $source_path -> $target_path"
+      ((fail_count++))
+      failed_paths+=("$target_path")
+    fi
   fi
 done
 
@@ -125,16 +158,19 @@ fi
 ## install TPM if not already installed
 TPM_DIR="$HOME/.config/tmux/plugins/tpm"
 if [[ ! -d "$TPM_DIR" ]]; then
-  log "Installing TPM (Tmux Plugin Manager)..."
-  git clone https://github.com/tmux-plugins/tpm "$TPM_DIR" || {
-    warn "Failed to install TPM"
-    ((fail_count++))
-    failed_paths+=("$TPM_DIR")
-  }
+  if $DRY_RUN; then
+    log "[dry-run] Would install TPM in $TPM_DIR"
+  else
+    log "Installing TPM (Tmux Plugin Manager)..."
+    git clone https://github.com/tmux-plugins/tpm "$TPM_DIR" || {
+      warn "Failed to install TPM"
+      ((fail_count++))
+      failed_paths+=("$TPM_DIR")
+    }
+  fi
 else
   log "TPM is already installed under $TPM_DIR"
 fi
-
 
 log "Finished setting up dotfiles."
 
