@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+## exit if any unset variable is used
 set -u
 
 ## check for dry-run mode
