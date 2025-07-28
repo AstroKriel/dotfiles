@@ -15,6 +15,7 @@ export BASH_SILENCE_DEPRECATION_WARNING=1
 
 ## terminal compatibility
 export TERM="xterm-256color"
+export COLORTERM="truecolor"
 
 ## enable command history
 HISTCONTROL=ignoredups
@@ -61,14 +62,18 @@ add_to_path() {
   local newpath="$2"
   case ":${!varname}:" in
     *":$newpath:"*) ;; # already in path, do nothing
-    *) export "$varname=${!varname:+${!varname}:}$newpath" ;;
+    # *) export "$varname=${!varname:+${!varname}:}$newpath" ;; # append
+    *) export "$varname=$newpath${!varname:+:${!varname}}" ;; # prepend
   esac
 }
 
 add_to_path CPATH /opt/homebrew/include
 add_to_path CPATH /opt/homebrew/lib
+
 add_to_path LIBRARY_PATH /opt/homebrew/lib
+
 add_to_path PATH /opt/homebrew/bin
+add_to_path PATH /Library/TeX/texbin
 add_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin # for `code` command
 # add_to_path PATH /Users/necoturb/Library/Python/3.9/bin # for supermuc proxy
 
