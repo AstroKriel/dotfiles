@@ -8,12 +8,20 @@ vim.g.mapleader = " "
 -- | options |
 -- -----------
 
+-- ui
 vim.opt.termguicolors = true
-vim.opt.clipboard = "unnamedplus"
+vim.opt.wrap = false
+vim.opt.mouse = "a"
+
+-- line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
+
+-- clipboard
+vim.opt.clipboard = "unnamedplus"
+
+-- syntax
 vim.cmd("syntax on")
-vim.opt.mouse = "a"
 
 -- ----------------
 -- | key mappings |
