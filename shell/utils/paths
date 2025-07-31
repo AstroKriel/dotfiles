@@ -1,4 +1,4 @@
-## add to env-var if not already present
+## add directory to an env-var if its not already present (bash/zsh agnostic)
 add_to_path() {
   local varname="$1"
   local newpath="$2"
@@ -9,7 +9,7 @@ add_to_path() {
     current_value="${!varname}"
   fi
   case ":$current_value:" in
-    *":$newpath:"*) ;;  # already present
+    *":$newpath:"*) ;; # ignore if already present
     *) export "$varname=$newpath${current_value:+:$current_value}" ;;
   esac
 }

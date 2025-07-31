@@ -1,5 +1,5 @@
 ## reload
-alias reload_zsh="source $HOME/.zshrc && echo 'Reloaded .zshrc!'"
+alias reload_zsh="source $HOME/.zshrc && echo 'Reloaded ~/.zshrc'"
 
 ## source file only if it exists
 source_if_present() {

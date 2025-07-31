@@ -9,3 +9,5 @@ fzfs() {
 
 fzfn() { local file=$(fzfs "$1"); [[ -n $file ]] && nvim "$file"; }
 fzfc() { local file=$(fzfs "$1"); [[ -n $file ]] && code "$file"; }
+
+## .

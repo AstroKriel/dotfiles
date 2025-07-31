@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ---------------------
-# SETTINGS
-# ---------------------
+## ---------------------
+## SETTINGS
+## ---------------------
 
 ## default dotfiles location, with override support
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
@@ -11,9 +11,9 @@ SHELL_DIR="$DOTFILES_DIR/shell"
 BACKUP_DIR="$HOME/.dotfiles_backup"
 DRY_RUN=0
 
-# ---------------------
-# ARGUMENT PARSING
-# ---------------------
+## ---------------------
+## ARGUMENT PARSING
+## ---------------------
 
 ## expect a shell name and optional --dry-run flag
 if [[ $# -lt 1 || $# -gt 2 ]]; then
@@ -28,9 +28,9 @@ if [[ $# -eq 1 && "$1" == "--dry-run" ]]; then
   DRY_RUN=1
 fi
 
-# ---------------------
-# HELPERS
-# ---------------------
+## ---------------------
+## HELPERS
+## ---------------------
 
 ## backup existing file and replace with symlink to source_path
 backup_and_link() {
@@ -75,8 +75,6 @@ remove_other_shell_configs() {
   done
 }
 
-
-
 ## link bash-related dotfiles from repo into home directory
 link_bash() {
   echo "Linking Bash dotfiles..."
@@ -96,9 +94,9 @@ link_zsh() {
 
 ## link shell-agnostic utility files (used by both shells)
 link_shared_utils() {
-  backup_and_link "$SHELL_DIR/utils/env"       "$HOME/.shell_options"
   backup_and_link "$SHELL_DIR/utils/aliases"   "$HOME/.shell_aliases"
   backup_and_link "$SHELL_DIR/utils/functions" "$HOME/.shell_functions"
+  backup_and_link "$SHELL_DIR/utils/env"       "$HOME/.shell_options"
   backup_and_link "$SHELL_DIR/utils/paths"     "$HOME/.shell_paths"
 }
 
@@ -127,9 +125,9 @@ change_login_shell() {
   fi
 }
 
-# ---------------------
-# MAIN
-# ---------------------
+## ---------------------
+## MAIN
+## ---------------------
 
 case "$shell_choice" in
   bash)

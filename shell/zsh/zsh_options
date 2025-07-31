@@ -1,34 +1,57 @@
-## history
+## ---------------------
+## History Configuration
+## ---------------------
+
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=200000
-setopt HIST_IGNORE_DUPS
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_REDUCE_BLANKS
-setopt APPEND_HISTORY
-setopt SHARE_HISTORY
-setopt EXTENDED_HISTORY
 
-## shell quality of life
-setopt AUTO_CD
+setopt HIST_IGNORE_DUPS     # ignore duplicate commands in history
+setopt HIST_IGNORE_ALL_DUPS # remove old duplicates, keep only most recent
+setopt HIST_REDUCE_BLANKS   # remove superfluous spaces from commands
+setopt APPEND_HISTORY       # append to history file, don’t overwrite
+setopt SHARE_HISTORY        # share history across terminals immediately
+setopt EXTENDED_HISTORY     # record timestamps with commands
+
+## ---------------------
+## Shell Behavior Tweaks
+## ---------------------
+
 setopt INTERACTIVE_COMMENTS
 setopt NO_BEEP
 
-## keybinds
+## ---------------------
+## Keybindings
+## ---------------------
+
+## jump over words with option + arrow-keys
+## for compatibility with integrated vscode terminal
+bindkey "\e[1;3D" backward-word
+bindkey "\e[1;3C" forward-word
+## for compatibility with other terminals
 bindkey "^[^[[D" backward-word
 bindkey "^[^[[C" forward-word
-autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+
+## up/down arrows search history by prefix
+autoload -Uz up-line-or-beginning-search
+autoload -Uz down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search
 bindkey "^[[B" down-line-or-beginning-search
 
-## tab-completion
-zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+## ---------------------
+## Tab Completion Settings
+## ---------------------
 
+zstyle ':completion:*' menu select                       # interactive menu-like completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'      # case-insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"  # use colors in completions
+
+## ---------------------
 ## Homebrew
+## ---------------------
+
 export HOMEBREW_NO_ENV_HINTS=1
 
 ## .
