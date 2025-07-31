@@ -1,0 +1,19 @@
+## reload
+alias reload_bash="source $HOME/.bashrc && echo 'Reloaded .bashrc!'"
+
+## helper function
+source_if_present() {
+  [[ -f "$1" ]] && source "$1"
+}
+
+## source modular components if present
+source_if_present "$HOME/.bash_options"
+source_if_present "$HOME/.bash_prompt"
+
+## source shared utils if present
+source_if_present "$HOME/.shell_env"
+source_if_present "$HOME/.shell_aliases"
+source_if_present "$HOME/.shell_functions"
+source_if_present "$HOME/.shell_paths"
+
+## .

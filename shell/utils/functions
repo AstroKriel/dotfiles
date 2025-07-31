@@ -1,0 +1,11 @@
+## ======== FZF + FILE OPENING ========
+## ====================================
+
+fzfs() {
+  local dir="${1:-.}"
+  find "$dir" -type f 2>/dev/null | \
+    fzf --preview="bat --style=numbers --color=always {} || cat {}"
+}
+
+fzfn() { local file=$(fzfs "$1"); [[ -n $file ]] && nvim "$file"; }
+fzfc() { local file=$(fzfs "$1"); [[ -n $file ]] && code "$file"; }

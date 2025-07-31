@@ -1,0 +1,15 @@
+## history
+export HISTSIZE=100000
+export HISTFILESIZE=200000
+export HISTCONTROL=ignoredups:erasedups             # skip duplicate commands
+export HISTTIMEFORMAT="%F %T "                      # timestamp commands
+shopt -s histappend                                 # append instead of overwriting
+export PROMPT_COMMAND="history -a; $PROMPT_COMMAND" # sync history across sessions
+
+## suppress bash version warnings on macOS
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
+## ignore homebrew env hints
+export HOMEBREW_NO_ENV_HINTS=1
+
+## .

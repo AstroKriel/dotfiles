@@ -1,0 +1,30 @@
+## add to env-var if not already present
+add_to_path() {
+  local varname="$1"
+  local newpath="$2"
+  local current_value
+  if [[ -n "$ZSH_VERSION" ]]; then
+    current_value="${(P)varname}"
+  else
+    current_value="${!varname}"
+  fi
+  case ":$current_value:" in
+    *":$newpath:"*) ;;  # already present
+    *) export "$varname=$newpath${current_value:+:$current_value}" ;;
+  esac
+}
+
+
+## extend compiler include paths
+add_to_path CPATH /opt/homebrew/include
+add_to_path CPATH /opt/homebrew/lib
+
+## extend library search paths
+add_to_path LIBRARY_PATH /opt/homebrew/lib
+
+## extend executable search paths
+add_to_path PATH /opt/homebrew/bin
+add_to_path PATH /Library/TeX/texbin
+add_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin
+
+## .
