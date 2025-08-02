@@ -4,11 +4,11 @@ from pathlib import Path
 from utils.logging import log_message
 from utils.shell_ops import create_symlink, ensure_dir_exists
 
-SCRIPT_NAME = Path(__file__).name
+SCRIPT_NAME  = Path(__file__).name
 DOTFILES_DIR = Path(__file__).resolve().parent
-INPUT_DIR = DOTFILES_DIR / "vscode" / "config"
-OUTPUT_FILE = DOTFILES_DIR / "vscode" / "settings.json"
-TARGET_FILE = Path.home() / "Library/Application Support/Code/User/settings.json" # macOS
+INPUT_DIR    = DOTFILES_DIR / "vscode" / "config"
+OUTPUT_FILE  = DOTFILES_DIR / "vscode" / "settings.json"
+TARGET_FILE  = Path.home() / "Library/Application Support/Code/User/settings.json" # macOS
 
 def _log_message(message: str):
   log_message(script_name=SCRIPT_NAME, message=message)

@@ -1,7 +1,7 @@
 [
   {
     "key": "cmd+shift+e",
-  "command": "workbench.action.toggleSidebarVisibility"
+    "command": "workbench.action.toggleSidebarVisibility"
   },
   {
     "key": "cmd+shift+r",

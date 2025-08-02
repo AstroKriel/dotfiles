@@ -5,7 +5,7 @@ from utils.logging import log_message
 from utils.shell_ops import create_symlink, ensure_dir_exists
 
 SCRIPT_NAME = Path(__file__).name
-TOOLS_DIR = Path(__file__).resolve().parent / "tools"
+TOOLS_DIR   = Path(__file__).resolve().parent / "tools"
 HOME_CONFIG_DIR = Path.home() / ".config"
 
 TOOL_CONFIGS = {
