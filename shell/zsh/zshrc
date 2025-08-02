@@ -1,5 +1,5 @@
 ## reload
-alias reload_zsh="source $HOME/.zshrc && echo 'Reloaded ~/.zshrc'"
+alias reload_zsh="source $HOME/.zshrc && echo 'Reloaded: ~/.zshrc'"
 
 ## source file only if it exists
 source_if_present() {
@@ -11,9 +11,9 @@ source_if_present "$HOME/.zsh_options"
 source_if_present "$HOME/.zsh_prompt"
 
 ## source shared utils if present
-source_if_present "$HOME/.shell_options"
 source_if_present "$HOME/.shell_aliases"
 source_if_present "$HOME/.shell_functions"
+source_if_present "$HOME/.shell_options"
 source_if_present "$HOME/.shell_paths"
 
 ## initialize completion

@@ -3,7 +3,7 @@ export HISTSIZE=100000
 export HISTFILESIZE=200000
 export HISTCONTROL=ignoredups:erasedups             # skip duplicate commands
 export HISTTIMEFORMAT="%F %T "                      # timestamp commands
-shopt -s histappend                                 # append instead of overwriting
+shopt -s histappend                                 # append instead of overwrite
 export PROMPT_COMMAND="history -a; $PROMPT_COMMAND" # sync history across sessions
 
 ## suppress bash version warnings on macOS

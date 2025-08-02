@@ -13,8 +13,13 @@ parse_git_branch() {
   echo " ($branch)"
 }
 
-PROMPT=$'\n[%*] %F{cyan}%~%f'               # timestamp and full path
-PROMPT+=$'\n%F{green}%n%f: %F{yellow}%1~%f' # user: short dir
-PROMPT+=$'%F{red}$(parse_git_branch)%f -> ' # git info and prompt symbol
+# PROMPT=$'\n[%*] %F{cyan}%~%f'               # line 1: timestamp + full path
+# PROMPT+=$'\n%F{green}%n%f: %F{yellow}%1~%f' # line 2: user + short dir
+# PROMPT+=$'%F{red}$(parse_git_branch)%f -> ' # line 2: git info + prompt symbol
+
+PROMPT=$'\n%F{cyan}%~%f'                         # line 1: full path
+PROMPT+=$'\n[%*] %F{green}%n%f: %F{yellow}%1~%f' # line 2: timestamp + user info
+PROMPT+=$'%F{red}$(parse_git_branch)%f'          # line 2: git info
+PROMPT+=$'\n-> '                                 # line 3: prompt symbol
 
 ## .

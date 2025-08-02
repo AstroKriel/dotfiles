@@ -24,6 +24,9 @@ setopt NO_BEEP
 ## Keybindings
 ## ---------------------
 
+## redefine word characters to treat _ / . as word boundaries
+WORDCHARS='*?-[]~=&;!#$%^(){}<>'
+
 ## jump over words with option + arrow-keys
 ## for compatibility with integrated vscode terminal
 bindkey "\e[1;3D" backward-word
@@ -44,9 +47,9 @@ bindkey "^[[B" down-line-or-beginning-search
 ## Tab Completion Settings
 ## ---------------------
 
-zstyle ':completion:*' menu select                       # interactive menu-like completion
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'      # case-insensitive completion
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"  # use colors in completions
+zstyle ':completion:*' menu select                      # interactive menu-like completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'     # case-insensitive completion
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # use colors in completions
 
 ## ---------------------
 ## Homebrew

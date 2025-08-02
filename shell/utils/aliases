@@ -3,8 +3,9 @@ alias lsl='ls -lhF --color=auto'
 alias lst='ls -lt --color=auto'
 alias lsa='ls -alhF --color=auto'
 
-## shortcut
+## short-hand commands
 alias da='deactivate'
+alias rsz='rsync -avz' # rsync with archive, verbose, compression
 
 ## useful directories
 export DHOME="$HOME"

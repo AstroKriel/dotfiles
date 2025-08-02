@@ -14,7 +14,6 @@ add_to_path() {
   esac
 }
 
-
 ## extend compiler include paths
 add_to_path CPATH /opt/homebrew/include
 add_to_path CPATH /opt/homebrew/lib
