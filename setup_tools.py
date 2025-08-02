@@ -10,6 +10,7 @@ HOME_CONFIG_DIR = Path.home() / ".config"
 
 TOOL_CONFIGS = {
   TOOLS_DIR / "ghostty" : HOME_CONFIG_DIR / "ghostty",
+  TOOLS_DIR / "kitty"   : HOME_CONFIG_DIR / "kitty",
   TOOLS_DIR / "nvim"    : HOME_CONFIG_DIR / "nvim",
   TOOLS_DIR / "tmux"    : HOME_CONFIG_DIR / "tmux",
 }
