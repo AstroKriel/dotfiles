@@ -1,0 +1,4 @@
+{
+  "gitlens.advanced.messages.suppressGitVersionWarning": true,
+  "gitlens.codeLens.includeSingleLineSymbols": false
+}

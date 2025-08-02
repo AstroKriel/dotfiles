@@ -1,4 +1,5 @@
 alefragnani.project-manager
+compulim.indent4to2
 donjayamanne.githistory
 eamodio.gitlens
 h5web.vscode-h5web
@@ -16,4 +17,3 @@ ms-vscode.cpptools
 ms-vscode.cpptools-extension-pack
 ms-vscode.cpptools-themes
 ms-vscode.remote-explorer
-tomoki1207.pdf

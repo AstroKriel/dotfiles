@@ -1,113 +1,32 @@
 {
-  "workbench.editorAssociations": {
-    "*.ipynb": "jupyter-notebook"
-  },
-  "workbench.tree.indent": 20,
-  "workbench.tree.renderIndentGuides": "always",
-  "workbench.colorCustomizations": {
-    "editorBracketMatch.border": "#f3d033a1",
-    "editorWhitespace.foreground": "#ffffff2f",
-    "minimap.errorHighlight": "#e9251b9d",
-    "minimap.findMatchHighlight": "#ffa631bc",
-    "minimap.selectionHighlight": "#00ff40b4",
-    "minimap.warningHighlight": "#b737b59f",
-    "terminal.background": "#1c1f22",
-    "terminal.findMatchBackground": "#d13d3d49",
-    "terminal.findMatchBorder": "#ff0000",
-    "terminal.findMatchHighlightBackground": "#d1cc3d49",
-    "terminal.findMatchHighlightBorder": "#fff700",
-    "terminal.foreground": "#ececec",
-    "terminal.selectionBackground": "#bcbcbc48"
-  },
-  "workbench.panel.defaultLocation": "right",
-  "workbench.colorTheme": "Default Dark+",
-  "workbench.editor.enablePreview": false,
-  "security.workspace.trust.untrustedFiles": "open",
-  "explorer.sortOrder": "type",
-  "explorer.confirmDragAndDrop": false,
-  "explorer.confirmDelete": false,
-
-  "terminal.integrated.fontWeight": "normal",
-  "terminal.integrated.copyOnSelection": true,
-  "terminal.integrated.sendKeybindingsToShell": true,
-  "terminal.integrated.scrollback": 50000,
-  "terminal.integrated.shellIntegration.enabled": false,
-  "terminal.integrated.defaultProfile.osx": "bash",
-
-  "editor.minimap.renderCharacters": true,
-  "editor.minimap.size": "proportional",
-  "editor.minimap.enabled": false,
-  "editor.suggestSelection": "first",
-  "editor.renderControlCharacters": true,
+  "editor.detectIndentation": true,
+  "editor.insertSpaces": true,
   "editor.renderWhitespace": "boundary",
   "editor.guides.bracketPairs": "active",
   "editor.guides.bracketPairsHorizontal": "active",
   "editor.guides.indentation": true,
-  "editor.detectIndentation": false,
-  "editor.insertSpaces": true,
-  "editor.tabSize": 2,
-  "editor.wordWrap": "on",
-  "editor.wordWrapColumn": 100,
   "editor.fontSize": 10.5,
-  "editor.glyphMargin": false,
-
-  "files.autoSave": "afterDelay",
-  "files.associations": {
-    "*.tex": "latex",
-    "*.py": "python"
-  },
-
   "diffEditor.ignoreTrimWhitespace": false,
-
-  "indentRainbow.colors": [
-    "rgba(255,255,64,0.07)",
-    "rgba(127,255,127,0.07)",
-    "rgba(255,127,255,0.07)",
-    "rgba(79,236,236,0.07)"
-  ],
-  "indentRainbow.errorColor": "rgba(255,255,230,0.3)",
-  "indentRainbow.includedLanguages": ["python", "cpp", "json"],
-  "indentRainbow.ignoreLinePatterns": [
-    "/[ \t]* [*]/g",
-    "/[ \t]+[/]{2}/g"
-  ],
-  "indentRainbow.tabmixColor": "rgba(128,32,96,0.6)",
-  "indentRainbow.updateDelay": 100,
-
-  "julia.enableTelemetry": true,
-  "julia.symbolCacheDownload": true,
-
-  "jupyter.askForKernelRestart": false,
-  "jupyter.widgetScriptSources": [
-    "jsdelivr.com",
-    "unpkg.com"
-  ],
-
-  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-  "python.analysis.extraPaths": [
-    "${workspaceFolder}/.venv/lib/python3.12/site-packages"
-  ],
-  "python.analysis.typeCheckingMode": "standard",
+  "files.autoSave": "afterDelay",
+  "gitlens.advanced.messages.suppressGitVersionWarning": true,
+  "gitlens.codeLens.includeSingleLineSymbols": false,
   "python.languageServer": "Pylance",
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": false,
   "python.terminal.activateEnvironment": false,
-  "python.venvFolders": [
-    ".",
-    "./.venv"
-  ],
-
-  "[python]": {
-    "editor.formatOnType": true
-  },
-
   "remote.SSH.showLoginTerminal": true,
-  "remote.SSH.logLevel": "info",
+  "remote.SSH.logLevel": "trace",
   "remote.SSH.experimental.chat": false,
-
-  "git.ignoreLegacyWarning": true,
-  "gitlens.advanced.messages": {
-    "suppressGitVersionWarning": true
-  },
-  "gitlens.codeLens.includeSingleLineSymbols": false
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.sendKeybindingsToShell": true,
+  "terminal.integrated.scrollback": 50000,
+  "terminal.integrated.shellIntegration.enabled": false,
+  "workbench.colorTheme": "Default Dark+",
+  "explorer.sortOrder": "type",
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  "workbench.tree.indent": 20,
+  "workbench.tree.renderIndentGuides": "always",
+  "workbench.panel.defaultLocation": "right",
+  "workbench.editor.enablePreview": false
 }

@@ -1,0 +1,11 @@
+{
+  "editor.detectIndentation": true,
+  "editor.insertSpaces": true,
+  "editor.renderWhitespace": "boundary",
+  "editor.guides.bracketPairs": "active",
+  "editor.guides.bracketPairsHorizontal": "active",
+  "editor.guides.indentation": true,
+  "editor.fontSize": 10.5,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "files.autoSave": "afterDelay"
+}

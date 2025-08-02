@@ -1,0 +1,10 @@
+{
+  "workbench.colorTheme": "Default Dark+",
+  "explorer.sortOrder": "type",
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  "workbench.tree.indent": 20,
+  "workbench.tree.renderIndentGuides": "always",
+  "workbench.panel.defaultLocation": "right",
+  "workbench.editor.enablePreview": false
+}

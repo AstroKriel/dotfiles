@@ -1,0 +1,5 @@
+{
+  "remote.SSH.showLoginTerminal": true,
+  "remote.SSH.logLevel": "trace",
+  "remote.SSH.experimental.chat": false
+}

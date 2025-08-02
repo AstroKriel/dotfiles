@@ -1,0 +1,6 @@
+{
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.sendKeybindingsToShell": true,
+  "terminal.integrated.scrollback": 50000,
+  "terminal.integrated.shellIntegration.enabled": false
+}
