@@ -96,7 +96,7 @@ def _rename_with_timestamp(
   if not target_path.exists() and not target_path.is_symlink():
     return None
   ## generate a timestamped backup name
-  timestamp = get_timestamp()
+  timestamp = get_timestamp().replace(" ", ".")
   backup_path = target_path.with_stem(f"{target_path.stem}.{timestamp}")
   if dry_run:
     log_message(
@@ -147,7 +147,7 @@ def create_symlink(
     )
     return
   ## check types match before replacing
-  if not _types_match(source_path, target_path):
+  if not _types_match(source_path=source_path, target_path=target_path):
     log_message(
       script_name = script_name,
       message     = f"Skipping due to a type mismatch. {target_path} is {_get_path_type(target_path)}, "
