@@ -22,6 +22,7 @@ def _log_message(message: str):
   )
 
 def remove_file_if_exists(
+    *,
     target_path : Path,
     dry_run     : bool
   ):
@@ -33,6 +34,7 @@ def remove_file_if_exists(
     )
 
 def change_login_shell(
+    *,
     shell   : str,
     dry_run : bool = False
   ):
