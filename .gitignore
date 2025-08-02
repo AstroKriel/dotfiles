@@ -4,4 +4,7 @@
 ## python bytecode
 __pycache__/
 
+## tmux plugins
+tools/tmux/plugins/
+
 ## .
