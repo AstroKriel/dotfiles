@@ -17,6 +17,7 @@
   "remote.SSH.showLoginTerminal": true,
   "remote.SSH.logLevel": "trace",
   "remote.SSH.experimental.chat": false,
+  "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.copyOnSelection": true,
   "terminal.integrated.sendKeybindingsToShell": true,
   "terminal.integrated.scrollback": 50000,
