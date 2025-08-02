@@ -1,3 +1,10 @@
+-- make all lsp floating windows use a rounded white border
+local float_opts = { border = "rounded", max_width=80, focusable = false }
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, float_opts)
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, float_opts)
+vim.api.nvim_set_hl(0, "NormalFloat",  { bg = "black" })
+vim.api.nvim_set_hl(0, "FloatBorder", { fg = "white", bg = "black" })
+
 -- create capabilities using standard nvim-cmp support
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
