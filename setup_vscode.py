@@ -1,4 +1,5 @@
 import json
+import shutil
 import argparse
 from pathlib import Path
 from utils.logging import log_message
@@ -23,15 +24,24 @@ def merge_config_settings() -> dict:
 
 def main():
   ## parse user inputs
-  parser = argparse.ArgumentParser(description="Generate and symlink VS Code settings.")
+  parser = argparse.ArgumentParser(description="Generate and symlink vs-code settings.")
   parser.add_argument("--dry-run", action="store_true", help="Print actions without applying them")
   args = parser.parse_args()
   dry_run = args.dry_run
-  _log_message("Started VS Code setup")
+  _log_message("Started running the vs-code setup")
+  ## check vs-code has been installed
+  if shutil.which("code"):
+    _log_message("Found vs-code (code) in your `$PATH`.")
+  else:
+    _log_message(
+      "vs-code was not found in your `$PATH`.\n"
+      "Please install it from https://code.visualstudio.com/\n"
+      "or via: `brew install --cask visual-studio-code`"
+    )
+    return
   ## merge modularised configs into a single collection
   _log_message(f"Merging settings from: {INPUT_DIR}")
   settings = merge_config_settings()
-  ## write output
   if dry_run:
     _log_message(f"[dry-run] Would write merged settings to: {OUTPUT_FILE}")
   else:
@@ -51,7 +61,7 @@ def main():
     script_name = SCRIPT_NAME,
     dry_run     = dry_run
   )
-  _log_message("Finished VS-Code setup")
+  _log_message("Finished vs-code setup")
 
 if __name__ == "__main__":
   main()
