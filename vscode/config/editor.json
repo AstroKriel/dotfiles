@@ -1,4 +1,6 @@
 {
+  "workbench.sideBar.location": "right",
+  "editor.minimap.enabled": false,
   "editor.detectIndentation": true,
   "editor.insertSpaces": true,
   "editor.renderWhitespace": "boundary",

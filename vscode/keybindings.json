@@ -1,29 +1,76 @@
 [
   {
-    "key": "cmd+shift+e",
-    "command": "workbench.action.toggleSidebarVisibility"
+    "key": "cmd+shift+m",
+    "command": "workbench.action.focusActiveEditorGroup"
   },
+
+  {
+    "key": "cmd+shift+[",
+    "command": "workbench.action.previousEditor"
+  },
+  {
+    "key": "cmd+shift+]",
+    "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "alt+cmd+left",
+    "command": "workbench.action.previousEditor"
+  },
+  {
+    "key": "alt+cmd+right",
+    "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "alt+cmd+[",
+    "command": "workbench.action.previousPanelView"
+  },
+  {
+    "key": "alt+cmd+]",
+    "command": "workbench.action.nextPanelView"
+  },
+
   {
     "key": "cmd+shift+r",
     "command": "opensshremotes.openEmptyWindow"
   },
   {
-    "key": "cmd+shift+2",
-    "command": "4to2.convert4to2"
+    "key": "cmd+shift+e",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  
+  {
+    "key": "alt+cmd+\\",
+    "command": "workbench.action.togglePanel"
+  },
+  {
+    "key": "cmd+shift+\\",
+    "command": "workbench.action.togglePanel"
+  },
+  {
+    "key": "cmd+shift+;",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "cmd+shift+=",
+    "command": "workbench.action.terminal.new"
+  },
+  {
+    "key": "cmd+shift+-",
+    "command": "workbench.action.terminal.kill"
   },
   {
     "key": "cmd+shift+]",
     "command": "workbench.action.createTerminalEditorSide"
   },
   {
-    "key": "cmd+shift+\\",
-    "command": "workbench.action.terminal.new",
-    "when": "terminalProcessSupported || terminalWebExtensionContributedProfile"
+    "key": "cmd+shift+g",
+    "command": "workbench.view.extension.gitlensPanel"
   },
   {
     "key": "cmd+shift+o",
     "command": "workbench.action.output.toggleOutput"
   },
+
   {
     "key": "cmd+shift+l",
     "command": "editor.action.transformToLowercase"
@@ -31,5 +78,9 @@
   {
     "key": "cmd+shift+u",
     "command": "editor.action.transformToUppercase"
+  },
+  {
+    "key": "cmd+shift+2",
+    "command": "4to2.convert4to2"
   }
 ]
