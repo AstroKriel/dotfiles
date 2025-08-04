@@ -123,7 +123,14 @@ def create_symlink(
 
   Handle existing files by checking correctness, backing up if needed, and logging all actions.
   """
-  ## case 1: target does not exist
+  ## source does not exist
+  if not source_path.exists():
+    log_message(
+      script_name = script_name,
+      message     = f"Skipping. {source_path} does not exist."
+    )
+    return
+  ## target does not exist
   if _path_is_missing(target_path):
     _make_symlink(
       source_path = source_path,
@@ -132,14 +139,14 @@ def create_symlink(
       dry_run     = dry_run
     )
     return
-  ## case 2: target is already correctly linked to source
+  ## target is already correctly linked to source
   if _already_linked_correctly(target_path=target_path, source_path=source_path):
     log_message(
       script_name = script_name,
       message     = f"Already correctly linked: {target_path}"
     )
     return
-  ## case 3: target points to something else
+  ## target points to something else
   if _symlink_is_broken(target_path):
     log_message(
       script_name = script_name,
