@@ -51,7 +51,7 @@ def main():
     _log_message(f"Wrote merged settings to: {MERGED_SETTINGS_PATH}")
   ## ensure vscode directory exists
   ensure_dir_exists(
-    directory   = VSCODE_TARGET_DIR.parent,
+    directory   = VSCODE_TARGET_DIR,
     script_name = SCRIPT_NAME,
     dry_run     = dry_run
   )
