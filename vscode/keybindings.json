@@ -1,192 +1,51 @@
 [
-  // Panels: Terminal, GitLense, Output
-  // Editor: files
+  // editor: files
+  // panels: terminal, gitlense, output
   // sidebar: explorer, search
 
-  // ======== FOCUS & NAVIGATION ========
-  // ====================================
+  // workspace management
+  { "key": "cmd+shift+enter", "command": "workbench.action.toggleFullScreen" },
+  { "key": "cmd+shift+r", "command": "opensshremotes.openEmptyWindow" },
+  { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
+  { "key": "cmd+shift+m", "command": "workbench.action.focusActiveEditorGroup" },
+  
+  // editor (group) navigation
+  { "key": "cmd+shift+h", "command": "workbench.action.focusLeftGroup" }, 
+  { "key": "cmd+shift+l", "command": "workbench.action.focusRightGroup" },
+  { "key": "cmd+shift+k", "command": "workbench.action.focusAboveGroup" },
+  { "key": "cmd+shift+j", "command": "workbench.action.focusBelowGroup" },
+  // resizing the active view
+  { "key": "cmd+shift+u", "command": "workbench.action.decreaseViewSize" },
+  { "key": "cmd+shift+i", "command": "workbench.action.increaseViewSize" },
+  // managing terminal (+panel)
+  { "key": "cmd+shift+[", "command": "workbench.action.togglePanel" },
+  { "key": "cmd+shift+;", "command": "workbench.action.terminal.toggleTerminal" },
+  { "key": "cmd+shift+=", "command": "workbench.action.terminal.new" },
+  { "key": "cmd+shift+-", "command": "workbench.action.terminal.kill" },
+  { "key": "cmd+shift+'", "command": "workbench.action.createTerminalEditorSide" },
+  { "key": "cmd+shift+g", "command": "workbench.view.extension.gitlensPanel" },
+  // sidebar actions
+  { "key": "cmd+shift+]", "command": "workbench.action.toggleSidebarVisibility" },
+  { "key": "cmd+shift+e", "command": "workbench.view.explorer" },
+  { "key": "cmd+shift+f", "command": "workbench.view.search" },
 
-  {
-    "key": "cmd+shift+enter",
-    "command": "workbench.action.toggleFullScreen"
-    // toggle full screen
-  },
-  {
-    "key": "cmd+shift+m",
-    "command": "workbench.action.focusActiveEditorGroup"
-    // move the cursor over to the active editor-window (from the panel)
-  },
+  // editor tab navigation
+  { "key": "alt+cmd+left", "command": "workbench.action.previousEditor" },
+  { "key": "alt+cmd+right", "command": "workbench.action.nextEditor" },
+  // editor splitting
+  { "key": "alt+cmd+h", "command": "workbench.action.splitEditorLeft" },
+  { "key": "alt+cmd+l", "command": "workbench.action.splitEditorRight" },
+  { "key": "alt+cmd+k", "command": "workbench.action.splitEditorUp" },
+  { "key": "alt+cmd+j", "command": "workbench.action.splitEditorDown" },
+  // panel navigation
+  { "key": "alt+cmd+[", "command": "workbench.action.previousPanelView" },
+  { "key": "alt+cmd+]", "command": "workbench.action.nextPanelView" },
+  // sidebar navigation
+  { "key": "alt+cmd+-", "command": "workbench.action.previousSideBarView" },
+  { "key": "alt+cmd+=", "command": "workbench.action.nextSideBarView" },
 
-  // cmd+shift (editor) navigation
-  {
-    "key": "cmd+shift+h",
-    "command": "workbench.action.focusLeftGroup"
-    // move focus to the editor-group to the left
-  },
-  {
-    "key": "cmd+shift+l",
-    "command": "workbench.action.focusRightGroup"
-    // move focus to the editor-group to the right
-  },
-  {
-    "key": "cmd+shift+k",
-    "command": "workbench.action.focusAboveGroup"
-    // move focus to the editor-group above
-  },
-  {
-    "key": "cmd+shift+j",
-    "command": "workbench.action.focusBelowGroup"
-    // move focus to the editor-group below
-  },
-
-  // alt+cmd (editor+panel+sidebar) navigation
-  {
-    "key": "alt+cmd+left",
-    "command": "workbench.action.previousEditor"
-    // cycle to the previous editor
-  },
-  {
-    "key": "alt+cmd+right",
-    "command": "workbench.action.nextEditor"
-    // cycle to the next editor
-  },
-  {
-    "key": "alt+cmd+[",
-    "command": "workbench.action.previousPanelView"
-    // cycle to the previous panel
-  },
-  {
-    "key": "alt+cmd+]",
-    "command": "workbench.action.nextPanelView"
-    // cycle to the next panel
-  },
-  {
-    "key": "alt+cmd+-",
-    "command": "workbench.action.previousSideBarView"
-    // cycle to the previous sidebar
-  },
-  {
-    "key": "alt+cmd+=",
-    "command": "workbench.action.nextSideBarView"
-    // cycle to the next sidebar
-  },
-
-  // ======== RESIZING PANELS ========
-  // =================================
-
-  {
-    "key": "cmd+shift+u",
-    "command": "workbench.action.decreaseViewSize"
-    // decrease the size of the focused view
-  },
-  {
-    "key": "cmd+shift+i",
-    "command": "workbench.action.increaseViewSize"
-    // increase the size of the focused view
-  },
-
-  // ======== EDITOR SPLITTING (vim-style) ========
-  // ==============================================
-
-  {
-    "key": "alt+cmd+h",
-    "command": "workbench.action.splitEditorLeft"
-    // split the current editor to the left
-  },
-  {
-    "key": "alt+cmd+l",
-    "command": "workbench.action.splitEditorRight"
-    // split the current editor to the right
-  },
-  {
-    "key": "alt+cmd+k",
-    "command": "workbench.action.splitEditorUp"
-    // split the current editor upward
-  },
-  {
-    "key": "alt+cmd+j",
-    "command": "workbench.action.splitEditorDown"
-    // split the current editor downward
-  },
-
-  // ======== WORKSPACE MANAGEMENT ========
-  // ======================================
-
-  {
-    "key": "cmd+shift+r",
-    "command": "opensshremotes.openEmptyWindow"
-    // open an empty ssh remote window
-  },
-
-  {
-    "key": "cmd+shift+]",
-    "command": "workbench.action.toggleSidebarVisibility"
-    // toggle the sidebar view
-  },
-  {
-    "key": "cmd+shift+e",
-    "command": "workbench.view.explorer"
-    // focus the file explorer sidebar
-  },
-  {
-    "key": "cmd+shift+f",
-    "command": "workbench.view.search"
-    // focus the file search sidebar
-  },
-
-  {
-    "key": "cmd+shift+[",
-    "command": "workbench.action.togglePanel"
-    // toggle the panel view
-  },
-  {
-    "key": "cmd+shift+;",
-    "command": "workbench.action.terminal.toggleTerminal"
-    // show/hide integrated terminal (in the panel)
-  },
-  {
-    "key": "cmd+shift+=",
-    "command": "workbench.action.terminal.new"
-    // create a new terminal instance (in the panel)
-  },
-  {
-    "key": "cmd+shift+-",
-    "command": "workbench.action.terminal.kill"
-    // kill current terminal instance (in the panel)
-  },
-  {
-    "key": "cmd+shift+'",
-    "command": "workbench.action.createTerminalEditorSide"
-    // create a new terminal instance (in the editor, not the panel)
-  },
-
-  {
-    "key": "cmd+shift+g",
-    "command": "workbench.view.extension.gitlensPanel"
-    // focus GitLens (in the panel; not a toggle)
-  },
-  {
-    "key": "cmd+shift+o",
-    "command": "workbench.action.output.toggleOutput"
-    // toggle the Output tab (in the panel)
-  },
-
-  // ======== TEXT UTILITIES ========
-  // ================================
-
-  {
-    "key": "cmd+l",
-    "command": "editor.action.transformToLowercase"
-    // transform selected text to lowercase
-  },
-  {
-    "key": "cmd+u",
-    "command": "editor.action.transformToUppercase"
-    // transform selected text to UPPERCASE
-  },
-  {
-    "key": "cmd+2",
-    "command": "4to2.convert4to2"
-    // convert indentation from 4-to-2 spaces (requires extension)
-  }
+  // text utilities
+  { "key": "cmd+l", "command": "editor.action.transformToLowercase" },
+  { "key": "cmd+u", "command": "editor.action.transformToUppercase" },
+  { "key": "cmd+2", "command": "4to2.convert4to2" }
 ]
