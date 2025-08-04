@@ -1,5 +1,4 @@
 {
-  "workbench.sideBar.location": "right",
   "editor.minimap.enabled": false,
   "editor.detectIndentation": true,
   "editor.insertSpaces": true,
@@ -25,11 +24,13 @@
   "terminal.integrated.scrollback": 50000,
   "terminal.integrated.shellIntegration.enabled": false,
   "workbench.colorTheme": "Default Dark+",
+  "workbench.startupEditor": "none",
+  "workbench.panel.defaultLocation": "left",
+  "workbench.sideBar.location": "right",
   "explorer.sortOrder": "type",
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
   "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "always",
-  "workbench.panel.defaultLocation": "right",
   "workbench.editor.enablePreview": false
 }
