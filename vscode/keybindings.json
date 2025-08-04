@@ -1,86 +1,129 @@
 [
+  // Panels: Terminal, GitLense, Output
+  // Editor: files
+
+  // ======== FOCUS & NAVIGATION ========
+  // ====================================
+
   {
     "key": "cmd+shift+m",
     "command": "workbench.action.focusActiveEditorGroup"
+    // move the cursor over to the active editor-window (from the panel)
   },
 
   {
-    "key": "cmd+shift+[",
-    "command": "workbench.action.previousEditor"
-  },
-  {
-    "key": "cmd+shift+]",
-    "command": "workbench.action.nextEditor"
-  },
-  {
     "key": "alt+cmd+left",
     "command": "workbench.action.previousEditor"
+    // cycle to the previous editor
   },
   {
     "key": "alt+cmd+right",
     "command": "workbench.action.nextEditor"
+    // cycle to the next editor
   },
   {
     "key": "alt+cmd+[",
     "command": "workbench.action.previousPanelView"
+    // cycle to the previous panel
   },
   {
     "key": "alt+cmd+]",
     "command": "workbench.action.nextPanelView"
+    // cycle to the next panel
   },
+
+  // ======== RESIZING PANELS ========
+  // =================================
+
+  {
+    "key": "cmd+shift+h",
+    "command": "workbench.action.decreaseViewSize"
+    // decrease the size of the focused view
+  },
+  {
+    "key": "cmd+shift+l",
+    "command": "workbench.action.increaseViewSize"
+    // increase the size of the focused view
+  },
+
+  // ======== WORKSPACE MANAGEMENT ========
+  // ======================================
 
   {
     "key": "cmd+shift+r",
     "command": "opensshremotes.openEmptyWindow"
+    // open an empty ssh remote window
+  },
+
+  {
+    "key": "cmd+shift+]",
+    "command": "workbench.action.toggleSidebarVisibility"
+    // toggle the sidebar view
   },
   {
     "key": "cmd+shift+e",
-    "command": "workbench.action.toggleSidebarVisibility"
-  },
-  
-  {
-    "key": "alt+cmd+\\",
-    "command": "workbench.action.togglePanel"
+    "command": "workbench.view.explorer"
+    // focus the file explorer sidebar
   },
   {
-    "key": "cmd+shift+\\",
+    "key": "cmd+shift+f",
+    "command": "workbench.view.search"
+    // focus the file search sidebar
+  },
+
+  {
+    "key": "cmd+shift+[",
     "command": "workbench.action.togglePanel"
+    // toggle the panel view
   },
   {
     "key": "cmd+shift+;",
     "command": "workbench.action.terminal.toggleTerminal"
+    // show/hide integrated terminal (in the panel)
   },
   {
     "key": "cmd+shift+=",
     "command": "workbench.action.terminal.new"
+    // create a new terminal instance (in the panel)
   },
   {
     "key": "cmd+shift+-",
     "command": "workbench.action.terminal.kill"
+    // kill current terminal instance (in the panel)
   },
   {
-    "key": "cmd+shift+]",
+    "key": "cmd+shift+'",
     "command": "workbench.action.createTerminalEditorSide"
+    // create a new terminal instance (in the editor, not the panel)
   },
+
   {
     "key": "cmd+shift+g",
     "command": "workbench.view.extension.gitlensPanel"
+    // focus GitLens (in the panel; not a toggle)
   },
   {
     "key": "cmd+shift+o",
     "command": "workbench.action.output.toggleOutput"
+    // toggle the Output tab (in the panel)
   },
 
+  // ======== TEXT UTILITIES ========
+  // ================================
+
   {
-    "key": "cmd+shift+l",
+    "key": "alt+cmd+l",
     "command": "editor.action.transformToLowercase"
+    // transform selected text to lowercase
   },
   {
-    "key": "cmd+shift+u",
+    "key": "alt+cmd+u",
     "command": "editor.action.transformToUppercase"
+    // transform selected text to UPPERCASE
   },
   {
-    "key": "cmd+shift+2",
+    "key": "alt+cmd+2",
     "command": "4to2.convert4to2"
+    // convert indentation from 4-to-2 spaces (requires extension)
   }
 ]
