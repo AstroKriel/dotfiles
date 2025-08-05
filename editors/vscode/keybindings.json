@@ -1,51 +1,138 @@
 [
-  // editor: files
-  // panels: terminal, gitlense, output
-  // sidebar: explorer, search
-
-  // workspace management
-  { "key": "cmd+shift+enter", "command": "workbench.action.toggleFullScreen" },
-  { "key": "cmd+shift+r", "command": "opensshremotes.openEmptyWindow" },
-  { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
-  { "key": "cmd+shift+m", "command": "workbench.action.focusActiveEditorGroup" },
-  
-  // editor (group) navigation
-  { "key": "cmd+shift+h", "command": "workbench.action.focusLeftGroup" }, 
-  { "key": "cmd+shift+l", "command": "workbench.action.focusRightGroup" },
-  { "key": "cmd+shift+k", "command": "workbench.action.focusAboveGroup" },
-  { "key": "cmd+shift+j", "command": "workbench.action.focusBelowGroup" },
-  // resizing the active view
-  { "key": "cmd+shift+u", "command": "workbench.action.decreaseViewSize" },
-  { "key": "cmd+shift+i", "command": "workbench.action.increaseViewSize" },
-  // managing terminal (+panel)
-  { "key": "cmd+shift+[", "command": "workbench.action.togglePanel" },
-  { "key": "cmd+shift+;", "command": "workbench.action.terminal.toggleTerminal" },
-  { "key": "cmd+shift+=", "command": "workbench.action.terminal.new" },
-  { "key": "cmd+shift+-", "command": "workbench.action.terminal.kill" },
-  { "key": "cmd+shift+'", "command": "workbench.action.createTerminalEditorSide" },
-  { "key": "cmd+shift+g", "command": "workbench.view.extension.gitlensPanel" },
-  // sidebar actions
-  { "key": "cmd+shift+]", "command": "workbench.action.toggleSidebarVisibility" },
-  { "key": "cmd+shift+e", "command": "workbench.view.explorer" },
-  { "key": "cmd+shift+f", "command": "workbench.view.search" },
-
-  // editor tab navigation
-  { "key": "alt+cmd+left", "command": "workbench.action.previousEditor" },
-  { "key": "alt+cmd+right", "command": "workbench.action.nextEditor" },
-  // editor splitting
-  { "key": "alt+cmd+h", "command": "workbench.action.splitEditorLeft" },
-  { "key": "alt+cmd+l", "command": "workbench.action.splitEditorRight" },
-  { "key": "alt+cmd+k", "command": "workbench.action.splitEditorUp" },
-  { "key": "alt+cmd+j", "command": "workbench.action.splitEditorDown" },
-  // panel navigation
-  { "key": "alt+cmd+[", "command": "workbench.action.previousPanelView" },
-  { "key": "alt+cmd+]", "command": "workbench.action.nextPanelView" },
-  // sidebar navigation
-  { "key": "alt+cmd+-", "command": "workbench.action.previousSideBarView" },
-  { "key": "alt+cmd+=", "command": "workbench.action.nextSideBarView" },
-
-  // text utilities
-  { "key": "cmd+l", "command": "editor.action.transformToLowercase" },
-  { "key": "cmd+u", "command": "editor.action.transformToUppercase" },
-  { "key": "cmd+2", "command": "4to2.convert4to2" }
+  {
+    "key": "cmd+shift+enter",
+    "command": "workbench.action.toggleFullScreen"
+  },
+  {
+    "key": "cmd+shift+r",
+    "command": "opensshremotes.openEmptyWindow"
+  },
+  {
+    "key": "cmd+shift+u",
+    "command": "workbench.action.decreaseViewSize"
+  },
+  {
+    "key": "cmd+shift+i",
+    "command": "workbench.action.increaseViewSize"
+  },
+  {
+    "key": "cmd+shift+[",
+    "command": "workbench.action.togglePanel"
+  },
+  {
+    "key": "cmd+shift+;",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "cmd+shift+=",
+    "command": "workbench.action.terminal.new"
+  },
+  {
+    "key": "cmd+shift+-",
+    "command": "workbench.action.terminal.kill"
+  },
+  {
+    "key": "cmd+shift+'",
+    "command": "workbench.action.createTerminalEditorSide"
+  },
+  {
+    "key": "cmd+shift+g",
+    "command": "workbench.view.extension.gitlensPanel"
+  },
+  {
+    "key": "cmd+shift+]",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "cmd+shift+e",
+    "command": "workbench.view.explorer"
+  },
+  {
+    "key": "cmd+shift+f",
+    "command": "workbench.view.search.focus"
+  },
+  {
+    "key": "alt+cmd+h",
+    "command": "workbench.action.splitEditorLeft"
+  },
+  {
+    "key": "alt+cmd+l",
+    "command": "workbench.action.splitEditorRight"
+  },
+  {
+    "key": "alt+cmd+k",
+    "command": "workbench.action.splitEditorUp"
+  },
+  {
+    "key": "alt+cmd+j",
+    "command": "workbench.action.splitEditorDown"
+  },
+  {
+    "key": "ctrl+cmd+left",
+    "command": "workbench.action.moveEditorToPreviousGroup"
+  },
+  {
+    "key": "ctrl+cmd+right",
+    "command": "workbench.action.moveEditorToNextGroup"
+  },
+  {
+    "key": "cmd+shift+o",
+    "command": "workbench.action.quickOpen"
+  },
+  {
+    "key": "cmd+shift+m",
+    "command": "workbench.action.focusActiveEditorGroup"
+  },
+  {
+    "key": "cmd+shift+h",
+    "command": "workbench.action.focusLeftGroup"
+  },
+  {
+    "key": "cmd+shift+l",
+    "command": "workbench.action.focusRightGroup"
+  },
+  {
+    "key": "cmd+shift+k",
+    "command": "workbench.action.focusAboveGroup"
+  },
+  {
+    "key": "cmd+shift+j",
+    "command": "workbench.action.focusBelowGroup"
+  },
+  {
+    "key": "alt+cmd+left",
+    "command": "workbench.action.previousEditor"
+  },
+  {
+    "key": "alt+cmd+right",
+    "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "alt+cmd+[",
+    "command": "workbench.action.previousPanelView"
+  },
+  {
+    "key": "alt+cmd+]",
+    "command": "workbench.action.nextPanelView"
+  },
+  {
+    "key": "alt+cmd+-",
+    "command": "workbench.action.previousSideBarView"
+  },
+  {
+    "key": "alt+cmd+=",
+    "command": "workbench.action.nextSideBarView"
+  },
+  {
+    "key": "cmd+l",
+    "command": "editor.action.transformToLowercase"
+  },
+  {
+    "key": "cmd+u",
+    "command": "editor.action.transformToUppercase"
+  },
+  {
+    "key": "cmd+2",
+    "command": "4to2.convert4to2"
+  }
 ]
