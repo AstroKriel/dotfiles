@@ -56,8 +56,8 @@ def merge_config_modules(
     _log_message(f"Error: Unsupported mode `{mode}`")
     return None
   if not modules_dir.exists():
-    _log_message(f"Skipping. No directory found for {modules_dir}")
-    return merged
+    _log_message(f"Skipping. No module directory found: {modules_dir}")
+    return None
   for module in sorted(modules_dir.glob("*.jsonc")):
     with module.open("r", encoding="utf-8") as f:
       raw_content = f.read()
@@ -86,6 +86,8 @@ def setup_editor(name, meta, dry_run):
       modules_dir = modules_dir,
       mode        = mode
     )
+    if merged_config is None:
+      return
     output_path = meta["dotfiles_dir"] / f"{file_name}.json"
     target_path = meta["target_dir"] / f"{file_name}.json"
     if dry_run:
@@ -94,19 +96,19 @@ def setup_editor(name, meta, dry_run):
       with output_path.open("w", encoding="utf-8") as f:
         json.dump(merged_config, f, indent=2)
       _log_message(f"Wrote merged config to: {output_path}")
-    # ## ensure target directory exists
-    # ensure_dir_exists(
-    #   directory   = meta["target_dir"],
-    #   script_name = SCRIPT_NAME,
-    #   dry_run     = dry_run
-    # )
-    # ## symlink merged config
-    # create_symlink(
-    #   source_path = output_path,
-    #   target_path = target_path,
-    #   script_name = SCRIPT_NAME,
-    #   dry_run     = dry_run
-    # )
+    ## ensure target directory exists
+    ensure_dir_exists(
+      directory   = meta["target_dir"],
+      script_name = SCRIPT_NAME,
+      dry_run     = dry_run
+    )
+    ## symlink merged config
+    create_symlink(
+      source_path = output_path,
+      target_path = target_path,
+      script_name = SCRIPT_NAME,
+      dry_run     = dry_run
+    )
 
 def main():
   ## parse user inputs
