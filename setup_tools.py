@@ -12,10 +12,10 @@ CONFIG_DIR   = HOME_DIR / ".config"
 
 TOOLS = {
   "emacs": {
-    "label": "Emacs (GUI)",
+    "name": "Emacs (GUI)",
     "brew": "emacs --cask",
-    "dotfiles_path": DOTFILES_DIR / "emacs",
-    "target_path": HOME_DIR / ".doom.d",
+    "dotfiles_dir": DOTFILES_DIR / "emacs",
+    "target_dir": HOME_DIR / ".doom.d",
     "clone_repo": {
       "name": "Doom-Emacs",
       "url": "https://github.com/doomemacs/doomemacs",
@@ -24,10 +24,10 @@ TOOLS = {
     "post_setup": "doom_sync"
   },
   "tmux": {
-    "label": "tmux",
+    "name": "Tmux",
     "brew": "tmux",
-    "dotfiles_path": DOTFILES_DIR / "tmux",
-    "target_path": CONFIG_DIR / "tmux",
+    "dotfiles_dir": DOTFILES_DIR / "tmux",
+    "target_dir": CONFIG_DIR / "tmux",
     "clone_repo": {
       "name": "TPM",
       "url": "https://github.com/tmux-plugins/tpm",
@@ -35,22 +35,22 @@ TOOLS = {
     }
   },
   "nvim": {
-    "label": "Neovim",
+    "name": "Neovim",
     "brew": "neovim",
-    "dotfiles_path": DOTFILES_DIR / "nvim",
-    "target_path": CONFIG_DIR / "nvim"
+    "dotfiles_dir": DOTFILES_DIR / "nvim",
+    "target_dir": CONFIG_DIR / "nvim"
   },
   "kitty": {
-    "label": "Kitty terminal",
-    "brew": "kitty",
-    "dotfiles_path": DOTFILES_DIR / "kitty",
-    "target_path": CONFIG_DIR / "kitty"
+    "name": "Kitty terminal",
+    "brew": "kitty --cask",
+    "dotfiles_dir": DOTFILES_DIR / "kitty",
+    "target_dir": CONFIG_DIR / "kitty"
   },
   "ghostty": {
-    "label": "Ghostty terminal",
-    "brew": "ghostty",
-    "dotfiles_path": DOTFILES_DIR / "ghostty",
-    "target_path": CONFIG_DIR / "ghostty"
+    "name": "Ghostty terminal",
+    "brew": "ghostty --cask",
+    "dotfiles_dir": DOTFILES_DIR / "ghostty",
+    "target_dir": CONFIG_DIR / "ghostty"
   }
 }
 
@@ -65,11 +65,11 @@ def check_installed_tools():
   available = set()
   for command, meta in TOOLS.items():
     if shutil.which(command):
-      _log_message(f"Found {meta['label']} ({command}) in your `$PATH`.")
+      _log_message(f"Found {meta['name']} ({command}) in your `$PATH`.")
       available.add(command)
     else:
       _log_message(
-        f"{meta['label']} was not found in your `$PATH`.\n"
+        f"{meta['name']} was not found in your `$PATH`.\n"
         f"Install it via: `brew install {meta['brew']}`"
       )
   return available
@@ -133,13 +133,13 @@ def main():
   for tool in sorted(available_tools):
     meta = TOOLS[tool]
     ensure_dir_exists(
-      directory   = meta["target_path"].parent,
+      directory   = meta["target_dir"].parent,
       script_name = SCRIPT_NAME,
       dry_run     = dry_run
     )
     create_symlink(
-      source_path = meta["dotfiles_path"],
-      target_path = meta["target_path"],
+      source_path = meta["dotfiles_dir"],
+      target_path = meta["target_dir"],
       script_name = SCRIPT_NAME,
       dry_run     = dry_run
     )
