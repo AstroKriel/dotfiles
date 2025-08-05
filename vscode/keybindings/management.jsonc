@@ -1,0 +1,32 @@
+[
+  // workspace
+  { "key": "cmd+shift+enter", "command": "workbench.action.toggleFullScreen" },
+  { "key": "cmd+shift+r", "command": "opensshremotes.openEmptyWindow" },
+
+  // resizing the active view
+  { "key": "cmd+shift+u", "command": "workbench.action.decreaseViewSize" },
+  { "key": "cmd+shift+i", "command": "workbench.action.increaseViewSize" },
+
+  // managing terminal (+panel)
+  { "key": "cmd+shift+[", "command": "workbench.action.togglePanel" },
+  { "key": "cmd+shift+;", "command": "workbench.action.terminal.toggleTerminal" },
+  { "key": "cmd+shift+=", "command": "workbench.action.terminal.new" },
+  { "key": "cmd+shift+-", "command": "workbench.action.terminal.kill" },
+  { "key": "cmd+shift+'", "command": "workbench.action.createTerminalEditorSide" },
+  { "key": "cmd+shift+g", "command": "workbench.view.extension.gitlensPanel" },
+
+  // sidebar actions
+  { "key": "cmd+shift+]", "command": "workbench.action.toggleSidebarVisibility" },
+  { "key": "cmd+shift+e", "command": "workbench.view.explorer" },
+  { "key": "cmd+shift+f", "command": "workbench.view.search.focus" },
+
+  // editor splitting
+  { "key": "alt+cmd+h", "command": "workbench.action.splitEditorLeft" },
+  { "key": "alt+cmd+l", "command": "workbench.action.splitEditorRight" },
+  { "key": "alt+cmd+k", "command": "workbench.action.splitEditorUp" },
+  { "key": "alt+cmd+j", "command": "workbench.action.splitEditorDown" },
+
+  // relocate editor
+  { "key": "ctrl+cmd+left", "command": "workbench.action.moveEditorToPreviousGroup" },
+  { "key": "ctrl+cmd+right", "command": "workbench.action.moveEditorToNextGroup" }
+]

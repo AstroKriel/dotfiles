@@ -1,0 +1,24 @@
+
+[
+  // workspace
+  { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
+  { "key": "cmd+shift+m", "command": "workbench.action.focusActiveEditorGroup" },
+
+  // editor (group)
+  { "key": "cmd+shift+h", "command": "workbench.action.focusLeftGroup" },
+  { "key": "cmd+shift+l", "command": "workbench.action.focusRightGroup" },
+  { "key": "cmd+shift+k", "command": "workbench.action.focusAboveGroup" },
+  { "key": "cmd+shift+j", "command": "workbench.action.focusBelowGroup" },
+
+  // editor (tab)
+  { "key": "alt+cmd+left", "command": "workbench.action.previousEditor" },
+  { "key": "alt+cmd+right", "command": "workbench.action.nextEditor" },
+
+  // panel
+  { "key": "alt+cmd+[", "command": "workbench.action.previousPanelView" },
+  { "key": "alt+cmd+]", "command": "workbench.action.nextPanelView" },
+
+  // sidebar
+  { "key": "alt+cmd+-", "command": "workbench.action.previousSideBarView" },
+  { "key": "alt+cmd+=", "command": "workbench.action.nextSideBarView" }
+]
