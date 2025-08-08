@@ -10,8 +10,23 @@ alias rsz='rsync -avz' # rsync with archive, verbose, compression
 ## useful directories
 export DHOME="$HOME"
 alias dhome='cd "$DHOME"'
-alias dcodes='cd "$DHOME/Documents/Codes"'
-alias ddwn='cd "$DHOME/Downloads"'
-alias done='cd "$DHOME/OneDrive"'
+
+export DDOT="$DHOME/dotfiles"
+alias ddot='cd "$DDOT"'
+
+export DDWN="$DHOME/Downloads"
+alias ddwn='cd "$DDWN"'
+
+export DONED="$DHOME/OneDrive"
+alias doned='cd "$DONED"'
+
+export DCODES="$DHOME/Documents/Codes"
+alias dcodes='cd "$DCODES"'
+
+export DQUOKKA="$DCODES/quokka"
+alias dquokka='cd "$DQUOKKA"'
+
+export DASGARD="$DCODES/asgard"
+alias dasgard='cd "$DASGARD"'
 
 ## .
