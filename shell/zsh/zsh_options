@@ -25,7 +25,7 @@ setopt NO_BEEP
 ## ---------------------
 
 ## redefine word characters to treat _ / . as word boundaries
-WORDCHARS='*?-[]~=&;!#$%^(){}<>'
+WORDCHARS='*?-[]~=&;!#$%^(){}<>.'
 
 ## jump over words with option + arrow-keys
 ## for compatibility with integrated vscode terminal
