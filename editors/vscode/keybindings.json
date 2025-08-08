@@ -134,5 +134,9 @@
   {
     "key": "cmd+2",
     "command": "4to2.convert4to2"
+  },
+  {
+    "key": "alt+cmd+m",
+    "command": "workbench.files.action.collapseExplorerFolders"
   }
 ]

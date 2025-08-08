@@ -31,7 +31,7 @@
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
   "workbench.editor.revealIfOpen": true,
-  "workbench.tree.indent": 20,
+  "workbench.tree.indent": 25,
   "workbench.tree.renderIndentGuides": "always",
   "workbench.editor.enablePreview": false
 }

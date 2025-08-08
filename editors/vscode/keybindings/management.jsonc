@@ -2,6 +2,7 @@
   // workspace
   { "key": "cmd+shift+enter", "command": "workbench.action.toggleFullScreen" },
   { "key": "cmd+shift+r", "command": "opensshremotes.openEmptyWindow" },
+  { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
 
   // resizing the active view
   { "key": "cmd+shift+u", "command": "workbench.action.decreaseViewSize" },
@@ -19,6 +20,7 @@
   { "key": "cmd+shift+]", "command": "workbench.action.toggleSidebarVisibility" },
   { "key": "cmd+shift+e", "command": "workbench.view.explorer" },
   { "key": "cmd+shift+f", "command": "workbench.view.search.focus" },
+  { "key": "alt+cmd+m", "command": "workbench.files.action.collapseExplorerFolders" },
 
   // editor splitting
   { "key": "alt+cmd+h", "command": "workbench.action.splitEditorLeft" },

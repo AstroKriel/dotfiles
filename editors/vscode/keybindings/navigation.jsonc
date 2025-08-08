@@ -1,7 +1,6 @@
 
 [
   // workspace
-  { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
   { "key": "cmd+shift+m", "command": "workbench.action.focusActiveEditorGroup" },
 
   // editor (group)
