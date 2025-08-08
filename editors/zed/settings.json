@@ -1,0 +1,70 @@
+{
+  // UI & theme
+  // The "theme" values below are examples—Zed supports built-in themes like "One Dark" or "Zed (Default)";
+  // if "Default Dark+" isn’t available, Zed will fall back to default.
+  "project_panel": {
+    "dock": "right"
+  },
+  "theme": "Default Dark+",
+  "bottom_dock_layout": "contained",        // Panels appear at bottom (similar to VS Code panel on bottom).
+  "project_panel_location": "right",        // (Note: may require manual setup via UI if not auto-read)
+
+  // Font sizing
+  "buffer_font_size": 10.5,                 // VS Code editor.fontSize
+  "buffer_line_height": "comfortable",      // Default 1.618×
+
+  // Indentation
+  "tab_size": 4,                            // Maps from tabSize / insertSpaces = false
+  "hard_tabs": false,
+
+  // Whitespace rendering
+  "show_whitespaces": "boundary",           // replicates VS Code's "boundary" setting :contentReference[oaicite:1]{index=1}
+
+  // Bracket pair guides (VS Code: bracketPair rendering)
+  "bracket_pair_color": [],
+  "bracket_pair_guides": {                  
+    "enabled": true,
+    "horizontal_wrap": true
+  },                                        // Zed uses similar bracket/pair guide config :contentReference[oaicite:2]{index=2}
+
+  // Autosave behavior
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000
+    }
+  },                                        // VS Code: "afterDelay" :contentReference[oaicite:3]{index=3}
+
+  // Session restore
+  "restore_on_startup": "none",             // VS Code: "startupEditor": "none" :contentReference[oaicite:4]{index=4}
+
+  // Terminal appearance
+  "terminal": {
+    "dock": "left",
+    "font_size": 10.5,
+    "line_height": "comfortable"
+  },
+
+  // Other VS Code settings that either have no direct Zed equivalent or require manual migration:
+  // - remote.SSH settings
+  // - python.linting / Pylance settings
+  // - workbench.editor.revealIfOpen
+  // These currently remain unsupported in core Zed and are omitted.
+
+  // Per-language formatting override — e.g. for Python
+  "languages": {
+    "Python": {
+      "tab_size": 4,
+      "hard_tabs": false,
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "enable_language_server": true
+    }
+  },
+  "language_overrides": {
+    "Python": {
+      "tab_size": 4,
+      "hard_tabs": false,
+      "format_on_save": "on"
+    }
+  }                                          // Both keys work for Zed; use based on your version :contentReference[oaicite:5]{index=5}
+}
