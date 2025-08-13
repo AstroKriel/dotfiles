@@ -1,12 +1,14 @@
 {
-  "editor.minimap.enabled": false,
+  "editor.fontSize": 10.5,
   "editor.detectIndentation": true,
   "editor.insertSpaces": true,
   "editor.renderWhitespace": "boundary",
   "editor.guides.bracketPairs": "active",
   "editor.guides.bracketPairsHorizontal": "active",
   "editor.guides.indentation": true,
-  "editor.fontSize": 10.5,
+  "editor.scrollBeyondTop": false,
+  "editor.scrollBeyondLastLine": false,
+  "editor.find.addExtraSpaceOnTop": false,
   "diffEditor.ignoreTrimWhitespace": false,
   "files.autoSave": "afterDelay"
 }

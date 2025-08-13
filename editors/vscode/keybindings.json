@@ -8,6 +8,10 @@
     "command": "opensshremotes.openEmptyWindow"
   },
   {
+    "key": "cmd+shift+o",
+    "command": "workbench.action.quickOpen"
+  },
+  {
     "key": "cmd+shift+u",
     "command": "workbench.action.decreaseViewSize"
   },
@@ -52,6 +56,10 @@
     "command": "workbench.view.search.focus"
   },
   {
+    "key": "alt+cmd+m",
+    "command": "workbench.files.action.collapseExplorerFolders"
+  },
+  {
     "key": "alt+cmd+h",
     "command": "workbench.action.splitEditorLeft"
   },
@@ -76,11 +84,7 @@
     "command": "workbench.action.moveEditorToNextGroup"
   },
   {
-    "key": "cmd+shift+o",
-    "command": "workbench.action.quickOpen"
-  },
-  {
-    "key": "cmd+shift+m",
+    "key": "cmd+shift+.",
     "command": "workbench.action.focusActiveEditorGroup"
   },
   {
@@ -98,6 +102,10 @@
   {
     "key": "cmd+shift+j",
     "command": "workbench.action.focusBelowGroup"
+  },
+  {
+    "key": "cmd+shift+d",
+    "command": "workbench.action.closeOtherEditors"
   },
   {
     "key": "alt+cmd+left",
@@ -124,6 +132,10 @@
     "command": "workbench.action.nextSideBarView"
   },
   {
+    "key": "cmd+shift+m",
+    "command": "editor.action.toggleMinimap"
+  },
+  {
     "key": "cmd+l",
     "command": "editor.action.transformToLowercase"
   },
@@ -134,9 +146,5 @@
   {
     "key": "cmd+2",
     "command": "4to2.convert4to2"
-  },
-  {
-    "key": "alt+cmd+m",
-    "command": "workbench.files.action.collapseExplorerFolders"
   }
 ]

@@ -1,13 +1,14 @@
 
 [
   // workspace
-  { "key": "cmd+shift+m", "command": "workbench.action.focusActiveEditorGroup" },
+  { "key": "cmd+shift+.", "command": "workbench.action.focusActiveEditorGroup" },
 
   // editor (group)
   { "key": "cmd+shift+h", "command": "workbench.action.focusLeftGroup" },
   { "key": "cmd+shift+l", "command": "workbench.action.focusRightGroup" },
   { "key": "cmd+shift+k", "command": "workbench.action.focusAboveGroup" },
   { "key": "cmd+shift+j", "command": "workbench.action.focusBelowGroup" },
+  { "key": "cmd+shift+d", "command": "workbench.action.closeOtherEditors" },
 
   // editor (tab)
   { "key": "alt+cmd+left", "command": "workbench.action.previousEditor" },
