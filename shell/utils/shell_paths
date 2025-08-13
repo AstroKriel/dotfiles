@@ -1,5 +1,5 @@
 ## add directory to an env-var if its not already present (bash/zsh agnostic)
-add_to_path() {
+prepend_to_path() {
   local varname="$1"
   local newpath="$2"
   local current_value
@@ -16,14 +16,14 @@ add_to_path() {
 }
 
 ## extend compiler include paths
-add_to_path CPATH /opt/homebrew/include
+prepend_to_path CPATH /opt/homebrew/include
 
 ## extend library search paths
-add_to_path LIBRARY_PATH /opt/homebrew/lib
+prepend_to_path LIBRARY_PATH /opt/homebrew/lib
 
 ## extend executable search paths
-add_to_path PATH /opt/homebrew/bin
-add_to_path PATH /Library/TeX/texbin
-add_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin
+prepend_to_path PATH /opt/homebrew/bin
+prepend_to_path PATH /Library/TeX/texbin
+prepend_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin
 
 ## .
