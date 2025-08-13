@@ -1,4 +1,5 @@
 import re
+import sys
 import json
 import shutil
 import argparse
@@ -34,9 +35,13 @@ EDITORS = {
   }
 }
 
+MAC_KEYBIND_FILE_NAME = "DefaultKeyBinding.dict"
+MAC_KEYBIND_TARGET_DIR  = Path.home() / "Library" / "KeyBindings"
+MAC_KEYBIND_SOURCE_PATH = DOTFILES_DIR / MAC_KEYBIND_FILE_NAME
+MAC_KEYBIND_TARGET_PATH = MAC_KEYBIND_TARGET_DIR / MAC_KEYBIND_FILE_NAME
+
 def _log_message(message: str):
   log_message(script_name=SCRIPT_NAME, message=message)
-
 
 def filter_jsonc_comments(content: str) -> str:
   content = re.sub(r'//.*', '', content) # remove line comments
@@ -71,7 +76,7 @@ def merge_config_modules(
 
 def setup_editor(name, meta, dry_run):
   _log_message(f"Started setting up {name}")
-  ## check editor is installed
+  ## check whether the editor is installed
   if shutil.which(meta["command"]):
     _log_message(f"Found {meta['name']} ({meta['command']}) in your `$PATH`.")
   else:
@@ -111,13 +116,25 @@ def setup_editor(name, meta, dry_run):
     )
 
 def main():
-  ## parse user inputs
   parser = argparse.ArgumentParser(description="Generate and symlink vs-code settings.")
   parser.add_argument("--dry-run", action="store_true", help="Print actions without applying them")
   args = parser.parse_args()
   dry_run = args.dry_run
   for name, meta in EDITORS.items():
     setup_editor(name, meta, dry_run)
+  if sys.platform.startswith("darwin"):
+    _log_message("Applying macOS keybindings (override to fix Electron shortcut conflict).")
+    ensure_dir_exists(
+      directory   = MAC_KEYBIND_TARGET_DIR,
+      script_name = SCRIPT_NAME,
+      dry_run     = args.dry_run,
+    )
+    create_symlink(
+      source_path = MAC_KEYBIND_SOURCE_PATH,
+      target_path = MAC_KEYBIND_TARGET_PATH,
+      script_name = SCRIPT_NAME,
+      dry_run     = args.dry_run,
+    )
   _log_message("Finished setting up editors.")
 
 if __name__ == "__main__":
