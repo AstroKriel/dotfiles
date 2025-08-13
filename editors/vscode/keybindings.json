@@ -1,5 +1,9 @@
 [
   {
+    "key": "cmd+shift+,",
+    "command": "workbench.action.openGlobalKeybindings"
+  },
+  {
     "key": "cmd+shift+enter",
     "command": "workbench.action.toggleFullScreen"
   },
@@ -12,11 +16,11 @@
     "command": "workbench.action.quickOpen"
   },
   {
-    "key": "cmd+alt+u",
+    "key": "cmd+shift+u",
     "command": "workbench.action.decreaseViewSize"
   },
   {
-    "key": "cmd+alt+i",
+    "key": "cmd+shift+i",
     "command": "workbench.action.increaseViewSize"
   },
   {
@@ -48,6 +52,14 @@
     "command": "workbench.action.toggleSidebarVisibility"
   },
   {
+    "key": "cmd+shift+e",
+    "command": "workbench.view.explorer"
+  },
+  {
+    "key": "cmd+shift+f",
+    "command": "workbench.action.findInFiles"
+  },
+  {
     "key": "cmd+alt+e",
     "command": "workbench.view.explorer"
   },
@@ -56,64 +68,48 @@
     "command": "workbench.action.findInFiles"
   },
   {
+    "key": "cmd+alt+r",
+    "command": "workbench.action.replaceInFiles"
+  },
+  {
     "key": "cmd+alt+o",
     "command": "outline.focus"
+  },
+  {
+    "key": "cmd+alt+t",
+    "command": "timeline.focus"
   },
   {
     "key": "cmd+alt+m",
     "command": "workbench.files.action.collapseExplorerFolders"
   },
   {
-    "key": "cmd+alt+h",
-    "command": "workbench.action.splitEditorLeft"
-  },
-  {
-    "key": "cmd+alt+l",
-    "command": "workbench.action.splitEditorRight"
-  },
-  {
-    "key": "cmd+alt+k",
-    "command": "workbench.action.splitEditorUp"
-  },
-  {
-    "key": "cmd+alt+j",
-    "command": "workbench.action.splitEditorDown"
-  },
-  {
-    "key": "ctrl+cmd+left",
-    "command": "workbench.action.moveEditorToPreviousGroup"
-  },
-  {
-    "key": "ctrl+cmd+right",
-    "command": "workbench.action.moveEditorToNextGroup"
-  },
-  {
     "key": "cmd+shift+.",
     "command": "workbench.action.focusActiveEditorGroup"
   },
   {
-    "key": "cmd+alt+.",
-    "command": "workbench.action.focusActiveEditorGroup"
-  },
-  {
-    "key": "cmd+shift+h",
-    "command": "workbench.action.focusLeftGroup"
-  },
-  {
-    "key": "cmd+shift+l",
-    "command": "workbench.action.focusRightGroup"
-  },
-  {
-    "key": "cmd+shift+k",
-    "command": "workbench.action.focusAboveGroup"
-  },
-  {
-    "key": "cmd+shift+j",
-    "command": "workbench.action.focusBelowGroup"
+    "key": "cmd+shift+w",
+    "command": "workbench.action.closeEditorsAndGroup"
   },
   {
     "key": "cmd+shift+d",
     "command": "workbench.action.closeOtherEditors"
+  },
+  {
+    "key": "cmd+alt+h",
+    "command": "workbench.action.focusLeftGroup"
+  },
+  {
+    "key": "cmd+alt+l",
+    "command": "workbench.action.focusRightGroup"
+  },
+  {
+    "key": "cmd+alt+k",
+    "command": "workbench.action.focusAboveGroup"
+  },
+  {
+    "key": "cmd+alt+j",
+    "command": "workbench.action.focusBelowGroup"
   },
   {
     "key": "cmd+alt+left",
@@ -122,6 +118,38 @@
   {
     "key": "cmd+alt+right",
     "command": "workbench.action.nextEditor"
+  },
+  {
+    "key": "cmd+shift+h",
+    "command": "workbench.action.splitEditorLeft"
+  },
+  {
+    "key": "cmd+shift+l",
+    "command": "workbench.action.splitEditorRight"
+  },
+  {
+    "key": "cmd+shift+k",
+    "command": "workbench.action.splitEditorUp"
+  },
+  {
+    "key": "cmd+shift+j",
+    "command": "workbench.action.splitEditorDown"
+  },
+  {
+    "key": "cmd+ctrl+left",
+    "command": "workbench.action.moveEditorLeftInGroup"
+  },
+  {
+    "key": "cmd+ctrl+right",
+    "command": "workbench.action.moveEditorRightInGroup"
+  },
+  {
+    "key": "cmd+shift+alt+left",
+    "command": "workbench.action.moveEditorToPreviousGroup"
+  },
+  {
+    "key": "cmd+shift+alt+right",
+    "command": "workbench.action.moveEditorToNextGroup"
   },
   {
     "key": "cmd+alt+[",
@@ -140,12 +168,12 @@
     "command": "workbench.action.nextSideBarView"
   },
   {
-    "key": "cmd+shift+,",
-    "command": "workbench.action.openGlobalKeybindings"
-  },
-  {
     "key": "cmd+shift+m",
     "command": "editor.action.toggleMinimap"
+  },
+  {
+    "key": "cmd+alt+w",
+    "command": "editor.action.toggleWordWrap"
   },
   {
     "key": "cmd+l",

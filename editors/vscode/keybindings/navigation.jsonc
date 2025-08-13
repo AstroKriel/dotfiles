@@ -2,18 +2,27 @@
 [
   // workspace
   { "key": "cmd+shift+.", "command": "workbench.action.focusActiveEditorGroup" },
-  { "key": "cmd+alt+.", "command": "workbench.action.focusActiveEditorGroup" },
-
-  // editor (group)
-  { "key": "cmd+shift+h", "command": "workbench.action.focusLeftGroup" },
-  { "key": "cmd+shift+l", "command": "workbench.action.focusRightGroup" },
-  { "key": "cmd+shift+k", "command": "workbench.action.focusAboveGroup" },
-  { "key": "cmd+shift+j", "command": "workbench.action.focusBelowGroup" },
+  { "key": "cmd+shift+w", "command": "workbench.action.closeEditorsAndGroup" },
   { "key": "cmd+shift+d", "command": "workbench.action.closeOtherEditors" },
 
-  // editor (tab)
+  // editor (group) navigation
+  { "key": "cmd+alt+h", "command": "workbench.action.focusLeftGroup" },
+  { "key": "cmd+alt+l", "command": "workbench.action.focusRightGroup" },
+  { "key": "cmd+alt+k", "command": "workbench.action.focusAboveGroup" },
+  { "key": "cmd+alt+j", "command": "workbench.action.focusBelowGroup" },
+  // editor (tab) navigation
   { "key": "cmd+alt+left", "command": "workbench.action.previousEditor" },
   { "key": "cmd+alt+right", "command": "workbench.action.nextEditor" },
+  // editor splitting
+  { "key": "cmd+shift+h", "command": "workbench.action.splitEditorLeft" },
+  { "key": "cmd+shift+l", "command": "workbench.action.splitEditorRight" },
+  { "key": "cmd+shift+k", "command": "workbench.action.splitEditorUp" },
+  { "key": "cmd+shift+j", "command": "workbench.action.splitEditorDown" },
+  // relocate editor
+  { "key": "cmd+ctrl+left", "command": "workbench.action.moveEditorLeftInGroup" },
+  { "key": "cmd+ctrl+right", "command": "workbench.action.moveEditorRightInGroup" },
+  { "key": "cmd+shift+alt+left", "command": "workbench.action.moveEditorToPreviousGroup" },
+  { "key": "cmd+shift+alt+right", "command": "workbench.action.moveEditorToNextGroup" },
 
   // panel
   { "key": "cmd+alt+[", "command": "workbench.action.previousPanelView" },
