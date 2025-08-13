@@ -8,15 +8,15 @@ add_to_path() {
   else
     current_value="${!varname}"
   fi
-  case ":$current_value:" in
-    *":$newpath:"*) ;; # ignore if already present
-    *) export "$varname=$newpath${current_value:+:$current_value}" ;;
-  esac
+  current_value=":${current_value}:" # sandwhich path with colons
+  current_value="${current_value//:$newpath:/:}" # remove path if already stored
+  current_value="${current_value#:}" # remove leading colon
+  current_value="${current_value%:}" # remove trailing colon
+  export "$varname=$newpath${current_value:+:$current_value}"
 }
 
 ## extend compiler include paths
 add_to_path CPATH /opt/homebrew/include
-add_to_path CPATH /opt/homebrew/lib
 
 ## extend library search paths
 add_to_path LIBRARY_PATH /opt/homebrew/lib
