@@ -12,11 +12,11 @@
     "command": "workbench.action.quickOpen"
   },
   {
-    "key": "cmd+shift+u",
+    "key": "cmd+alt+u",
     "command": "workbench.action.decreaseViewSize"
   },
   {
-    "key": "cmd+shift+i",
+    "key": "cmd+alt+i",
     "command": "workbench.action.increaseViewSize"
   },
   {
@@ -40,7 +40,7 @@
     "command": "workbench.action.createTerminalEditorSide"
   },
   {
-    "key": "cmd+shift+g",
+    "key": "cmd+alt+g",
     "command": "workbench.view.extension.gitlensPanel"
   },
   {
@@ -48,31 +48,35 @@
     "command": "workbench.action.toggleSidebarVisibility"
   },
   {
-    "key": "cmd+shift+e",
+    "key": "cmd+alt+e",
     "command": "workbench.view.explorer"
   },
   {
-    "key": "cmd+shift+f",
+    "key": "cmd+alt+f",
     "command": "workbench.action.findInFiles"
   },
   {
-    "key": "alt+cmd+m",
+    "key": "cmd+alt+o",
+    "command": "outline.focus"
+  },
+  {
+    "key": "cmd+alt+m",
     "command": "workbench.files.action.collapseExplorerFolders"
   },
   {
-    "key": "alt+cmd+h",
+    "key": "cmd+alt+h",
     "command": "workbench.action.splitEditorLeft"
   },
   {
-    "key": "alt+cmd+l",
+    "key": "cmd+alt+l",
     "command": "workbench.action.splitEditorRight"
   },
   {
-    "key": "alt+cmd+k",
+    "key": "cmd+alt+k",
     "command": "workbench.action.splitEditorUp"
   },
   {
-    "key": "alt+cmd+j",
+    "key": "cmd+alt+j",
     "command": "workbench.action.splitEditorDown"
   },
   {
@@ -85,6 +89,10 @@
   },
   {
     "key": "cmd+shift+.",
+    "command": "workbench.action.focusActiveEditorGroup"
+  },
+  {
+    "key": "cmd+alt+.",
     "command": "workbench.action.focusActiveEditorGroup"
   },
   {
@@ -108,28 +116,32 @@
     "command": "workbench.action.closeOtherEditors"
   },
   {
-    "key": "alt+cmd+left",
+    "key": "cmd+alt+left",
     "command": "workbench.action.previousEditor"
   },
   {
-    "key": "alt+cmd+right",
+    "key": "cmd+alt+right",
     "command": "workbench.action.nextEditor"
   },
   {
-    "key": "alt+cmd+[",
+    "key": "cmd+alt+[",
     "command": "workbench.action.previousPanelView"
   },
   {
-    "key": "alt+cmd+]",
+    "key": "cmd+alt+]",
     "command": "workbench.action.nextPanelView"
   },
   {
-    "key": "alt+cmd+-",
+    "key": "cmd+alt+-",
     "command": "workbench.action.previousSideBarView"
   },
   {
-    "key": "alt+cmd+=",
+    "key": "cmd+alt+=",
     "command": "workbench.action.nextSideBarView"
+  },
+  {
+    "key": "cmd+shift+,",
+    "command": "workbench.action.openGlobalKeybindings"
   },
   {
     "key": "cmd+shift+m",

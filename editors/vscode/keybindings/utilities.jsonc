@@ -1,5 +1,8 @@
 [
-  // text utilities
+  // general
+  { "key": "cmd+shift+,", "command": "workbench.action.openGlobalKeybindings" },
+  
+  // in files
   { "key": "cmd+shift+m", "command": "editor.action.toggleMinimap" },
   { "key": "cmd+l", "command": "editor.action.transformToLowercase" },
   { "key": "cmd+u", "command": "editor.action.transformToUppercase" },

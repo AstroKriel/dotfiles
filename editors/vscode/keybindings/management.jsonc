@@ -5,8 +5,8 @@
   { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
 
   // resizing the active view
-  { "key": "cmd+shift+u", "command": "workbench.action.decreaseViewSize" },
-  { "key": "cmd+shift+i", "command": "workbench.action.increaseViewSize" },
+  { "key": "cmd+alt+u", "command": "workbench.action.decreaseViewSize" },
+  { "key": "cmd+alt+i", "command": "workbench.action.increaseViewSize" },
 
   // managing terminal (+panel)
   { "key": "cmd+shift+[", "command": "workbench.action.togglePanel" },
@@ -14,19 +14,20 @@
   { "key": "cmd+shift+=", "command": "workbench.action.terminal.new" },
   { "key": "cmd+shift+-", "command": "workbench.action.terminal.kill" },
   { "key": "cmd+shift+'", "command": "workbench.action.createTerminalEditorSide" },
-  { "key": "cmd+shift+g", "command": "workbench.view.extension.gitlensPanel" },
+  { "key": "cmd+alt+g", "command": "workbench.view.extension.gitlensPanel" },
 
   // sidebar actions
   { "key": "cmd+shift+]", "command": "workbench.action.toggleSidebarVisibility" },
-  { "key": "cmd+shift+e", "command": "workbench.view.explorer" },
-  { "key": "cmd+shift+f", "command": "workbench.action.findInFiles" },
-  { "key": "alt+cmd+m", "command": "workbench.files.action.collapseExplorerFolders" },
+  { "key": "cmd+alt+e", "command": "workbench.view.explorer" },
+  { "key": "cmd+alt+f", "command": "workbench.action.findInFiles" },
+  { "key": "cmd+alt+o", "command": "outline.focus" },
+  { "key": "cmd+alt+m", "command": "workbench.files.action.collapseExplorerFolders" },
 
   // editor splitting
-  { "key": "alt+cmd+h", "command": "workbench.action.splitEditorLeft" },
-  { "key": "alt+cmd+l", "command": "workbench.action.splitEditorRight" },
-  { "key": "alt+cmd+k", "command": "workbench.action.splitEditorUp" },
-  { "key": "alt+cmd+j", "command": "workbench.action.splitEditorDown" },
+  { "key": "cmd+alt+h", "command": "workbench.action.splitEditorLeft" },
+  { "key": "cmd+alt+l", "command": "workbench.action.splitEditorRight" },
+  { "key": "cmd+alt+k", "command": "workbench.action.splitEditorUp" },
+  { "key": "cmd+alt+j", "command": "workbench.action.splitEditorDown" },
 
   // relocate editor
   { "key": "ctrl+cmd+left", "command": "workbench.action.moveEditorToPreviousGroup" },

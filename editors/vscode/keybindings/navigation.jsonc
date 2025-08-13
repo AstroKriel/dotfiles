@@ -2,6 +2,7 @@
 [
   // workspace
   { "key": "cmd+shift+.", "command": "workbench.action.focusActiveEditorGroup" },
+  { "key": "cmd+alt+.", "command": "workbench.action.focusActiveEditorGroup" },
 
   // editor (group)
   { "key": "cmd+shift+h", "command": "workbench.action.focusLeftGroup" },
@@ -11,14 +12,14 @@
   { "key": "cmd+shift+d", "command": "workbench.action.closeOtherEditors" },
 
   // editor (tab)
-  { "key": "alt+cmd+left", "command": "workbench.action.previousEditor" },
-  { "key": "alt+cmd+right", "command": "workbench.action.nextEditor" },
+  { "key": "cmd+alt+left", "command": "workbench.action.previousEditor" },
+  { "key": "cmd+alt+right", "command": "workbench.action.nextEditor" },
 
   // panel
-  { "key": "alt+cmd+[", "command": "workbench.action.previousPanelView" },
-  { "key": "alt+cmd+]", "command": "workbench.action.nextPanelView" },
+  { "key": "cmd+alt+[", "command": "workbench.action.previousPanelView" },
+  { "key": "cmd+alt+]", "command": "workbench.action.nextPanelView" },
 
   // sidebar
-  { "key": "alt+cmd+-", "command": "workbench.action.previousSideBarView" },
-  { "key": "alt+cmd+=", "command": "workbench.action.nextSideBarView" }
+  { "key": "cmd+alt+-", "command": "workbench.action.previousSideBarView" },
+  { "key": "cmd+alt+=", "command": "workbench.action.nextSideBarView" }
 ]
