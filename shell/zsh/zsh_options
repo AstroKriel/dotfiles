@@ -10,7 +10,7 @@ setopt HIST_IGNORE_DUPS     # ignore duplicate commands in history
 setopt HIST_IGNORE_ALL_DUPS # remove old duplicates, keep only most recent
 setopt HIST_REDUCE_BLANKS   # remove superfluous spaces from commands
 setopt APPEND_HISTORY       # append to history file, don’t overwrite
-setopt SHARE_HISTORY        # share history across terminals immediately
+setopt INC_APPEND_HISTORY   # do not share shell histories live, instead incrementally append
 setopt EXTENDED_HISTORY     # record timestamps with commands
 
 ## ---------------------
@@ -24,8 +24,8 @@ setopt NO_BEEP
 ## Keybindings
 ## ---------------------
 
-## redefine word characters to treat _ / . as word boundaries
-WORDCHARS='*?-[]~=&;!#$%^(){}<>.'
+## add `_`, `-`, `/` and `.` as word boundaries
+WORDCHARS=${WORDCHARS//[._\/-]/}
 
 ## jump over words with option + arrow-keys
 ## for compatibility with integrated vscode terminal
