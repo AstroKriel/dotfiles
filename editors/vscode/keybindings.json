@@ -53,7 +53,7 @@
   },
   {
     "key": "cmd+shift+f",
-    "command": "workbench.view.search.focus"
+    "command": "workbench.action.findInFiles"
   },
   {
     "key": "alt+cmd+m",

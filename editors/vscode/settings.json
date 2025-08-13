@@ -11,6 +11,7 @@
   "editor.find.addExtraSpaceOnTop": false,
   "diffEditor.ignoreTrimWhitespace": false,
   "files.autoSave": "afterDelay",
+  "search.seedWithSelection": true,
   "gitlens.advanced.messages.suppressGitVersionWarning": true,
   "gitlens.codeLens.includeSingleLineSymbols": false,
   "editor.minimap.enabled": false,

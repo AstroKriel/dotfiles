@@ -10,5 +10,6 @@
   "editor.scrollBeyondLastLine": false,
   "editor.find.addExtraSpaceOnTop": false,
   "diffEditor.ignoreTrimWhitespace": false,
-  "files.autoSave": "afterDelay"
+  "files.autoSave": "afterDelay",
+  "search.seedWithSelection": true
 }

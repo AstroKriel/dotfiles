@@ -19,7 +19,7 @@
   // sidebar actions
   { "key": "cmd+shift+]", "command": "workbench.action.toggleSidebarVisibility" },
   { "key": "cmd+shift+e", "command": "workbench.view.explorer" },
-  { "key": "cmd+shift+f", "command": "workbench.view.search.focus" },
+  { "key": "cmd+shift+f", "command": "workbench.action.findInFiles" },
   { "key": "alt+cmd+m", "command": "workbench.files.action.collapseExplorerFolders" },
 
   // editor splitting
