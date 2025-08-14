@@ -1,6 +1,6 @@
 {
-  "workbench.preferredLightColorTheme": "Default Light Modern",
-"workbench.preferredDarkColorTheme": "Default Dark+",
+  "workbench.preferredLightColorTheme": "Default Light+",
+  "workbench.preferredDarkColorTheme": "Default Dark+",
   "editor.fontSize": 10.5,
   "editor.detectIndentation": true,
   "editor.insertSpaces": true,
