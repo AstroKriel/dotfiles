@@ -1,4 +1,6 @@
 {
+  "workbench.preferredLightColorTheme": "Default Light Modern",
+  "workbench.preferredDarkColorTheme": "Default Dark+",
   "editor.fontSize": 10.5,
   "editor.detectIndentation": true,
   "editor.insertSpaces": true,
@@ -14,6 +16,10 @@
   "search.seedWithSelection": true,
   "gitlens.advanced.messages.suppressGitVersionWarning": true,
   "gitlens.codeLens.includeSingleLineSymbols": false,
+  "gitlens.heatmap.locations": [
+    "gutter",
+    "overview"
+  ],
   "editor.minimap.enabled": false,
   "editor.minimap.showSlider": "always",
   "editor.minimap.size": "fill",

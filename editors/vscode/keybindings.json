@@ -8,6 +8,10 @@
     "command": "workbench.action.toggleFullScreen"
   },
   {
+    "key": "cmd+shift+t",
+    "command": "workbench.action.toggleLightDarkThemes"
+  },
+  {
     "key": "cmd+shift+r",
     "command": "opensshremotes.openEmptyWindow"
   },
