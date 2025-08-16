@@ -35,6 +35,10 @@ EDITORS = {
   }
 }
 
+## see for details
+## https://kevinyank.com/posts/fix-system-beep-vscode/
+## https://blog.victormendonca.com/2020/04/27/how-to-change-macos-key-bindings/
+## https://gist.github.com/trusktr/1e5e516df4e8032cbc3d
 MAC_KEYBIND_FILE_NAME = "DefaultKeyBinding.dict"
 MAC_KEYBIND_TARGET_DIR  = Path.home() / "Library" / "KeyBindings"
 MAC_KEYBIND_SOURCE_PATH = DOTFILES_DIR / MAC_KEYBIND_FILE_NAME
@@ -44,8 +48,8 @@ def _log_message(message: str):
   log_message(script_name=SCRIPT_NAME, message=message)
 
 def filter_jsonc_comments(content: str) -> str:
-  content = re.sub(r'//.*', '', content) # remove line comments
   content = re.sub(r'/\*[\s\S]*?\*/', '', content) # remove block comments
+  content = re.sub(r'//[^\n\r]*', '', content) # remove line comments
   return content
 
 def merge_config_modules(
