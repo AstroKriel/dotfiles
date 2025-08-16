@@ -1,5 +1,7 @@
 {
-  "workbench.colorTheme": "Default Dark+",
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredLightColorTheme": "Default Light Modern",
+  "workbench.preferredDarkColorTheme": "Default Dark+",
   "workbench.startupEditor": "none",
   "workbench.panel.defaultLocation": "left",
   "workbench.sideBar.location": "right",

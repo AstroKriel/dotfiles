@@ -8,16 +8,24 @@
     "command": "workbench.action.toggleFullScreen"
   },
   {
-    "key": "cmd+shift+t",
-    "command": "workbench.action.toggleLightDarkThemes"
-  },
-  {
     "key": "cmd+shift+r",
     "command": "opensshremotes.openEmptyWindow"
   },
   {
+    "key": "cmd+alt+shift+r",
+    "command": "workbench.action.reloadWindow"
+  },
+  {
+    "key": "cmd+ctrl+r",
+    "command": "workbench.action.remote.close"
+  },
+  {
     "key": "cmd+shift+o",
     "command": "workbench.action.quickOpen"
+  },
+  {
+    "key": "shift+enter",
+    "command": ""
   },
   {
     "key": "cmd+shift+u",
@@ -88,16 +96,24 @@
     "command": "workbench.files.action.collapseExplorerFolders"
   },
   {
+    "key": "cmd+alt+.",
+    "command": "workbench.action.focusActiveEditorGroup"
+  },
+  {
     "key": "cmd+shift+.",
     "command": "workbench.action.focusActiveEditorGroup"
   },
   {
-    "key": "cmd+shift+w",
-    "command": "workbench.action.closeEditorsAndGroup"
-  },
-  {
     "key": "cmd+shift+d",
     "command": "workbench.action.closeOtherEditors"
+  },
+  {
+    "key": "cmd+alt+d",
+    "command": "workbench.action.closeEditorsToTheRight"
+  },
+  {
+    "key": "cmd+d",
+    "command": "workbench.action.closeActiveEditor"
   },
   {
     "key": "cmd+alt+h",
@@ -148,11 +164,11 @@
     "command": "workbench.action.moveEditorRightInGroup"
   },
   {
-    "key": "cmd+shift+alt+left",
+    "key": "cmd+alt+shift+left",
     "command": "workbench.action.moveEditorToPreviousGroup"
   },
   {
-    "key": "cmd+shift+alt+right",
+    "key": "cmd+alt+shift+right",
     "command": "workbench.action.moveEditorToNextGroup"
   },
   {
@@ -176,8 +192,12 @@
     "command": "editor.action.toggleMinimap"
   },
   {
-    "key": "cmd+alt+w",
+    "key": "cmd+shift+w",
     "command": "editor.action.toggleWordWrap"
+  },
+  {
+    "key": "cmd+r",
+    "command": "editor.action.startFindReplaceAction"
   },
   {
     "key": "cmd+l",

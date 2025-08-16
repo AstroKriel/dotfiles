@@ -1,6 +1,7 @@
 [
   { "key": "cmd+shift+m", "command": "editor.action.toggleMinimap" },
-  { "key": "cmd+alt+w", "command": "editor.action.toggleWordWrap" },
+  { "key": "cmd+shift+w", "command": "editor.action.toggleWordWrap" },
+  { "key": "cmd+r", "command": "editor.action.startFindReplaceAction" },
   { "key": "cmd+l", "command": "editor.action.transformToLowercase" },
   { "key": "cmd+u", "command": "editor.action.transformToUppercase" },
   { "key": "cmd+2", "command": "4to2.convert4to2" }
