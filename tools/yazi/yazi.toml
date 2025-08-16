@@ -1,0 +1,7 @@
+[mgr]
+show_hidden = true   # always see dotfiles
+sort_by = "natural"  # human-friendly sorting
+
+[preview]
+max_width  = 120
+max_height = 40

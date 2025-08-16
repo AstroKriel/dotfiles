@@ -51,6 +51,12 @@ TOOLS = {
     "brew": "ghostty --cask",
     "dotfiles_dir": DOTFILES_DIR / "ghostty",
     "target_dir": CONFIG_DIR / "ghostty"
+  },
+  "yazi": {
+    "name": "Yazi",
+    "brew": "yazi ffmpeg",
+    "dotfiles_dir": DOTFILES_DIR / "yazi",
+    "target_dir": CONFIG_DIR / "yazi"
   }
 }
 
