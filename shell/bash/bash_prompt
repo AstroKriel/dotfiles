@@ -4,34 +4,44 @@ yellow="\033[38;5;232;48;5;220m"
 white_on_red="\033[38;5;255;48;5;160m"
 white="\e[00m"
 
+## return the current git repo name and branch/tag (if inside a repo)
 parse_git_info() {
+  ## return early if not inside a git repo
   if ! git rev-parse --is-inside-work-tree &>/dev/null; then
     echo ""
     return
   fi
-  ## name of the repo folder
+  ## local repo folder name (basename of toplevel path)
   local toplevel repo_local
   toplevel=$(git rev-parse --show-toplevel 2>/dev/null) || return
   repo_local=$(basename "$toplevel")
-  ## name of the remote repo
+  ## extract remote repo name (basename of remote.origin.url)
   local remote_url remote_name
   remote_url=$(git config --get remote.origin.url 2>/dev/null)
   if [[ -n $remote_url ]]; then
     remote_name=$(basename "$remote_url")
     remote_name=${remote_name%.git}
   fi
-  ## display of repo name. indicate if the folder uses an alias name
+  ## normalize names for comparison: lowercase + remove underscores and dashes
+  local repo_norm remote_norm
+  repo_norm=${repo_local,,}
+  repo_norm=${repo_norm//[_-]/}
+  remote_norm=${remote_name,,}
+  remote_norm=${remote_norm//[_-]/}
+  ## decide display name:
+  ## show alias form (local->remote) only if normalized names differ
   local repo_display=$repo_local
-  if [[ -n $remote_name && $remote_name != "$repo_local" ]]; then
+  if [[ -n $remote_name && $remote_norm != "$repo_norm" ]]; then
     repo_display="$repo_local->$remote_name"
   fi
-  ## branch or tag. fallback to 'detached'
+  ## current branch or tag (fallback to 'detached' if neither)
   local branch
   branch=$( \
     git symbolic-ref --quiet --short HEAD 2>/dev/null || \
     git describe --tags --exact-match 2>/dev/null || \
-    echo "detached" )
-  ## final display
+    echo "detached"
+  )
+  ## final formatted output
   echo " ($repo_display | $branch)"
 }
 
@@ -42,6 +52,5 @@ PS1+="\[${yellow}\] \W \[${white}\]"                     # current folder name
 PS1+="\[${white_on_red}\]\$(parse_git_info)\[${white}\]" # repo + branch
 PS1+="\n\[${white}\] -> "                                # end symbol
 export PS1
-
 
 ## .
