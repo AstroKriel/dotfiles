@@ -4,22 +4,21 @@ setopt PROMPT_SUBST
 ## enable color names
 autoload -Uz colors && colors
 
-## return the current git branch or tag (if inside a repo)
-parse_git_branch() {
+## return the current git repo name and branch/tag (if inside a repo)
+parse_git_info() {
   git rev-parse --is-inside-work-tree &>/dev/null || return
-  local branch
-  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null || \
-           git describe --tags --exact-match 2>/dev/null || echo "detached")
-  echo " ($branch)"
+  local repo branch
+  repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
+  branch=$(
+    git symbolic-ref --quiet --short HEAD 2>/dev/null || \
+    git describe --tags --exact-match 2>/dev/null || echo "detached"
+  )
+  echo " ($repo | $branch)"
 }
-
-# PROMPT=$'\n[%*] %F{cyan}%~%f'               # line 1: timestamp + full path
-# PROMPT+=$'\n%F{green}%n%f: %F{yellow}%1~%f' # line 2: user + short dir
-# PROMPT+=$'%F{red}$(parse_git_branch)%f -> ' # line 2: git info + prompt symbol
 
 PROMPT=$'\n%F{cyan}%~%f'                         # line 1: full path
 PROMPT+=$'\n[%*] %F{green}%n%f: %F{yellow}%1~%f' # line 2: timestamp + user info
-PROMPT+=$'%F{red}$(parse_git_branch)%f'          # line 2: git info
+PROMPT+=$'%F{red}$(parse_git_info)%f'            # line 2: git repo + branch
 PROMPT+=$'\n-> '                                 # line 3: prompt symbol
 
 ## .
