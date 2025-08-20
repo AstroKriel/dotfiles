@@ -4,24 +4,26 @@ yellow="\033[38;5;232;48;5;220m"
 white_on_red="\033[38;5;255;48;5;160m"
 white="\e[00m"
 
-parse_git_branch() {
+parse_git_info() {
   if git rev-parse --is-inside-work-tree &>/dev/null; then
-    branch=$(\
+    repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
+    branch=$( \
       git symbolic-ref --quiet --short HEAD 2>/dev/null || \
       git describe --tags --exact-match 2>/dev/null || \
-      echo "detached")
-    echo "($branch)"
+      echo "detached" )
+    echo "($repo | $branch)"
   else
     echo ""
   fi
 }
 
 PS1=""
-PS1+="\n\[${lightblue}\] \w \[${white}\]"                  # full path
-PS1+="\n\[${green}\]\u\[${white}\]: "                      # username
-PS1+="\[${yellow}\] \W \[${white}\]"                       # current folder name
-PS1+="\[${white_on_red}\]\$(parse_git_branch)\[${white}\]" # git branch name
-PS1+="\[${white}\] -> "                                    # end symbol
-export PS1;
+PS1+="\n\[${lightblue}\] \w \[${white}\]"                 # full path
+PS1+="\n\[${green}\]\u\[${white}\]: "                     # username
+PS1+="\[${yellow}\] \W \[${white}\]"                      # current folder name
+PS1+="\[${white_on_red}\]\$(parse_git_info)\[${white}\]"  # repo + branch
+PS1+="\[${white}\] -> "                                   # end symbol
+export PS1
+
 
 ## .
