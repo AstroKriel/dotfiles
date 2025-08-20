@@ -29,7 +29,7 @@ parse_git_info() {
     git symbolic-ref --quiet --short HEAD 2>/dev/null || \
     git describe --tags --exact-match 2>/dev/null || echo "detached"
   )
-  ## display
+  ## final display
   echo " ($repo_display | $branch)"
 }
 
