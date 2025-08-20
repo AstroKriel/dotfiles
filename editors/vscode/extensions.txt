@@ -1,10 +1,12 @@
 alefragnani.project-manager
 compulim.indent4to2
-donjayamanne.githistory
 eamodio.gitlens
 h5web.vscode-h5web
 llvm-vs-code-extensions.vscode-clangd
 ms-python.python
 ms-python.vscode-pylance
+ms-toolsai.jupyter
+ms-toolsai.jupyter-keymap
 ms-vscode-remote.remote-ssh
 ms-vscode.remote-explorer
+tomoki1207.pdf
