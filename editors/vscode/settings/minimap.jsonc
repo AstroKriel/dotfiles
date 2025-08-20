@@ -1,5 +1,5 @@
 {
-  "editor.minimap.enabled": false,
+  "editor.minimap.enabled": true,
   "editor.minimap.showSlider": "always",
   "editor.minimap.size": "fill",
   "editor.minimap.renderCharacters": true,
