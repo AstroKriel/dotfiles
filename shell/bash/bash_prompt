@@ -5,16 +5,34 @@ white_on_red="\033[38;5;255;48;5;160m"
 white="\e[00m"
 
 parse_git_info() {
-  if git rev-parse --is-inside-work-tree &>/dev/null; then
-    repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
-    branch=$( \
-      git symbolic-ref --quiet --short HEAD 2>/dev/null || \
-      git describe --tags --exact-match 2>/dev/null || \
-      echo "detached" )
-    echo "($repo | $branch)"
-  else
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
     echo ""
+    return
   fi
+  ## name of the repo folder
+  local toplevel repo_local
+  toplevel=$(git rev-parse --show-toplevel 2>/dev/null) || return
+  repo_local=$(basename "$toplevel")
+  ## name of the remote repo
+  local remote_url remote_name
+  remote_url=$(git config --get remote.origin.url 2>/dev/null)
+  if [[ -n $remote_url ]]; then
+    remote_name=$(basename "$remote_url")
+    remote_name=${remote_name%.git}
+  fi
+  ## display of repo name. indicate if the folder uses an alias name
+  local repo_display=$repo_local
+  if [[ -n $remote_name && $remote_name != "$repo_local" ]]; then
+    repo_display="$repo_local->$remote_name"
+  fi
+  ## branch or tag. fallback to 'detached'
+  local branch
+  branch=$( \
+    git symbolic-ref --quiet --short HEAD 2>/dev/null || \
+    git describe --tags --exact-match 2>/dev/null || \
+    echo "detached" )
+  ## final display
+  echo " ($repo_display | $branch)"
 }
 
 PS1=""
