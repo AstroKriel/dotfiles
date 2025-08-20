@@ -7,13 +7,30 @@ autoload -Uz colors && colors
 ## return the current git repo name and branch/tag (if inside a repo)
 parse_git_info() {
   git rev-parse --is-inside-work-tree &>/dev/null || return
-  local repo branch
-  repo=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)")
+  ## name of the repo folder
+  local toplevel repo_local
+  toplevel=$(git rev-parse --show-toplevel 2>/dev/null) || return
+  repo_local=${toplevel:t}
+  ## name of the remote repo
+  local remote_url remote_name
+  remote_url=$(git config --get remote.origin.url 2>/dev/null)
+  if [[ -n $remote_url ]]; then
+    remote_name=${remote_url:t}
+    remote_name=${remote_name%.git}
+  fi
+  ## display of repo name. indicate if the folder uses an alias name
+  local repo_display=$repo_local
+  if [[ -n $remote_name && $remote_name != $repo_local ]]; then
+    repo_display="$repo_local->$remote_name"
+  fi
+  ## branch or tag. fallback to 'detached'
+  local branch
   branch=$(
     git symbolic-ref --quiet --short HEAD 2>/dev/null || \
     git describe --tags --exact-match 2>/dev/null || echo "detached"
   )
-  echo " ($repo | $branch)"
+  ## display
+  echo " ($repo_display | $branch)"
 }
 
 PROMPT=$'\n%F{cyan}%~%f'                         # line 1: full path
