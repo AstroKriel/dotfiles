@@ -6,6 +6,7 @@ alias lsa='ls -alhF --color=auto'
 ## short-hand commands
 alias da='deactivate'
 alias rsz='rsync -avz' # rsync with archive, verbose, compression
+alias ktmux='tmux kill-server'
 
 ## useful directories
 export DHOME="$HOME"
