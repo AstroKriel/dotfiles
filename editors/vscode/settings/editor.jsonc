@@ -1,15 +1,21 @@
 {
   "editor.fontSize": 10.5,
-  "editor.detectIndentation": true,
   "editor.insertSpaces": true,
+  "editor.detectIndentation": true,
+  
   "editor.renderWhitespace": "boundary",
+  "editor.guides.indentation": true,
+  "editor.guides.highlightActiveIndentation": true,
+  "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": "active",
   "editor.guides.bracketPairsHorizontal": "active",
-  "editor.guides.indentation": true,
+  
+  "search.seedWithSelection": true,
+  "editor.find.addExtraSpaceOnTop": false,
   "editor.scrollBeyondTop": false,
   "editor.scrollBeyondLastLine": false,
-  "editor.find.addExtraSpaceOnTop": false,
+
   "diffEditor.ignoreTrimWhitespace": false,
-  "files.autoSave": "afterDelay",
-  "search.seedWithSelection": true
+
+  "files.autoSave": "afterDelay"
 }
