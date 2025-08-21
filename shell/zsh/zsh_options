@@ -25,7 +25,7 @@ setopt NO_BEEP
 ## ---------------------
 
 ## add `.`, `_`, `-`, and `/` as word boundaries
-WORDCHARS=${WORDCHARS//[._-\/]/}
+WORDCHARS=${WORDCHARS//[._\-\/]/}
 
 ## jump over words with option + arrow-keys
 ## for compatibility with integrated vscode terminal
