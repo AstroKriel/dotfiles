@@ -1,12 +1,15 @@
 
 [
-  // workspace
-  { "key": "cmd+alt+.", "command": "workbench.action.focusActiveEditorGroup" },
+  { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
+  { "key": "cmd+alt+o", "command": "workbench.action.quickOpen" },
+  { "key": "cmd+alt+i", "command": "workbench.action.gotoLine" },
+  // focus editor
   { "key": "cmd+shift+.", "command": "workbench.action.focusActiveEditorGroup" },
+  { "key": "cmd+alt+.", "command": "workbench.action.focusActiveEditorGroup" },
+  // closing editors
   { "key": "cmd+shift+d", "command": "workbench.action.closeOtherEditors" },
   { "key": "cmd+alt+d", "command": "workbench.action.closeEditorsToTheRight" },
   { "key": "cmd+d", "command": "workbench.action.closeActiveEditor" },
-
   // editor (group) navigation
   { "key": "cmd+alt+h", "command": "workbench.action.focusLeftGroup" },
   { "key": "cmd+alt+l", "command": "workbench.action.focusRightGroup" },

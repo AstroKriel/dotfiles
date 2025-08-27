@@ -5,7 +5,6 @@
   { "key": "cmd+shift+r", "command": "opensshremotes.openEmptyWindow" },
   { "key": "cmd+alt+shift+r", "command": "workbench.action.reloadWindow" },
   { "key": "cmd+ctrl+r", "command": "workbench.action.remote.close" },
-  { "key": "cmd+shift+o", "command": "workbench.action.quickOpen" },
   // { "key": "cmd+ctrl+t", "command": "workbench.action.toggleLightDarkThemes" },
   { "key": "shift+enter", "command": "" },
 
@@ -18,18 +17,22 @@
   { "key": "cmd+shift+;", "command": "workbench.action.terminal.toggleTerminal" },
   { "key": "cmd+shift+=", "command": "workbench.action.terminal.new" },
   { "key": "cmd+shift+-", "command": "workbench.action.terminal.kill" },
-  { "key": "cmd+shift+'", "command": "workbench.action.createTerminalEditorSide" },
+  { "key": "cmd+shift+'", "command": "workbench.action.createTerminalEditor" },
   { "key": "cmd+alt+g", "command": "workbench.view.extension.gitlensPanel" },
 
+  // editor actions
+  { "key": "cmd+\\", "command": "workbench.action.splitEditor" },
   // sidebar actions
   { "key": "cmd+shift+]", "command": "workbench.action.toggleSidebarVisibility" },
   { "key": "cmd+shift+e", "command": "workbench.view.explorer" },
   { "key": "cmd+shift+f", "command": "workbench.action.findInFiles" },
-  // extra actions
+  // extra panel actions
+  { "key": "cmd+\\", "command": "workbench.action.terminal.split", "when": "terminalFocus && terminalProcessSupported || terminalFocus && terminalWebExtensionContributedProfile" },
+  // extra sidebar actions
+  { "key": "cmd+alt+o", "command": "outline.focus" },
+  { "key": "cmd+alt+t", "command": "timeline.focus" },
   { "key": "cmd+alt+e", "command": "workbench.view.explorer" },
   { "key": "cmd+alt+f", "command": "workbench.action.findInFiles" },
   { "key": "cmd+alt+r", "command": "workbench.action.replaceInFiles" },
-  { "key": "cmd+alt+o", "command": "outline.focus" },
-  { "key": "cmd+alt+t", "command": "timeline.focus" },
   { "key": "cmd+alt+m", "command": "workbench.files.action.collapseExplorerFolders" }
 ]
