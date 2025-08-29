@@ -1,4 +1,8 @@
 [
+  { "key": "cmd+alt+shift+up", "command": "cursorColumnSelectUp", "when": "textInputFocus" },
+  { "key": "cmd+alt+shift+down", "command": "cursorColumnSelectDown", "when": "textInputFocus" },
+  { "key": "cmd+alt+shift+pageup", "command": "cursorColumnSelectPageUp", "when": "textInputFocus" },
+  { "key": "cmd+alt+shift+pagedown", "command": "cursorColumnSelectPageDown", "when": "textInputFocus" },
   { "key": "cmd+shift+m", "command": "editor.action.toggleMinimap" },
   { "key": "cmd+shift+w", "command": "editor.action.toggleWordWrap" },
   { "key": "cmd+r", "command": "editor.action.startFindReplaceAction" },
