@@ -46,4 +46,8 @@ PROMPT+=$'\n[%*] %F{green}%n%f: %F{yellow}%1~%f' # line 2: timestamp + user info
 PROMPT+=$'%F{red}$(parse_git_info)%f'            # line 2: git repo + branch
 PROMPT+=$'\n-> '                                 # line 3: prompt symbol
 
+## insert a blank line between the command and its output
+preexec() { print -r -- ""; }
+# unset -f preexec # uncomment to undo effect
+
 ## .
