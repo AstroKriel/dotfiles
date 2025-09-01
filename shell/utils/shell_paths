@@ -23,6 +23,7 @@ prepend_to_path LIBRARY_PATH /opt/homebrew/lib
 
 ## extend executable search paths
 prepend_to_path PATH /opt/homebrew/bin
+prepend_to_path PATH "$HOME/.local/bin"
 prepend_to_path PATH /Library/TeX/texbin
 prepend_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin
 
