@@ -20,6 +20,10 @@
     "command": "workbench.action.remote.close"
   },
   {
+    "key": "alt+t",
+    "command": "workbench.action.toggleLightDarkThemes"
+  },
+  {
     "key": "shift+enter",
     "command": ""
   },
@@ -37,7 +41,7 @@
   },
   {
     "key": "cmd+shift+;",
-    "command": "workbench.action.terminal.toggleTerminal"
+    "command": "workbench.action.terminal.focus"
   },
   {
     "key": "cmd+shift+=",
@@ -203,11 +207,6 @@
   {
     "key": "cmd+alt+=",
     "command": "workbench.action.nextSideBarView"
-  },
-  {
-    "key": "alt+lastCursorLineSelect",
-    "command": "cursorColumnSelectUp",
-    "when": "textInputFocus"
   },
   {
     "key": "cmd+alt+shift+up",
