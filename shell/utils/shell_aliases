@@ -21,13 +21,13 @@ alias ddwn='cd "$DDWN"'
 export DONED="$DHOME/OneDrive"
 alias doned='cd "$DONED"'
 
-export DCODES="$DHOME/Documents/Codes"
-alias dcodes='cd "$DCODES"'
+export DPROJ="$DHOME/Documents/Projects"
+alias dproj='cd "$DPROJ"'
 
-export DQUOKKA="$DCODES/quokka"
+export DQUOKKA="$DPROJ/quokka"
 alias dquokka='cd "$DQUOKKA"'
 
-export DASGARD="$DCODES/asgard"
+export DASGARD="$DPROJ/asgard"
 alias dasgard='cd "$DASGARD"'
 
 ## .
