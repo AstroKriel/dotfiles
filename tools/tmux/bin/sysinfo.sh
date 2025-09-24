@@ -1,7 +1,8 @@
 #!/bin/bash
 
-## ======== BATTERY INFO ========
-## ==============================
+##
+## === BATTERY INFO
+##
 
 battery_status="N/A"
 if command -v pmset &>/dev/null; then
@@ -25,8 +26,9 @@ elif [[ -d /sys/class/power_supply/ ]]; then
   fi
 fi
 
-## ======== MEMORY + CPU STATS ========
-## ====================================
+##
+## === MEMORY + CPU STATS
+##
 
 tmux_mem_cpu_load=$(command -v tmux-mem-cpu-load || echo "/opt/homebrew/bin/tmux-mem-cpu-load")
 mem_used="N/A"
@@ -39,8 +41,9 @@ if [[ -x "$tmux_mem_cpu_load" ]]; then
   fi
 fi
 
-## ======== OUTPUT ========
-## ========================
+##
+## === OUTPUT
+##
 
 echo "Charge: $battery_status  CPU: $cpu_used  MEM: $mem_used"
 
