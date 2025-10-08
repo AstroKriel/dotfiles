@@ -1,6 +1,6 @@
 {
   "window.autoDetectColorScheme": true,
-  "workbench.preferredLightColorTheme": "Default Light Modern",
+  "workbench.preferredLightColorTheme": "Solarized Light",
   "workbench.preferredDarkColorTheme": "Default Dark+",
   "workbench.startupEditor": "none",
   "workbench.panel.defaultLocation": "left",
