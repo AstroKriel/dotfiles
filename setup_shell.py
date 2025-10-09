@@ -12,7 +12,7 @@ HOME_DIR = Path.home()
 SHELL_FILES = {
     "bash": ["bashrc", "bash_options", "bash_prompt", "inputrc"],
     "zsh": ["zshrc", "zsh_options", "zsh_prompt"],
-    "utils": ["shell_aliases", "shell_functions", "shell_options", "shell_paths"],
+    "utils": ["git_options", "shell_aliases", "shell_functions", "shell_options", "shell_paths"],
 }
 
 

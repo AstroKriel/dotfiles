@@ -11,6 +11,7 @@ source_if_present "$HOME/.zsh_options"
 source_if_present "$HOME/.zsh_prompt"
 
 ## source shared utils if present
+source_if_present "$HOME/.git_options"
 source_if_present "$HOME/.shell_aliases"
 source_if_present "$HOME/.shell_functions"
 source_if_present "$HOME/.shell_options"
