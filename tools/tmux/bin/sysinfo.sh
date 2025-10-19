@@ -45,6 +45,6 @@ fi
 ## === OUTPUT
 ##
 
-echo "Charge: $battery_status  CPU: $cpu_used  MEM: $mem_used"
+echo "Charge: $battery_status | CPU: $cpu_used | MEM: $mem_used"
 
 ## .
