@@ -112,7 +112,7 @@ _run_and_capture() {
 ## Usage:
 ##   _probe git rev-parse --is-inside-work-tree >/dev/null
 _probe() {
-  _log "? (probe) $*"
+  _log "? $*"
   command "$@"
 }
 
@@ -124,7 +124,7 @@ _probe() {
 ##   _probe_sh 'git remote -v | wc -l'
 _probe_sh() {
   local cmd="$*"
-  _log "? (probe) $cmd"
+  _log "? $cmd"
   ( set -o pipefail; eval "$cmd" )
 }
 
@@ -135,7 +135,7 @@ _probe_sh() {
 ## Usage:
 ##   out="$(_probe_and_capture git remote)"
 _probe_and_capture() {
-  _log "? (probe) $*"
+  _log "? $*"
   command "$@"
 }
 
@@ -147,7 +147,7 @@ _probe_and_capture() {
 ##   out="$(_probe_and_capture_sh 'git symbolic-ref -q refs/remotes/origin/HEAD')"
 _probe_and_capture_sh() {
   local cmd="$*"
-  _log "? (probe) $cmd"
+  _log "? $cmd"
   ( set -o pipefail; eval "$cmd" )
 }
 
@@ -254,7 +254,7 @@ _has_upstream() {
 ## Purpose:
 ##   Print the current local branch name.
 ## Usage:
-##   cur=$(_current_branch) || return 1
+##   current_branch=$(_current_branch) || return 1
 _current_branch() {
   _require_repo || return 1
   local name
@@ -286,157 +286,31 @@ _ensure_clean_worktree() {
 }
 
 ##
-## === MAIN WORKFLOW
-##
-
-## Defn:
-##    g_track_remote_branch <remote>/<branch> [local_branch]
-## Purpose:
-##    Create a local branch that tracks an existing remote branch.
-## Usage:
-##    g_track_remote_branch origin/feature-x
-##    g_track_remote_branch upstream/release-1.4 rel-1.4
-g_track_remote_branch() {
-  _require_remote || return 1
-  [ -z "$1" ] && { _die "usage: g_track_remote_branch <remote>/<branch> [local_branch]"; return 1; }
-  case "$1" in */*) : ;; *) _die "argument must be remote-qualified, e.g. origin/feature-x"; return 1 ;; esac
-  local remote_branch="$1"
-  local local_branch="${2:-${remote_branch#*/}}"
-  _log_step "fetching latest remote refs"; _bind_var remote_branch "$remote_branch"; _bind_var local_branch "$local_branch"
-  _run git fetch --prune "${remote_branch%%/*}" || return $?
-  _log_step "creating local branch and setting it to track the remote branch"
-  _run git switch -c "$local_branch" --track "$remote_branch"
-  _log_outcome "created '$local_branch' to track '$remote_branch'"
-}
-
-## Defn:
-##   g_create_branch_from_default <new_branch>
-## Purpose:
-##   Create a new branch from the remote’s declared default branch and publish it with upstream set.
-## Usage:
-##   g_create_branch_from_default my-feature
-## Notes:
-##   Fails with guidance if the remote’s default branch is not set; suggests using g_create_branch_from_remote.
-g_create_branch_from_default() {
-  _require_remote || return 1
-  [ -z "$1" ] && { _die "usage: g_create_branch_from_default <new_branch>"; return 1; }
-  local new_branch="$1" remote_name base_branch
-  _bind_var new_branch "$new_branch"
-  _log_step "selecting default remote"
-  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
-  _bind_var remote_name "$remote_name"
-  _log_step "fetching remote refs"
-  _run git fetch --prune "$remote_name" || return $?
-  _log_step "discovering remote default branch (<remote>/HEAD)"
-  base_branch=$(_get_default_branch_name)
-  if [ -z "$base_branch" ]; then
-    cat >&2 <<EOF
-No remote default branch is set (refs/remotes/${remote_name}/HEAD unknown).
-Be explicit:
-  g_create_branch_from_remote $new_branch ${remote_name}/<base_branch>
-Example:
-  g_create_branch_from_remote $new_branch ${remote_name}/development
-Inspect the remote:
-  git remote show $remote_name
-EOF
-    return 1
-  fi
-  _bind_var base_branch "$base_branch"
-  _log_step "creating local branch from remote default (no tracking)"
-  _run git switch -c "$new_branch" --no-track "$remote_name/$base_branch" || { _die "failed to create branch"; return 1; }
-  _log_step "publishing branch and setting upstream (-u)"
-  _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
-  _log_outcome "created '$new_branch' from '$remote_name/$base_branch' and set upstream to '$remote_name/$new_branch'"
-}
-
-## Defn:
-##   g_create_branch_from_remote <new_branch> <remote>/<base_branch>
-## Purpose:
-##   Create a new local branch from an explicit remote start point and publish with upstream.
-## Usage:
-##   g_create_branch_from_remote hotfix-1 origin/release-1.4
-g_create_branch_from_remote() {
-  _require_remote || return 1
-  [ -z "$1" ] || [ -z "$2" ] && { _die "usage: g_create_branch_from_remote <new_branch> <remote>/<base_branch>"; return 1; }
-  local new_branch="$1" start_ref="$2" remote_name
-  case "$start_ref" in */*) : ;; *) _die "startpoint must be remote-qualified, e.g. origin/development"; return 1 ;; esac
-  _bind_var new_branch "$new_branch"; _bind_var start_ref "$start_ref"
-  _log_step "selecting default remote"
-  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
-  _bind_var remote_name "$remote_name"
-  _log_step "fetching remote refs"
-  _run git fetch --prune "$remote_name" || return $?
-  _log_step "creating local branch from explicit start point (no tracking)"
-  _run git switch -c "$new_branch" --no-track "$start_ref" || { _die "failed to create branch"; return 1; }
-  _log_step "publishing branch and setting upstream (-u)"
-  _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
-  _log_outcome "created '$new_branch' from '$start_ref' and set upstream to '$remote_name/$new_branch'"
-}
-
-## Defn:
-##   g_push_changes [extra git push args...]
-## Purpose:
-##   Push the current branch; if no upstream exists, creates it as <remote>/<same-name> with -u.
-## Usage:
-##   g_push_changes
-##   g_push_changes --tags
-g_push_changes() {
-  _require_remote || return 1
-  _log_step "publishing current branch"
-  local remote_name; remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
-  _bind_var remote_name "$remote_name"
-  _log_step "detecting whether upstream is already set"
-  if _has_upstream; then
-    _log_outcome "using plain push (upstream already set)"
-    _run git push "$@"
-  else
-    _log_outcome "creating upstream and pushing with -u to ${remote_name}/<same-name>"
-    _run git push -u "$remote_name" HEAD "$@"
-  fi
-}
-
-## Defn:
-##   g_sync_branch [<remote>/<base_branch>]
-## Purpose:
-##   FF-first sync of the current branch: pull --ff if upstream exists; else optionally merge an explicit base.
-## Usage:
-##   g_sync_branch
-##   g_sync_branch origin/development
-## Notes:
-##   Requires a clean worktree unless GIT_ALLOW_DIRTY=1.
-g_sync_branch() {
-  _require_remote || return 1
-  local remote_name base_ref
-  _log_step "identifying default remote"
-  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
-  _bind_var remote_name "$remote_name"
-  _log_step "verifying clean worktree (unless GIT_ALLOW_DIRTY=1)"
-  _ensure_clean_worktree || return $?
-  _log_step "fetching from remote"
-  _run git fetch --prune "$remote_name" || return $?
-  _log_step "deciding on the sync method"
-  if _has_upstream; then
-    _log_step "pulling with --ff"
-    _run git pull --ff
-    _log_outcome "synced via 'git pull --ff' (fast-forward if possible; merge if diverged by Git)"
-  else
-    if [ -n "$1" ]; then
-      base_ref="$1"
-      case "$base_ref" in */*) : ;; *) _die "base must be remote-qualified, e.g. origin/development"; return 1 ;; esac
-      _bind_var base_ref "$base_ref"
-      _log_step "merging explicit base into current branch with --ff"
-      _run git merge --ff "$base_ref"
-      _log_outcome "synced by merging '$base_ref' into current branch (fast-forward if possible)"
-    else
-      _die "no upstream set; publish (g_push_changes) or provide a base: g_sync_branch <remote>/<base_branch>"
-      return 1
-    fi
-  fi
-}
-
-##
 ## === PROBING HELPERS
 ##
+
+## Purpose:
+##   Check whether the current HEAD is detached (not on any branch).
+## Returns:
+##   0 if detached, 1 if attached to a branch, non-zero on error.
+## Usage:
+##   if g_is_detached; then echo "HEAD is detached"; fi
+g_is_detached() {
+  _require_repo || return 1
+
+  _log_step "checking whether HEAD is attached to a branch"
+  local ref
+  ref="$(_probe_and_capture git symbolic-ref -q HEAD || true)"
+  _bind_var ref "${ref:-<empty>}"
+
+  if [ -z "$ref" ]; then
+    _log_outcome "HEAD is detached (not on any branch)"
+    return 0
+  else
+    _log_outcome "HEAD is attached to branch '${ref#refs/heads/}'"
+    return 1
+  fi
+}
 
 ## Purpose:
 ##   Print the current branch, its upstream (if any), and the upstream’s latest commit.
@@ -578,6 +452,272 @@ g_rename_last_commit() {
   _log "note: this rewrites commit history; avoid if already pushed"
   _run git commit --amend -m "$new_msg"
   _log_outcome "amended last commit message"
+}
+
+## Defn:
+##   g_delete_local_branch <branch>
+## Purpose:
+##   Delete a local branch safely (-d). Fails if unmerged or if it's the current branch.
+## Usage:
+##   g_delete_local_branch feature/foo
+g_delete_local_branch() {
+  _require_repo || return 1
+  if g_is_detached; then
+    _die "operation not valid in detached HEAD state"
+    return 1
+  fi
+  [ -z "$1" ] && { _die "usage: g_delete_local_branch <branch>"; return 1; }
+  local b="$1"
+  _log_step "verifying not deleting the current branch"
+  if [ "$(_current_branch)" = "$b" ]; then _die "cannot delete the current branch"; return 1; fi
+  _log_step "deleting local branch (-d)"
+  _run git branch -d -- "$b"
+  _log_outcome "deleted local branch '$b'"
+}
+
+## Defn:
+##   g_prune_gone_locals
+## Purpose:
+##   Delete local branches whose upstream is [gone] (deleted on remote).
+## Usage:
+##   g_prune_gone_locals
+g_prune_gone_locals() {
+  _require_repo || return 1
+  if g_is_detached; then
+    _die "operation not valid in detached HEAD state"
+    return 1
+  fi
+  _log_step "refreshing remote-tracking refs (fetch --prune)"
+  _run git fetch --prune --quiet || return $?
+  _log_step "finding local branches with [gone] upstream"
+  local gone
+  gone="$(_probe_and_capture_sh "git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | awk '/\\[gone\\]/{print \$1}'")"
+  [ -z "$gone" ] && { _log_outcome "no [gone] local branches"; return 0; }
+  _bind_var to_delete "$gone"
+  _log_step "deleting [gone] local branches (-d)"
+  printf '%s\n' "$gone" | while IFS= read -r b; do [ -n "$b" ] && _run git branch -d -- "$b"; done
+  _log_outcome "deleted [gone] local branches"
+}
+
+## Defn:
+##   g_prune_merged_locals [base_ref]
+## Purpose:
+##   Delete local branches fully merged into <base_ref>. Defaults to the remote’s default branch, else HEAD.
+## Usage:
+##   g_prune_merged_locals
+##   g_prune_merged_locals origin/main
+g_prune_merged_locals() {
+  _require_repo || return 1
+  if g_is_detached; then
+    _die "operation not valid in detached HEAD state"
+    return 1
+  fi
+  _log_step "resolving base reference for merge checks"
+  local base="$1"
+  if [ -z "$base" ]; then
+    local r d
+    r=$(_get_default_remote_name) || r=""
+    d=$(_get_default_branch_name) || d=""
+    if [ -n "$r" ] && [ -n "$d" ]; then
+      base="$r/$d"
+    else
+      base="HEAD"
+    fi
+  fi
+  _bind_var base "$base"
+  _log_step "finding branches fully merged into $base"
+  local protect_regex='^(main|master|trunk|develop|development|release|stable)$'
+  local current_branch
+  local merged
+  current_branch="$(_current_branch)" || return 1
+  merged="$(_probe_and_capture_sh "
+    git branch --format='%(refname:short)' --merged \"$base\" \
+    | sed 's/^\\* \\?//' \
+    | grep -Ev \"$protect_regex\" \
+    | grep -v \"^$current_branch$\"
+  ")"
+  [ -z "$merged" ] && { _log_outcome "no fully merged local branches to delete"; return 0; }
+  _bind_var to_delete "$merged"
+  _log_step "deleting fully merged local branches (-d)"
+  printf '%s\n' "$merged" | while IFS= read -r b; do [ -n "$b" ] && _run git branch -d -- "$b"; done
+  _log_outcome "deleted fully merged local branches into $base"
+}
+
+## Defn:
+##   g_cleanup_local_branches [base_ref]
+## Purpose:
+##   End-to-end cleanup: fetch --prune, delete [gone] locals, then delete locals merged into base.
+## Usage:
+##   g_cleanup_local_branches
+##   g_cleanup_local_branches origin/main
+g_cleanup_local_branches() {
+  _require_repo || return 1
+  if g_is_detached; then
+    _die "operation not valid in detached HEAD state"
+    return 1
+  fi
+  _log_step "refreshing remote-tracking refs (fetch --prune)"
+  _run git fetch --prune --quiet || return $?
+  g_prune_gone_locals || return $?
+  g_prune_merged_locals "$1" || return $?
+  _log_outcome "completed local branch cleanup"
+}
+
+##
+## === MAIN WORKFLOW
+##
+
+## Defn:
+##    g_track_remote_branch <remote>/<branch> [local_branch]
+## Purpose:
+##    Create a local branch that tracks an existing remote branch.
+## Usage:
+##    g_track_remote_branch origin/feature-x
+##    g_track_remote_branch upstream/release-1.4 rel-1.4
+g_track_remote_branch() {
+  _require_remote || return 1
+  [ -z "$1" ] && { _die "usage: g_track_remote_branch <remote>/<branch> [local_branch]"; return 1; }
+  case "$1" in */*) : ;; *) _die "argument must be remote-qualified, e.g. origin/feature-x"; return 1 ;; esac
+  local remote_branch="$1"
+  local local_branch="${2:-${remote_branch#*/}}"
+  _log_step "fetching latest remote refs"; _bind_var remote_branch "$remote_branch"; _bind_var local_branch "$local_branch"
+  _run git fetch --prune "${remote_branch%%/*}" || return $?
+  _log_step "creating local branch and setting it to track the remote branch"
+  _run git switch -c "$local_branch" --track "$remote_branch"
+  _log_outcome "created '$local_branch' to track '$remote_branch'"
+}
+
+## Defn:
+##   g_create_branch_from_default <new_branch>
+## Purpose:
+##   Create a new branch from the remote’s declared default branch and publish it with upstream set.
+## Usage:
+##   g_create_branch_from_default my-feature
+## Notes:
+##   Fails with guidance if the remote’s default branch is not set; suggests using g_create_branch_from_remote.
+g_create_branch_from_default() {
+  _require_remote || return 1
+  [ -z "$1" ] && { _die "usage: g_create_branch_from_default <new_branch>"; return 1; }
+  local new_branch="$1" remote_name base_branch
+  _bind_var new_branch "$new_branch"
+  _log_step "selecting default remote"
+  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
+  _bind_var remote_name "$remote_name"
+  _log_step "fetching remote refs"
+  _run git fetch --prune "$remote_name" || return $?
+  _log_step "discovering remote default branch (<remote>/HEAD)"
+  base_branch=$(_get_default_branch_name)
+  if [ -z "$base_branch" ]; then
+    cat >&2 <<EOF
+No remote default branch is set (refs/remotes/${remote_name}/HEAD unknown).
+Be explicit:
+  g_create_branch_from_remote $new_branch ${remote_name}/<base_branch>
+Example:
+  g_create_branch_from_remote $new_branch ${remote_name}/development
+Inspect the remote:
+  git remote show $remote_name
+EOF
+    return 1
+  fi
+  _bind_var base_branch "$base_branch"
+  _log_step "creating local branch from remote default (no tracking)"
+  _run git switch -c "$new_branch" --no-track "$remote_name/$base_branch" || { _die "failed to create branch"; return 1; }
+  _log_step "publishing branch and setting upstream (-u)"
+  _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
+  _log_outcome "created '$new_branch' from '$remote_name/$base_branch' and set upstream to '$remote_name/$new_branch'"
+}
+
+## Defn:
+##   g_create_branch_from_remote <new_branch> <remote>/<base_branch>
+## Purpose:
+##   Create a new local branch from an explicit remote start point and publish with upstream.
+## Usage:
+##   g_create_branch_from_remote hotfix-1 origin/release-1.4
+g_create_branch_from_remote() {
+  _require_remote || return 1
+  [ -z "$1" ] || [ -z "$2" ] && { _die "usage: g_create_branch_from_remote <new_branch> <remote>/<base_branch>"; return 1; }
+  local new_branch="$1" start_ref="$2" remote_name
+  case "$start_ref" in */*) : ;; *) _die "startpoint must be remote-qualified, e.g. origin/development"; return 1 ;; esac
+  _bind_var new_branch "$new_branch"; _bind_var start_ref "$start_ref"
+  _log_step "selecting default remote"
+  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
+  _bind_var remote_name "$remote_name"
+  _log_step "fetching remote refs"
+  _run git fetch --prune "$remote_name" || return $?
+  _log_step "creating local branch from explicit start point (no tracking)"
+  _run git switch -c "$new_branch" --no-track "$start_ref" || { _die "failed to create branch"; return 1; }
+  _log_step "publishing branch and setting upstream (-u)"
+  _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
+  _log_outcome "created '$new_branch' from '$start_ref' and set upstream to '$remote_name/$new_branch'"
+}
+
+## Defn:
+##   g_push [extra git push args...]
+## Purpose:
+##   Push the current branch; if no upstream exists, creates it as <remote>/<same-name> with -u.
+## Usage:
+##   g_push
+##   g_push --tags
+g_push() {
+  _require_remote || return 1
+  if g_is_detached; then
+    _die "operation not valid in detached HEAD state"
+    return 1
+  fi
+  _log_step "publishing current branch"
+  local remote_name; remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
+  _bind_var remote_name "$remote_name"
+  _log_step "detecting whether upstream is already set"
+  if _has_upstream; then
+    _log_outcome "using plain push (upstream already set)"
+    _run git push "$@"
+  else
+    _log_outcome "creating upstream and pushing with -u to ${remote_name}/<same-name>"
+    _run git push -u "$remote_name" HEAD "$@"
+  fi
+}
+
+## Defn:
+##   g_sync_branch [<remote>/<base_branch>]
+## Purpose:
+##   FF-first sync of the current branch: pull --ff if upstream exists; else optionally merge an explicit base.
+## Usage:
+##   g_sync_branch
+##   g_sync_branch origin/development
+## Notes:
+##   Requires a clean worktree unless GIT_ALLOW_DIRTY=1.
+g_sync_branch() {
+  _require_remote || return 1
+  if g_is_detached; then
+    _die "operation not valid in detached HEAD state"
+    return 1
+  fi
+  local remote_name base_ref
+  _log_step "identifying default remote"
+  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
+  _bind_var remote_name "$remote_name"
+  _log_step "verifying clean worktree (unless GIT_ALLOW_DIRTY=1)"
+  _ensure_clean_worktree || return $?
+  _log_step "fetching from remote"
+  _run git fetch --prune "$remote_name" || return $?
+  _log_step "deciding on the sync method"
+  if _has_upstream; then
+    _log_step "pulling with --ff"
+    _run git pull --ff
+    _log_outcome "synced via 'git pull --ff' (fast-forward if possible; merge if diverged by Git)"
+  else
+    if [ -n "$1" ]; then
+      base_ref="$1"
+      case "$base_ref" in */*) : ;; *) _die "base must be remote-qualified, e.g. origin/development"; return 1 ;; esac
+      _bind_var base_ref "$base_ref"
+      _log_step "merging explicit base into current branch with --ff"
+      _run git merge --ff "$base_ref"
+      _log_outcome "synced by merging '$base_ref' into current branch (fast-forward if possible)"
+    else
+      _die "no upstream set; publish (g_push) or provide a base: g_sync_branch <remote>/<base_branch>"
+      return 1
+    fi
+  fi
 }
 
 ## .
