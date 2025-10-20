@@ -36,6 +36,14 @@ _log() { [ "${GIT_VERBOSE:-1}" != "0" ] && printf '%s\n' "$*" >&2; }
 _log_step() { _log "STEP: $*"; }
 
 ## Defn:
+##   _log_outcome <message...>
+## Purpose:
+##   Call out a chosen path / result clearly after a decision.
+## Usage:
+##   _log_outcome "using plain push (upstream exists)"
+_log_outcome() { _log "OUTCOME: $*"; }
+
+## Defn:
 ##   _bind_var <name> <value>
 ## Purpose:
 ##   Show “variable binding” so learners see state moving between steps.
@@ -207,11 +215,15 @@ _require_remote() {
 _get_default_remote_name() {
   _require_remote || return 1
   if _probe git remote get-url origin >/dev/null 2>&1; then
+    _log_outcome "selecting 'origin' as default remote"
     printf %s "origin"; return 0
   fi
   local first_remote
   first_remote="$(_probe_and_capture_sh 'git remote | head -n1')"
-  [ -n "$first_remote" ] && { printf %s "$first_remote"; return 0; }
+  if [ -n "$first_remote" ]; then
+    _log_outcome "selecting first configured remote: $first_remote"
+    printf %s "$first_remote"; return 0
+  fi
   _die "no remotes configured (try: git remote add origin <url>)"; return 1
 }
 
@@ -224,8 +236,9 @@ _get_default_branch_name() {
   local remote_name remote_head_ref default_branch_name
   remote_name=$(_get_default_remote_name) || return 0
   remote_head_ref="$(_probe_and_capture git symbolic-ref -q "refs/remotes/$remote_name/HEAD" 2>/dev/null)" || remote_head_ref=""
-  [ -n "$remote_head_ref" ] || { printf ""; return 0; }
+  [ -n "$remote_head_ref" ] || { _log_outcome "no remote default branch advertised"; printf ""; return 0; }
   default_branch_name=${remote_head_ref#refs/remotes/$remote_name/}
+  _log_outcome "remote default branch is '$default_branch_name'"
   printf %s "$default_branch_name"
 }
 
@@ -247,10 +260,11 @@ _current_branch() {
   local name
   name="$(_probe_and_capture git rev-parse --abbrev-ref HEAD)"
   if [ "$name" = "HEAD" ]; then
-    # Detached; show short SHA so users understand where they are
     local sha; sha="$(_probe_and_capture git rev-parse --short HEAD)"
+    _log_outcome "detached HEAD at $sha"
     printf 'DETACHED@%s' "$sha"
   else
+    _log_outcome "on branch '$name'"
     printf %s "$name"
   fi
 }
@@ -262,11 +276,13 @@ _current_branch() {
 _ensure_clean_worktree() {
   _require_repo || return 1
   if [ "${GIT_ALLOW_DIRTY:-0}" = "1" ]; then
-    _log "note: skipping clean-worktree check (GIT_ALLOW_DIRTY=1)"; return 0
+    _log_outcome "continuing despite dirty worktree (GIT_ALLOW_DIRTY=1)"
+    return 0
   fi
   if ! _probe git diff --quiet || ! _probe git diff --cached --quiet; then
     _die "working tree not clean (stash/commit first). Try: git status --short"; return 1
   fi
+  _log_outcome "worktree is clean"
 }
 
 ##
@@ -290,6 +306,7 @@ g_track_remote_branch() {
   _run git fetch --prune "${remote_branch%%/*}" || return $?
   _log_step "creating local branch and setting it to track the remote branch"
   _run git switch -c "$local_branch" --track "$remote_branch"
+  _log_outcome "created '$local_branch' to track '$remote_branch'"
 }
 
 ## Defn:
@@ -329,7 +346,7 @@ EOF
   _run git switch -c "$new_branch" --no-track "$remote_name/$base_branch" || { _die "failed to create branch"; return 1; }
   _log_step "publishing branch and setting upstream (-u)"
   _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
-  _log "result: created '$new_branch' from '$remote_name/$base_branch' and set upstream to '$remote_name/$new_branch'"
+  _log_outcome "created '$new_branch' from '$remote_name/$base_branch' and set upstream to '$remote_name/$new_branch'"
 }
 
 ## Defn:
@@ -353,7 +370,7 @@ g_create_branch_from_remote() {
   _run git switch -c "$new_branch" --no-track "$start_ref" || { _die "failed to create branch"; return 1; }
   _log_step "publishing branch and setting upstream (-u)"
   _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
-  _log "result: created '$new_branch' from '$start_ref' and set upstream to '$remote_name/$new_branch'"
+  _log_outcome "created '$new_branch' from '$start_ref' and set upstream to '$remote_name/$new_branch'"
 }
 
 ## Defn:
@@ -370,10 +387,10 @@ g_push_changes() {
   _bind_var remote_name "$remote_name"
   _log_step "detecting whether upstream is already set"
   if _has_upstream; then
-    _log "decision: upstream exists -> plain push"
+    _log_outcome "using plain push (upstream already set)"
     _run git push "$@"
   else
-    _log "decision: no upstream -> first push with -u to ${remote_name}/<same-name>"
+    _log_outcome "creating upstream and pushing with -u to ${remote_name}/<same-name>"
     _run git push -u "$remote_name" HEAD "$@"
   fi
 }
@@ -399,9 +416,9 @@ g_sync_branch() {
   _run git fetch --prune "$remote_name" || return $?
   _log_step "deciding on the sync method"
   if _has_upstream; then
-    _log "decision: upstream detected -> pull --ff (fast-forward if possible; merge if diverged)"
     _log_step "pulling with --ff"
     _run git pull --ff
+    _log_outcome "synced via 'git pull --ff' (fast-forward if possible; merge if diverged by Git)"
   else
     if [ -n "$1" ]; then
       base_ref="$1"
@@ -409,6 +426,7 @@ g_sync_branch() {
       _bind_var base_ref "$base_ref"
       _log_step "merging explicit base into current branch with --ff"
       _run git merge --ff "$base_ref"
+      _log_outcome "synced by merging '$base_ref' into current branch (fast-forward if possible)"
     else
       _die "no upstream set; publish (g_push_changes) or provide a base: g_sync_branch <remote>/<base_branch>"
       return 1
@@ -439,7 +457,9 @@ g_show_upstream() {
     printf 'upstream:     %s\n' "$upstream_ref"
     _log_step "showing the latest commit on the upstream"
     _run git log --oneline --decorate -1 "$upstream_ref"
+    _log_outcome "upstream detected: $upstream_ref"
   else
+    _log_outcome "no upstream configured for current branch"
     echo "upstream:     (none)"
   fi
 }
@@ -479,7 +499,6 @@ g_ahead_behind() {
   read -r ahead behind <<< "$counts"
   _bind_var ahead  "$ahead"
   _bind_var behind "$behind"
-  _log_step "reporting result"
   printf "ahead: %s  behind: %s\n" "$ahead" "$behind"
 }
 
@@ -523,6 +542,7 @@ g_remotes() {
 g_recent_commits() {
   _require_repo || return 1
   local max_entries="${1:-20}"
+  _bind_var max_entries "$max_entries"
   _log_step "showing recent commits on current branch"
   _run git log --oneline --decorate -n "$max_entries"
 }
@@ -549,13 +569,15 @@ g_submodules_status() {
 g_rename_last_commit() {
   _require_repo || return 1
   [ -z "$1" ] && { _die "usage: g_rename_last_commit \"<new message>\""; return 1; }
-
-  local new_msg="$1"
+  if ! _probe git rev-parse --verify HEAD >/dev/null 2>&1; then
+    _die "no commits yet (nothing to amend)"; return 1
+  fi
+  local new_msg="$*"
   _bind_var new_msg "$new_msg"
-
   _log_step "renaming last commit"
   _log "note: this rewrites commit history; avoid if already pushed"
   _run git commit --amend -m "$new_msg"
+  _log_outcome "amended last commit message"
 }
 
 ## .
