@@ -32,7 +32,7 @@ _log() { [ "${GIT_VERBOSE:-1}" != "0" ] && printf '%s\n' "$*" >&2; }
 ## Purpose:
 ##   Pedagogical breadcrumb: narrate each major step. Respects GIT_VERBOSE.
 ## Usage:
-##   _log_step "determine upstream"
+##   _log_step "determining upstream"
 _log_step() { _log "STEP: $*"; }
 
 ## Defn:
@@ -41,7 +41,7 @@ _log_step() { _log "STEP: $*"; }
 ##   Show “variable binding” so learners see state moving between steps.
 ## Usage:
 ##   _bind_var upstream_ref "$upstream_ref"
-_bind_var()  { _log "SET: $1 = ${2-}"; }
+_bind_var() { _log "SET: $1 = ${2-}"; }
 
 ## Defn:
 ##   _die <message>
@@ -194,7 +194,7 @@ _require_remote() {
   _require_repo || return 1
   local remotes
   remotes="$(_probe_and_capture git remote)" || remotes=""
-  if [ -z "$remotes" ]; then
+  if [ -z "$remotes" ] && [ "${GIT_DRYRUN:-0}" != "1" ]; then
     _die "no remotes configured (try: git remote add origin <url>)"
     return 1
   fi
@@ -270,105 +270,105 @@ _ensure_clean_worktree() {
 }
 
 ##
-## === MAIN WORKFLOW (staged where useful)
+## === MAIN WORKFLOW
 ##
 
 ## Defn:
-##    g_feature_branch <remote>/<branch> [local_branch]
+##    g_track_remote_branch <remote>/<branch> [local_branch]
 ## Purpose:
 ##    Create a local branch that tracks an existing remote branch.
 ## Usage:
-##    g_feature_branch origin/feature-x
-##    g_feature_branch upstream/release-1.4 rel-1.4
-g_feature_branch() {
+##    g_track_remote_branch origin/feature-x
+##    g_track_remote_branch upstream/release-1.4 rel-1.4
+g_track_remote_branch() {
   _require_remote || return 1
-  [ -z "$1" ] && { _die "usage: g_feature_branch <remote>/<branch> [local_branch]"; return 1; }
+  [ -z "$1" ] && { _die "usage: g_track_remote_branch <remote>/<branch> [local_branch]"; return 1; }
   case "$1" in */*) : ;; *) _die "argument must be remote-qualified, e.g. origin/feature-x"; return 1 ;; esac
   local remote_branch="$1"
   local local_branch="${2:-${remote_branch#*/}}"
-  _log_step "fetch remote for latest refs"; _bind_var remote_branch "$remote_branch"; _bind_var local_branch "$local_branch"
+  _log_step "fetching latest remote refs"; _bind_var remote_branch "$remote_branch"; _bind_var local_branch "$local_branch"
   _run git fetch --prune "${remote_branch%%/*}" || return $?
-  _log_step "create local branch and set it to track the remote branch"
+  _log_step "creating local branch and setting it to track the remote branch"
   _run git switch -c "$local_branch" --track "$remote_branch"
 }
 
 ## Defn:
-##   g_branch_from_default <new_branch>
+##   g_create_branch_from_default <new_branch>
 ## Purpose:
 ##   Create a new branch from the remote’s declared default branch and publish it with upstream set.
 ## Usage:
-##   g_branch_from_default my-feature
+##   g_create_branch_from_default my-feature
 ## Notes:
-##   Fails with guidance if the remote’s default branch is not set; suggests using g_branch_from_remote.
-g_branch_from_default() {
+##   Fails with guidance if the remote’s default branch is not set; suggests using g_create_branch_from_remote.
+g_create_branch_from_default() {
   _require_remote || return 1
-  [ -z "$1" ] && { _die "usage: g_branch_from_default <new_branch>"; return 1; }
+  [ -z "$1" ] && { _die "usage: g_create_branch_from_default <new_branch>"; return 1; }
   local new_branch="$1" remote_name base_branch
   _bind_var new_branch "$new_branch"
-  _log_step "select default remote"
+  _log_step "selecting default remote"
   remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
   _bind_var remote_name "$remote_name"
-  _log_step "fetch remote refs"
+  _log_step "fetching remote refs"
   _run git fetch --prune "$remote_name" || return $?
-  _log_step "discover remote default branch (<remote>/HEAD)"
+  _log_step "discovering remote default branch (<remote>/HEAD)"
   base_branch=$(_get_default_branch_name)
   if [ -z "$base_branch" ]; then
     cat >&2 <<EOF
 No remote default branch is set (refs/remotes/${remote_name}/HEAD unknown).
 Be explicit:
-  g_branch_from_remote $new_branch ${remote_name}/<base_branch>
+  g_create_branch_from_remote $new_branch ${remote_name}/<base_branch>
 Example:
-  g_branch_from_remote $new_branch ${remote_name}/development
+  g_create_branch_from_remote $new_branch ${remote_name}/development
 Inspect the remote:
   git remote show $remote_name
 EOF
     return 1
   fi
   _bind_var base_branch "$base_branch"
-  _log_step "create local branch from remote default without tracking it"
+  _log_step "creating local branch from remote default (no tracking)"
   _run git switch -c "$new_branch" --no-track "$remote_name/$base_branch" || { _die "failed to create branch"; return 1; }
-  _log_step "publish branch and set upstream (-u)"
+  _log_step "publishing branch and setting upstream (-u)"
   _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
   _log "result: created '$new_branch' from '$remote_name/$base_branch' and set upstream to '$remote_name/$new_branch'"
 }
 
 ## Defn:
-##   g_branch_from_remote <new_branch> <remote>/<base_branch>
+##   g_create_branch_from_remote <new_branch> <remote>/<base_branch>
 ## Purpose:
 ##   Create a new local branch from an explicit remote start point and publish with upstream.
 ## Usage:
-##   g_branch_from_remote hotfix-1 origin/release-1.4
-g_branch_from_remote() {
+##   g_create_branch_from_remote hotfix-1 origin/release-1.4
+g_create_branch_from_remote() {
   _require_remote || return 1
-  [ -z "$1" ] || [ -z "$2" ] && { _die "usage: g_branch_from_remote <new_branch> <remote>/<base_branch>"; return 1; }
+  [ -z "$1" ] || [ -z "$2" ] && { _die "usage: g_create_branch_from_remote <new_branch> <remote>/<base_branch>"; return 1; }
   local new_branch="$1" start_ref="$2" remote_name
   case "$start_ref" in */*) : ;; *) _die "startpoint must be remote-qualified, e.g. origin/development"; return 1 ;; esac
   _bind_var new_branch "$new_branch"; _bind_var start_ref "$start_ref"
-  _log_step "select default remote"
+  _log_step "selecting default remote"
   remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
   _bind_var remote_name "$remote_name"
-  _log_step "fetch remote refs"
+  _log_step "fetching remote refs"
   _run git fetch --prune "$remote_name" || return $?
-  _log_step "create local branch from explicit start point (no-track)"
+  _log_step "creating local branch from explicit start point (no tracking)"
   _run git switch -c "$new_branch" --no-track "$start_ref" || { _die "failed to create branch"; return 1; }
-  _log_step "publish branch and set upstream (-u)"
+  _log_step "publishing branch and setting upstream (-u)"
   _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
   _log "result: created '$new_branch' from '$start_ref' and set upstream to '$remote_name/$new_branch'"
 }
 
 ## Defn:
-##   g_push [extra git push args...]
+##   g_push_changes [extra git push args...]
 ## Purpose:
 ##   Push the current branch; if no upstream exists, creates it as <remote>/<same-name> with -u.
 ## Usage:
-##   g_push
-##   g_push --tags
-g_push() {
+##   g_push_changes
+##   g_push_changes --tags
+g_push_changes() {
   _require_remote || return 1
-  _log_step "publish current branch"
+  _log_step "publishing current branch"
   local remote_name; remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
   _bind_var remote_name "$remote_name"
-  _log_step "detect whether upstream is already set"
+  _log_step "detecting whether upstream is already set"
   if _has_upstream; then
     _log "decision: upstream exists -> plain push"
     _run git push "$@"
@@ -390,27 +390,27 @@ g_push() {
 g_sync_branch() {
   _require_remote || return 1
   local remote_name base_ref
-  _log_step "identify default remote"
+  _log_step "identifying default remote"
   remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
   _bind_var remote_name "$remote_name"
-  _log_step "verify clean worktree (unless GIT_ALLOW_DIRTY=1)"
+  _log_step "verifying clean worktree (unless GIT_ALLOW_DIRTY=1)"
   _ensure_clean_worktree || return $?
-  _log_step "fetch from remote"
+  _log_step "fetching from remote"
   _run git fetch --prune "$remote_name" || return $?
-  _log_step "decide sync method"
+  _log_step "deciding on the sync method"
   if _has_upstream; then
     _log "decision: upstream detected -> pull --ff (fast-forward if possible; merge if diverged)"
-    _log_step "pull with --ff"
+    _log_step "pulling with --ff"
     _run git pull --ff
   else
     if [ -n "$1" ]; then
       base_ref="$1"
       case "$base_ref" in */*) : ;; *) _die "base must be remote-qualified, e.g. origin/development"; return 1 ;; esac
       _bind_var base_ref "$base_ref"
-      _log_step "merge explicit base into current branch with --ff"
+      _log_step "merging explicit base into current branch with --ff"
       _run git merge --ff "$base_ref"
     else
-      _die "no upstream set; publish (g_push) or provide a base: g_sync_branch <remote>/<base_branch>"
+      _die "no upstream set; publish (g_push_changes) or provide a base: g_sync_branch <remote>/<base_branch>"
       return 1
     fi
   fi
@@ -423,48 +423,47 @@ g_sync_branch() {
 ## Purpose:
 ##   Print the current branch, its upstream (if any), and the upstream’s latest commit.
 ## Usage:
-##   g_upstream
-g_upstream() {
+##   g_show_upstream
+g_show_upstream() {
   _require_repo || return 1
-  _log_step "identify current branch"
+  _log_step "identifying current branch"
   local current_branch_name upstream_ref
   current_branch_name="$(_current_branch)" || { _die "not inside a git repo"; return 1; }
   printf 'local branch: %s\n' "$current_branch_name"
-  _log_step "resolve upstream (if any)"
+  _log_step "resolving upstream (if any)"
   upstream_ref=""
   if _has_upstream; then
     upstream_ref="$(_probe_and_capture git rev-parse --abbrev-ref --symbolic-full-name '@{u}')" || upstream_ref=""
   fi
   if [ -n "$upstream_ref" ]; then
     printf 'upstream:     %s\n' "$upstream_ref"
-    _log_step "show latest commit on upstream"
+    _log_step "showing the latest commit on the upstream"
     _run git log --oneline --decorate -1 "$upstream_ref"
   else
     echo "upstream:     (none)"
   fi
 }
 
-
 ## Purpose:
 ##   Update remote-tracking refs (fetch --prune) and show local branches with upstream and ahead/behind info.
 ## Usage:
-##   g_status
-g_status() {
+##   g_branches_status
+g_branches_status() {
   _require_repo || return 1
-  _log_step "refresh remote tracking information"
+  _log_step "refreshing remote-tracking information"
   _run git fetch --prune --quiet || return $?
-  _log_step "show local branches with upstream and ahead/behind"
+  _log_step "showing local branches with upstream and ahead/behind"
   _run git branch -vv --no-abbrev
 }
 
 ## Purpose:
 ##   Display ahead/behind counts versus upstream for the current branch.
 ## Usage:
-##   g_diverge
-g_diverge() {
+##   g_ahead_behind
+g_ahead_behind() {
   _require_repo || return 1
   local upstream_ref ahead behind counts
-  _log_step "determine upstream for current branch"
+  _log_step "determining upstream for current branch"
   if _has_upstream; then
     upstream_ref="$(_probe_and_capture git rev-parse --abbrev-ref --symbolic-full-name '@{u}')" || {
       _die "failed to resolve upstream ref"; return 1; }
@@ -472,15 +471,15 @@ g_diverge() {
   else
     _die "no upstream set for $(_current_branch)"; return 1
   fi
-  _log_step "fetch latest refs from remote"
+  _log_step "fetching latest refs from remote"
   _run git fetch --quiet || return $?
-  _log_step "compute ahead/behind vs upstream"
+  _log_step "computing ahead/behind vs upstream"
   counts="$(_run_and_capture git rev-list --left-right --count HEAD..."$upstream_ref")" || return $?
   if [ -z "$counts" ] && [ "${GIT_DRYRUN:-0}" = "1" ]; then return 0; fi
   read -r ahead behind <<< "$counts"
   _bind_var ahead  "$ahead"
   _bind_var behind "$behind"
-  _log_step "report result"
+  _log_step "reporting result"
   printf "ahead: %s  behind: %s\n" "$ahead" "$behind"
 }
 
@@ -491,7 +490,7 @@ g_diverge() {
 g_unpulled_commits() {
   _require_repo || return 1
   local upstream_ref
-  _log_step "determine upstream"
+  _log_step "determining upstream"
   if _has_upstream; then
     upstream_ref="$(_probe_and_capture git rev-parse --abbrev-ref --symbolic-full-name '@{u}')" || {
       _die "failed to resolve upstream ref"; return 1; }
@@ -499,9 +498,9 @@ g_unpulled_commits() {
     _die "no upstream set"; return 1
   fi
   _bind_var upstream_ref "$upstream_ref"
-  _log_step "fetch latest from remote"
+  _log_step "fetching latest from remote"
   _run git fetch --quiet || return $?
-  _log_step "list commits present upstream but missing locally"
+  _log_step "listing commits present upstream but missing locally"
   _run git log --oneline HEAD.."$upstream_ref"
 }
 
@@ -524,17 +523,39 @@ g_remotes() {
 g_recent_commits() {
   _require_repo || return 1
   local max_entries="${1:-20}"
-  _log_step "show recent commits on current branch"
+  _log_step "showing recent commits on current branch"
   _run git log --oneline --decorate -n "$max_entries"
 }
 
 ## Purpose:
 ##   Display submodule SHA/status if present; otherwise print a helpful message.
 ## Usage:
-##   g_submodule_status
-g_submodule_status() {
+##   g_submodules_status
+g_submodules_status() {
   _require_repo || return 1
   _run_sh 'git submodule status || echo "No submodules or not initialized."'
+}
+
+## Defn:
+##   g_rename_last_commit <message...>
+## Purpose:
+##   Rename (amend) the message of the most recent commit.
+## Usage:
+##   g_rename_last_commit "New message"
+## Notes:
+##   - Only changes the *most recent* commit.
+##   - Does not alter the commit content (just the message).
+##   - Use with care if you’ve already pushed the commit.
+g_rename_last_commit() {
+  _require_repo || return 1
+  [ -z "$1" ] && { _die "usage: g_rename_last_commit \"<new message>\""; return 1; }
+
+  local new_msg="$1"
+  _bind_var new_msg "$new_msg"
+
+  _log_step "renaming last commit"
+  _log "note: this rewrites commit history; avoid if already pushed"
+  _run git commit --amend -m "$new_msg"
 }
 
 ## .
