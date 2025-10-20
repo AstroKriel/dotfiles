@@ -98,22 +98,6 @@ _run_and_capture() {
 }
 
 ## Defn:
-##   _run_and_capture_sh '<shell command>'
-## Purpose:
-##   Shell-string variant returning stdout. Dry-run -> log + empty.
-## Usage:
-##   out="$(_run_and_capture_sh 'git remote -v | sort -u')"
-_run_and_capture_sh() {
-  local cmd="$*"
-  if [ "${GIT_DRYRUN:-0}" = "1" ]; then
-    _log "+ (dryrun) skipped: $cmd"
-    return 0
-  fi
-  _log "+ $cmd"
-  ( set -o pipefail; eval "$cmd" )
-}
-
-## Defn:
 ##   _probe <cmd> [args...]
 ## Purpose:
 ##   Log and execute argv-style read-only check (does NOT skip in dry-run).
@@ -173,7 +157,7 @@ g_set_global_config() {
   _run git config --global pull.ff true        || return $?
   _run git config --global merge.ff true       || return $?
   _run git config --global rerere.enabled true || return $?
-  _log "result: installed FF-first merge defaults globally in ~/.gitconfig"
+  printf "result: installed FF-first merge defaults globally in ~/.gitconfig"
 }
 
 ## Purpose:
@@ -462,10 +446,10 @@ g_upstream() {
 
 
 ## Purpose:
-##   Show a compact overview of local branches, their upstreams, and ahead/behind info.
+##   Update remote-tracking refs (fetch --prune) and show local branches with upstream and ahead/behind info.
 ## Usage:
-##   g_branch_statuses
-g_branch_statuses() {
+##   g_status
+g_status() {
   _require_repo || return 1
   _log_step "refresh remote tracking information"
   _run git fetch --prune --quiet || return $?
@@ -531,32 +515,24 @@ g_remotes() {
 }
 
 ## Defn:
-##   g_merges [N]
+##   g_recent_commits [max_entries]
 ## Purpose:
-##   Show recent merges/pulls from the reflog (useful to see merges done outside CLI).
+##   Show recent commits on the current branch (default 20).
 ## Usage:
-##   g_merges          # default 50
-##   g_merges 100
-g_merges() {
+##   g_recent_commits
+##   g_recent_commits 50
+g_recent_commits() {
   _require_repo || return 1
-  local max_entries="${1:-50}"
-  _run_sh 'git reflog --date=local -n '"$max_entries"' | grep -Ei "merge|pull" || echo "No recent merges/pulls found."'
-}
-
-## Purpose:
-##   Quick working tree summary: short status plus branch line.
-## Usage:
-##   g_status
-g_status() {
-  _require_repo || return 1
-  _run git status --short --branch
+  local max_entries="${1:-20}"
+  _log_step "show recent commits on current branch"
+  _run git log --oneline --decorate -n "$max_entries"
 }
 
 ## Purpose:
 ##   Display submodule SHA/status if present; otherwise print a helpful message.
 ## Usage:
-##   g_submodules
-g_submodules() {
+##   g_submodule_status
+g_submodule_status() {
   _require_repo || return 1
   _run_sh 'git submodule status || echo "No submodules or not initialized."'
 }
