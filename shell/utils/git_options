@@ -1,320 +1,564 @@
 ###############################################################################
-## Git helpers (FF-first, merge-when-diverged) + probes
+## Git helpers (FF-first, merge-when-diverged) + probes (teaching-friendly)
 ##
 ## Runtime toggles (env-vars):
-##   GIT_HELPERS_VERBOSE=1   # default: 1  -> print decisions + the exact git commands
-##   GIT_HELPERS_VERBOSE=0   #             -> quiet mode
+##   GIT_VERBOSE=1  # default  -> print decisions + the exact git commands
+##   GIT_VERBOSE=0  #          -> quiet mode
 ##
-##   GIT_HELPERS_DRYRUN=1    # default: 0  -> show commands, DO NOT execute them
-##   GIT_HELPERS_DRYRUN=0    #             -> execute normally
+##   GIT_DRYRUN=1   #          -> show commands, but DO NOT execute them
+##   GIT_DRYRUN=0   # default  -> execute normally
 ##
-##   GIT_HELPERS_ALLOW_DIRTY=1  # default: 0 -> allow g_sync/merges with uncommitted changes
-##   GIT_HELPERS_ALLOW_DIRTY=0  #            -> require a clean worktree (safer)
+##   GIT_ALLOW_DIRTY=1  #          -> allow g_sync_branch/merges with uncommitted changes
+##   GIT_ALLOW_DIRTY=0  # default  -> require a clean worktree (safer)
 ##
 ## One-time global config (recommended):
-##   g_configure_git         # sets: pull.rebase=false, pull.ff=true, merge.ff=true, rerere.enabled=true
+##   g_set_global_config  # sets: pull.rebase=false, pull.ff=true, merge.ff=true, rerere.enabled=true
 ###############################################################################
 
-## configure user's Git for FF-first, merge-not-rebase, and quality-of-life, globally
-g_set_config() {
-  g_run git config --global pull.rebase false     || return $?
-  g_run git config --global pull.ff true          || return $?
-  g_run git config --global merge.ff true         || return $?
-  g_run git config --global rerere.enabled true   || return $?
-  g_log "result: installed FF-first merge defaults globally in ~/.gitconfig"
+##
+## === LOGGING
+##
+
+## Defn:
+##   _log <message...>
+## Purpose:
+##   Conditional stderr logger controlled by GIT_VERBOSE (default 1).
+## Usage:
+##   _log "decision: doing X"
+_log() { [ "${GIT_VERBOSE:-1}" != "0" ] && printf '%s\n' "$*" >&2; }
+
+## Defn:
+##   _log_step <message...>
+## Purpose:
+##   Pedagogical breadcrumb: narrate each major step. Respects GIT_VERBOSE.
+## Usage:
+##   _log_step "determine upstream"
+_log_step() { _log "STEP: $*"; }
+
+## Defn:
+##   _bind_var <name> <value>
+## Purpose:
+##   Show “variable binding” so learners see state moving between steps.
+## Usage:
+##   _bind_var upstream_ref "$upstream_ref"
+_bind_var()  { _log "SET: $1 = ${2-}"; }
+
+## Defn:
+##   _die <message>
+## Purpose:
+##   Send an error message to stderr and return non-zero from the current function.
+## Usage:
+##   some_check || { _die "explanation"; return 1; }
+_die() { printf 'error: %s\n' "$*" >&2; return 1; }
+
+## Defn:
+##   _run <cmd> [args...]
+## Purpose:
+##   Log and execute argv-style command; in dry-run, mark as skipped.
+## Usage:
+##   _run git fetch --prune origin
+_run() {
+  if [ "${GIT_DRYRUN:-0}" = "1" ]; then
+    _log "+ (dryrun) skipped: $*"
+    return 0
+  fi
+  _log "+ $*"
+  command "$@"
 }
 
-## display the current global Git configuration relevant to these helpers.
-g_show_config() {
-  g_log "Current global Git configuration:"
-  g_run git config --global --get pull.rebase       || true
-  g_run git config --global --get pull.ff           || true
-  g_run git config --global --get merge.ff          || true
-  g_run git config --global --get rerere.enabled    || true
-
-  printf "\nSummary:\n"
-  printf "  pull.rebase      = %s\n" "$(git config --global --get pull.rebase || echo '(unset)')"
-  printf "  pull.ff          = %s\n" "$(git config --global --get pull.ff || echo '(unset)')"
-  printf "  merge.ff         = %s\n" "$(git config --global --get merge.ff || echo '(unset)')"
-  printf "  rerere.enabled   = %s\n" "$(git config --global --get rerere.enabled || echo '(unset)')"
-  g_log "Tip: edit directly via 'git config --global --edit' or rerun g_set_config"
+## Defn:
+##   _run_sh '<shell command>'
+## Purpose:
+##   Like _run, but for pipelines / && / || as a single unit. Uses eval.
+## Usage:
+##   _run_sh 'git remote -v | sort -u'
+_run_sh() {
+  local cmd="$*"
+  if [ "${GIT_DRYRUN:-0}" = "1" ]; then
+    _log "+ (dryrun) skipped: $cmd"
+    return 0
+  fi
+  _log "+ $cmd"
+  ( set -o pipefail; eval "$cmd" )
 }
 
+## Defn:
+##   _run_and_capture <cmd> [args...]
+## Purpose:
+##   Run argv-style command, return stdout (for $(...)). Dry-run -> log + empty.
+## Usage:
+##   out="$(_run_and_capture git rev-parse --abbrev-ref HEAD)"
+_run_and_capture() {
+  if [ "${GIT_DRYRUN:-0}" = "1" ]; then
+    _log "+ (dryrun) skipped: $*"
+    return 0
+  fi
+  _log "+ $*"
+  command "$@"
+}
+
+## Defn:
+##   _run_and_capture_sh '<shell command>'
+## Purpose:
+##   Shell-string variant returning stdout. Dry-run -> log + empty.
+## Usage:
+##   out="$(_run_and_capture_sh 'git remote -v | sort -u')"
+_run_and_capture_sh() {
+  local cmd="$*"
+  if [ "${GIT_DRYRUN:-0}" = "1" ]; then
+    _log "+ (dryrun) skipped: $cmd"
+    return 0
+  fi
+  _log "+ $cmd"
+  ( set -o pipefail; eval "$cmd" )
+}
+
+## Defn:
+##   _probe <cmd> [args...]
+## Purpose:
+##   Log and execute argv-style read-only check (does NOT skip in dry-run).
+## Usage:
+##   _probe git rev-parse --is-inside-work-tree >/dev/null
+_probe() {
+  _log "? (probe) $*"
+  command "$@"
+}
+
+## Defn:
+##   _probe_sh '<shell command>'
+## Purpose:
+##   Shell-string probe variant (pipelines). Does not skip in dry-run.
+## Usage:
+##   _probe_sh 'git remote -v | wc -l'
+_probe_sh() {
+  local cmd="$*"
+  _log "? (probe) $cmd"
+  ( set -o pipefail; eval "$cmd" )
+}
+
+## Defn:
+##   _probe_and_capture <cmd> [args...]
+## Purpose:
+##   Read-only argv-style query that returns stdout; runs even in dry-run.
+## Usage:
+##   out="$(_probe_and_capture git remote)"
+_probe_and_capture() {
+  _log "? (probe) $*"
+  command "$@"
+}
+
+## Defn:
+##   _probe_and_capture_sh '<shell command>'
+## Purpose:
+##   Shell-string read-only query returning stdout; runs even in dry-run.
+## Usage:
+##   out="$(_probe_and_capture_sh 'git symbolic-ref -q refs/remotes/origin/HEAD')"
+_probe_and_capture_sh() {
+  local cmd="$*"
+  _log "? (probe) $cmd"
+  ( set -o pipefail; eval "$cmd" )
+}
 
 ##
-## === logging + wrappers
+## === GIT CONFIGURATION
 ##
 
-g_log() { [ "${GIT_HELPERS_VERBOSE:-1}" -eq 1 ] && printf '%s\n' "$*" >&2; }
-g_die() { printf 'error: %s\n' "$*" >&2; return 1; }
-g_run() { g_log "+ $*"; [ "${GIT_HELPERS_DRYRUN:-0}" -eq 1 ] || command "$@"; }
+## Purpose:
+##   Configure global Git defaults for a fast-forward-first workflow and enable
+##   rerere (reuse recorded conflict resolutions).
+## Notes:
+##   Writes to ~/.gitconfig (pull.rebase=false, pull.ff=true, merge.ff=true, rerere.enabled=true).
+g_set_global_config() {
+  _run git config --global pull.rebase false   || return $?
+  _run git config --global pull.ff true        || return $?
+  _run git config --global merge.ff true       || return $?
+  _run git config --global rerere.enabled true || return $?
+  _log "result: installed FF-first merge defaults globally in ~/.gitconfig"
+}
+
+## Purpose:
+##   Display the current global Git settings that this helper module relies on.
+## Notes:
+##   Prints raw values and a short summary.
+g_show_global_config() {
+  printf "\nCurrent global Git configuration summary:\n"
+  printf "\tpull.rebase    = %s\n" "$(git config --global --get pull.rebase || echo '(unset)')"
+  printf "\tpull.ff        = %s\n"   "$(git config --global --get pull.ff || echo '(unset)')"
+  printf "\tmerge.ff       = %s\n"   "$(git config --global --get merge.ff || echo '(unset)')"
+  printf "\trerere.enabled = %s\n"   "$(git config --global --get rerere.enabled || echo '(unset)')"
+  printf "Tip: edit directly via 'git config --global --edit' or run 'g_set_global_config'\n"
+}
 
 ##
-## === internal helpers
+## === INTERNAL HELPERS
 ##
 
-## require we're inside a git repo
+## Purpose:
+##   Verify the current directory is inside a Git work tree.
+## Usage:
+##   _require_repo || return 1
 _require_repo() {
-  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { g_die "not inside a git repo"; return 1; }
+  _probe git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    _die "not inside a git repo"; return 1; }
 }
 
-## require at least one remote
+## Purpose:
+##   Ensure we are in a repo and that at least one remote is configured.
+## Usage:
+##   _require_remote || return 1
 _require_remote() {
   _require_repo || return 1
-  if [ -z "$(git remote)" ]; then
-    g_die "no remotes configured (try: git remote add origin <url>)"
+  local remotes
+  remotes="$(_probe_and_capture git remote)" || remotes=""
+  if [ -z "$remotes" ]; then
+    _die "no remotes configured (try: git remote add origin <url>)"
     return 1
   fi
 }
 
+## Purpose:
+##   Pick the default remote name: prefer 'origin' if it exists, otherwise choose the first configured remote.
+## Usage:
+##   remote=$(_get_default_remote_name) || return 1
 _get_default_remote_name() {
-  _require_remote || return 1;
-  if git remote get-url origin >/dev/null 2>&1; then
-    printf %s "origin"
-    return 0
-  fi
-  ## fallback: first configured remote, or fail if none
-  local first_remote
-  first_remote=$(git remote | head -n1)
-  [ -n "$first_remote" ] && { printf %s "$first_remote"; return 0; }
-  g_die "no remotes configured (try: git remote add origin <url>)"
-  return 1
-}
-
-## strict: only accept the remote's declared default (origin/HEAD), otherwise empty if unset
-_get_default_branch_name() {
-  _require_remote || return 1;
-  local remote_name ref short
-  remote_name=$(_get_default_remote_name) || return 0
-  ref=$(git symbolic-ref -q "refs/remotes/$remote_name/HEAD" 2>/dev/null) || ref=""
-  [ -n "$ref" ] || { printf ""; return 0; }
-  short=${ref#refs/remotes/$remote_name/}
-  printf %s "$short"
-}
-
-_has_upstream()   { _require_remote || return 1; git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; }
-_current_branch() { _require_repo || return 1; git rev-parse --abbrev-ref HEAD 2>/dev/null; }
-
-##
-## === main workflow
-##
-
-
-## g_checkout_remote <remote>/<branch> [local_branch]
-## Create a local branch that tracks an existing remote branch.
-## Examples:
-##   g_checkout_remote origin/feature-x
-##   g_checkout_remote upstream/release-1.4 rel-1.4
-g_checkout_remote() {
-  _require_remote || return 1;
-  [ -z "$1" ] && { g_die "usage: g_checkout_remote <remote>/<branch> [local_branch]"; return 1; }
-  case "$1" in */*) : ;; *) g_die "argument must be remote-qualified, e.g. origin/feature-x"; return 1 ;; esac
-  local remote_branch="$1"
-  local local_branch="${2:-${remote_branch#*/}}"   # default local name = remote tail
-  g_run git fetch --prune "${remote_branch%%/*}" || return $?
-  g_log "decision: create local '$local_branch' tracking '$remote_branch'"
-  g_run git switch -c "$local_branch" --track "$remote_branch"
-}
-
-## g_require_clean_worktree: fail if there are unstaged or uncommitted changes.
-g_require_clean_worktree() {
-  _require_repo || return 1
-  # optional opt-out below…
-  if [ "${GIT_HELPERS_ALLOW_DIRTY:-0}" -eq 1 ]; then
-    g_log "note: skipping clean-worktree check (GIT_HELPERS_ALLOW_DIRTY=1)"
-    return 0
-  fi
-  if ! git diff --quiet || ! git diff --cached --quiet; then
-    g_die "working tree not clean (stash/commit first). Try: git status --short"
-    return 1
-  fi
-}
-
-## g_new <new_branch>
-## Create from REMOTE'S DECLARED DEFAULT ONLY (origin/HEAD). Publish & set upstream.
-g_new() {
   _require_remote || return 1
-  [ -z "$1" ] && { g_die "usage: g_new <new_branch>"; return 1; }
+  if _probe git remote get-url origin >/dev/null 2>&1; then
+    printf %s "origin"; return 0
+  fi
+  local first_remote
+  first_remote="$(_probe_and_capture_sh 'git remote | head -n1')"
+  [ -n "$first_remote" ] && { printf %s "$first_remote"; return 0; }
+  _die "no remotes configured (try: git remote add origin <url>)"; return 1
+}
+
+## Purpose:
+##   Strictly resolve the remote’s default branch via <remote>/HEAD; print nothing if undefined.
+## Usage:
+##   def=$(_get_default_branch_name)  # may be empty
+_get_default_branch_name() {
+  _require_remote || return 1
+  local remote_name remote_head_ref default_branch_name
+  remote_name=$(_get_default_remote_name) || return 0
+  remote_head_ref="$(_probe_and_capture git symbolic-ref -q "refs/remotes/$remote_name/HEAD" 2>/dev/null)" || remote_head_ref=""
+  [ -n "$remote_head_ref" ] || { printf ""; return 0; }
+  default_branch_name=${remote_head_ref#refs/remotes/$remote_name/}
+  printf %s "$default_branch_name"
+}
+
+## Purpose:
+##   Test whether the current branch has an upstream configured.
+## Usage:
+##   if _has_upstream; then ... fi
+_has_upstream() {
+  _require_repo || return 1
+  _probe git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1
+}
+
+## Purpose:
+##   Print the current local branch name.
+## Usage:
+##   cur=$(_current_branch) || return 1
+_current_branch() {
+  _require_repo || return 1
+  local name
+  name="$(_probe_and_capture git rev-parse --abbrev-ref HEAD)"
+  if [ "$name" = "HEAD" ]; then
+    # Detached; show short SHA so users understand where they are
+    local sha; sha="$(_probe_and_capture git rev-parse --short HEAD)"
+    printf 'DETACHED@%s' "$sha"
+  else
+    printf %s "$name"
+  fi
+}
+
+## Purpose:
+##   Enforce a clean working tree unless GIT_ALLOW_DIRTY=1; abort if unstaged/uncommitted changes exist.
+## Usage:
+##   _ensure_clean_worktree || return 1
+_ensure_clean_worktree() {
+  _require_repo || return 1
+  if [ "${GIT_ALLOW_DIRTY:-0}" = "1" ]; then
+    _log "note: skipping clean-worktree check (GIT_ALLOW_DIRTY=1)"; return 0
+  fi
+  if ! _probe git diff --quiet || ! _probe git diff --cached --quiet; then
+    _die "working tree not clean (stash/commit first). Try: git status --short"; return 1
+  fi
+}
+
+##
+## === MAIN WORKFLOW (staged where useful)
+##
+
+## Defn:
+##    g_feature_branch <remote>/<branch> [local_branch]
+## Purpose:
+##    Create a local branch that tracks an existing remote branch.
+## Usage:
+##    g_feature_branch origin/feature-x
+##    g_feature_branch upstream/release-1.4 rel-1.4
+g_feature_branch() {
+  _require_remote || return 1
+  [ -z "$1" ] && { _die "usage: g_feature_branch <remote>/<branch> [local_branch]"; return 1; }
+  case "$1" in */*) : ;; *) _die "argument must be remote-qualified, e.g. origin/feature-x"; return 1 ;; esac
+  local remote_branch="$1"
+  local local_branch="${2:-${remote_branch#*/}}"
+  _log_step "fetch remote for latest refs"; _bind_var remote_branch "$remote_branch"; _bind_var local_branch "$local_branch"
+  _run git fetch --prune "${remote_branch%%/*}" || return $?
+  _log_step "create local branch and set it to track the remote branch"
+  _run git switch -c "$local_branch" --track "$remote_branch"
+}
+
+## Defn:
+##   g_branch_from_default <new_branch>
+## Purpose:
+##   Create a new branch from the remote’s declared default branch and publish it with upstream set.
+## Usage:
+##   g_branch_from_default my-feature
+## Notes:
+##   Fails with guidance if the remote’s default branch is not set; suggests using g_branch_from_remote.
+g_branch_from_default() {
+  _require_remote || return 1
+  [ -z "$1" ] && { _die "usage: g_branch_from_default <new_branch>"; return 1; }
   local new_branch="$1" remote_name base_branch
-  remote_name=$(_get_default_remote_name) || { g_die "not inside a git repo"; return 1; }
-  g_log "decision: remote=${remote_name}"
-  g_run git fetch --prune "$remote_name" || return $?
+  _bind_var new_branch "$new_branch"
+  _log_step "select default remote"
+  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
+  _bind_var remote_name "$remote_name"
+  _log_step "fetch remote refs"
+  _run git fetch --prune "$remote_name" || return $?
+  _log_step "discover remote default branch (<remote>/HEAD)"
   base_branch=$(_get_default_branch_name)
   if [ -z "$base_branch" ]; then
     cat >&2 <<EOF
 No remote default branch is set (refs/remotes/${remote_name}/HEAD unknown).
 Be explicit:
-  g_new_from $new_branch ${remote_name}/<base_branch>
+  g_branch_from_remote $new_branch ${remote_name}/<base_branch>
 Example:
-  g_new_from $new_branch ${remote_name}/development
-
+  g_branch_from_remote $new_branch ${remote_name}/development
 Inspect the remote:
   git remote show $remote_name
 EOF
     return 1
   fi
-  g_log "decision: start_ref=${remote_name}/${base_branch} (remote default)"
-  g_run git switch -c "$new_branch" --no-track "$remote_name/$base_branch" || { g_die "failed to create branch"; return 1; }
-  g_run git push -u "$remote_name" HEAD || { g_log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
-  g_log "result: created '$new_branch' from '$remote_name/$base_branch' and set upstream to '$remote_name/$new_branch'"
+  _bind_var base_branch "$base_branch"
+  _log_step "create local branch from remote default without tracking it"
+  _run git switch -c "$new_branch" --no-track "$remote_name/$base_branch" || { _die "failed to create branch"; return 1; }
+  _log_step "publish branch and set upstream (-u)"
+  _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
+  _log "result: created '$new_branch' from '$remote_name/$base_branch' and set upstream to '$remote_name/$new_branch'"
 }
 
-## g_new_from <new_branch> <remote>/<base_branch>
-## Explicit startpoint version (no guessing). Publish & set upstream.
-g_new_from() {
+## Defn:
+##   g_branch_from_remote <new_branch> <remote>/<base_branch>
+## Purpose:
+##   Create a new local branch from an explicit remote start point and publish with upstream.
+## Usage:
+##   g_branch_from_remote hotfix-1 origin/release-1.4
+g_branch_from_remote() {
   _require_remote || return 1
-  [ -z "$1" ] || [ -z "$2" ] && { g_die "usage: g_new_from <new_branch> <remote>/<base_branch>"; return 1; }
+  [ -z "$1" ] || [ -z "$2" ] && { _die "usage: g_branch_from_remote <new_branch> <remote>/<base_branch>"; return 1; }
   local new_branch="$1" start_ref="$2" remote_name
-  case "$start_ref" in */*) : ;; *) g_die "startpoint must be remote-qualified, e.g. origin/development"; return 1 ;; esac
-  remote_name=$(_get_default_remote_name) || { g_die "not inside a git repo"; return 1; }
-
-  g_run git fetch --prune "$remote_name" || return $?
-  g_log "decision: explicit start_ref=$start_ref"
-  g_run git switch -c "$new_branch" --no-track "$start_ref" || { g_die "failed to create branch"; return 1; }
-  g_run git push -u "$remote_name" HEAD || { g_log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
-  g_log "result: created '$new_branch' from '$start_ref' and set upstream to '$remote_name/$new_branch'"
+  case "$start_ref" in */*) : ;; *) _die "startpoint must be remote-qualified, e.g. origin/development"; return 1 ;; esac
+  _bind_var new_branch "$new_branch"; _bind_var start_ref "$start_ref"
+  _log_step "select default remote"
+  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
+  _bind_var remote_name "$remote_name"
+  _log_step "fetch remote refs"
+  _run git fetch --prune "$remote_name" || return $?
+  _log_step "create local branch from explicit start point (no-track)"
+  _run git switch -c "$new_branch" --no-track "$start_ref" || { _die "failed to create branch"; return 1; }
+  _log_step "publish branch and set upstream (-u)"
+  _run git push -u "$remote_name" HEAD || { _log "note: local branch created; publish later via: git push -u $remote_name HEAD"; return 1; }
+  _log "result: created '$new_branch' from '$start_ref' and set upstream to '$remote_name/$new_branch'"
 }
 
-## g_push [extra git push args...]
-## Push current branch; first push creates upstream as <remote>/<same-name>. Never forces.
+## Defn:
+##   g_push [extra git push args...]
+## Purpose:
+##   Push the current branch; if no upstream exists, creates it as <remote>/<same-name> with -u.
+## Usage:
+##   g_push
+##   g_push --tags
 g_push() {
-  _require_remote || return 1;
-  local remote_name; remote_name=$(_get_default_remote_name) || { g_die "not inside a git repo"; return $?; }
+  _require_remote || return 1
+  _log_step "publish current branch"
+  local remote_name; remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
+  _bind_var remote_name "$remote_name"
+  _log_step "detect whether upstream is already set"
   if _has_upstream; then
-    g_log "decision: upstream exists -> plain push"
-    g_run git push "$@"
+    _log "decision: upstream exists -> plain push"
+    _run git push "$@"
   else
-    g_log "decision: no upstream -> first push with -u to ${remote_name}/<same-name>"
-    g_run git push -u "$remote_name" HEAD "$@"
+    _log "decision: no upstream -> first push with -u to ${remote_name}/<same-name>"
+    _run git push -u "$remote_name" HEAD "$@"
   fi
 }
 
-## g_sync [<remote>/<base_branch>]
-## FF-first sync.
-## - If upstream exists: `git pull --ff` (fast-forward when possible; merge when diverged).
-## - If no upstream: FAIL unless an explicit base ref (remote/branch) is provided, which we merge with --ff.
-g_sync() {
-  _require_remote || return 1;
+## Defn:
+##   g_sync_branch [<remote>/<base_branch>]
+## Purpose:
+##   FF-first sync of the current branch: pull --ff if upstream exists; else optionally merge an explicit base.
+## Usage:
+##   g_sync_branch
+##   g_sync_branch origin/development
+## Notes:
+##   Requires a clean worktree unless GIT_ALLOW_DIRTY=1.
+g_sync_branch() {
+  _require_remote || return 1
   local remote_name base_ref
-  remote_name=$(_get_default_remote_name) || { g_die "not inside a git repo"; return $?; }
-  g_require_clean_worktree || return $?
-  g_run git fetch --prune "$remote_name" || return $?
+  _log_step "identify default remote"
+  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
+  _bind_var remote_name "$remote_name"
+  _log_step "verify clean worktree (unless GIT_ALLOW_DIRTY=1)"
+  _ensure_clean_worktree || return $?
+  _log_step "fetch from remote"
+  _run git fetch --prune "$remote_name" || return $?
+  _log_step "decide sync method"
   if _has_upstream; then
-    g_log "decision: upstream detected -> git pull --ff (FF if possible, merge if diverged)"
-    g_run git pull --ff
+    _log "decision: upstream detected -> pull --ff (fast-forward if possible; merge if diverged)"
+    _log_step "pull with --ff"
+    _run git pull --ff
   else
     if [ -n "$1" ]; then
       base_ref="$1"
-      case "$base_ref" in */*) : ;; *) g_die "base must be remote-qualified, e.g. origin/development"; return 1 ;; esac
-      g_log "decision: no upstream; explicit base_ref -> git merge --ff $base_ref"
-      g_run git merge --ff "$base_ref"
+      case "$base_ref" in */*) : ;; *) _die "base must be remote-qualified, e.g. origin/development"; return 1 ;; esac
+      _bind_var base_ref "$base_ref"
+      _log_step "merge explicit base into current branch with --ff"
+      _run git merge --ff "$base_ref"
     else
-      cat >&2 <<EOF
-No upstream set for the current branch, so there is nothing to sync from.
-Do one of the following:
-  1) Publish the branch (sets upstream), then sync:
-       g_push
-       g_sync
-  2) Intentionally merge a base into this local branch by naming it explicitly:
-       g_sync <remote>/<base_branch>
-     Example:
-       g_sync origin/development
-EOF
+      _die "no upstream set; publish (g_push) or provide a base: g_sync_branch <remote>/<base_branch>"
       return 1
     fi
   fi
 }
 
 ##
-## === probe helpers
-## (read-only introspection)
+## === PROBING HELPERS
+##
 
-## g_upstream: show current branch and its upstream (if any), plus last upstream commit.
+## Purpose:
+##   Print the current branch, its upstream (if any), and the upstream’s latest commit.
+## Usage:
+##   g_upstream
 g_upstream() {
   _require_repo || return 1
+  _log_step "identify current branch"
   local current_branch_name upstream_ref
-  current_branch_name=$(_current_branch) || { g_die "not inside a git repo"; return 1; }
+  current_branch_name="$(_current_branch)" || { _die "not inside a git repo"; return 1; }
   printf 'local branch: %s\n' "$current_branch_name"
-  if upstream_ref=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null); then
+  _log_step "resolve upstream (if any)"
+  upstream_ref=""
+  if _has_upstream; then
+    upstream_ref="$(_probe_and_capture git rev-parse --abbrev-ref --symbolic-full-name '@{u}')" || upstream_ref=""
+  fi
+  if [ -n "$upstream_ref" ]; then
     printf 'upstream:     %s\n' "$upstream_ref"
-    git log --oneline --decorate -1 "$upstream_ref"
+    _log_step "show latest commit on upstream"
+    _run git log --oneline --decorate -1 "$upstream_ref"
   else
     echo "upstream:     (none)"
   fi
 }
 
-## g_branches: compact overview of local branches, their upstreams, and ahead/behind.
-g_branches() {
-  _require_repo || return 1;
-  g_run git branch -vv --no-abbrev
+
+## Purpose:
+##   Show a compact overview of local branches, their upstreams, and ahead/behind info.
+## Usage:
+##   g_branch_statuses
+g_branch_statuses() {
+  _require_repo || return 1
+  _log_step "refresh remote tracking information"
+  _run git fetch --prune --quiet || return $?
+  _log_step "show local branches with upstream and ahead/behind"
+  _run git branch -vv --no-abbrev
 }
 
-## g_diverge: show ahead/behind vs upstream for the current branch.
+## Purpose:
+##   Display ahead/behind counts versus upstream for the current branch.
+## Usage:
+##   g_diverge
 g_diverge() {
   _require_repo || return 1
-  local upstream_ref
-  if upstream_ref=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null); then
-    git fetch --quiet
-    git rev-list --left-right --count HEAD..."$upstream_ref" \
-      | awk '{print "ahead: "$1"  behind: "$2}'
+  local upstream_ref ahead behind counts
+  _log_step "determine upstream for current branch"
+  if _has_upstream; then
+    upstream_ref="$(_probe_and_capture git rev-parse --abbrev-ref --symbolic-full-name '@{u}')" || {
+      _die "failed to resolve upstream ref"; return 1; }
+    _bind_var upstream_ref "$upstream_ref"
   else
-    g_die "no upstream set for $(_current_branch)"
+    _die "no upstream set for $(_current_branch)"; return 1
   fi
+  _log_step "fetch latest refs from remote"
+  _run git fetch --quiet || return $?
+  _log_step "compute ahead/behind vs upstream"
+  counts="$(_run_and_capture git rev-list --left-right --count HEAD..."$upstream_ref")" || return $?
+  if [ -z "$counts" ] && [ "${GIT_DRYRUN:-0}" = "1" ]; then return 0; fi
+  read -r ahead behind <<< "$counts"
+  _bind_var ahead  "$ahead"
+  _bind_var behind "$behind"
+  _log_step "report result"
+  printf "ahead: %s  behind: %s\n" "$ahead" "$behind"
 }
 
-## g_unpulled: list commits you don't have locally yet.
-g_unpulled() {
+## Purpose:
+##   List commits present on the upstream that are not yet in the local branch.
+## Usage:
+##   g_unpulled_commits
+g_unpulled_commits() {
   _require_repo || return 1
   local upstream_ref
-  upstream_ref=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null) \
-    || { g_die "no upstream set"; return 1; }
-  git fetch --quiet
-  git log --oneline HEAD.."$upstream_ref"
+  _log_step "determine upstream"
+  if _has_upstream; then
+    upstream_ref="$(_probe_and_capture git rev-parse --abbrev-ref --symbolic-full-name '@{u}')" || {
+      _die "failed to resolve upstream ref"; return 1; }
+  else
+    _die "no upstream set"; return 1
+  fi
+  _bind_var upstream_ref "$upstream_ref"
+  _log_step "fetch latest from remote"
+  _run git fetch --quiet || return $?
+  _log_step "list commits present upstream but missing locally"
+  _run git log --oneline HEAD.."$upstream_ref"
 }
 
-## g_unpulled: list commits you don't have locally yet.
-g_unpulled() {
-  _require_repo || return 1;
-  local up
-  up=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null) || { g_die "no upstream set"; return $?; }
-  git fetch --quiet
-  git log --oneline HEAD.."$up"
-}
-
-## strict: only accept the remote's declared default (origin/HEAD), otherwise empty if unset
-_get_default_branch_name() {
-  _require_remote || return 1
-  local remote_name remote_head_ref default_branch_name
-  remote_name=$(_get_default_remote_name) || return 0
-  remote_head_ref=$(git symbolic-ref -q "refs/remotes/$remote_name/HEAD" 2>/dev/null) || remote_head_ref=""
-  [ -n "$remote_head_ref" ] || { printf ""; return 0; }
-  default_branch_name=${remote_head_ref#refs/remotes/$remote_name/}
-  printf %s "$default_branch_name"
-}
-
-## g_remotes: list remotes and URLs.
+## Purpose:
+##   List configured remotes and their URLs (unique lines).
+## Usage:
+##   g_remotes
 g_remotes() {
-  _require_repo || return 1;
-  git remote -v | sort -u
+  _require_repo || return 1
+  _run_sh 'git remote -v | sort -u'
 }
 
-## g_merges [N] : show recent merges/pulls from reflog (includes merges done via VS Code).
+## Defn:
+##   g_merges [N]
+## Purpose:
+##   Show recent merges/pulls from the reflog (useful to see merges done outside CLI).
+## Usage:
+##   g_merges          # default 50
+##   g_merges 100
 g_merges() {
   _require_repo || return 1
   local max_entries="${1:-50}"
-  git reflog --date=local -n "$max_entries" | grep -Ei "merge|pull" || echo "No recent merges/pulls found."
+  _run_sh 'git reflog --date=local -n '"$max_entries"' | grep -Ei "merge|pull" || echo "No recent merges/pulls found."'
 }
 
-## g_clean: quick working tree summary (status short + branch).
-g_clean() {
-  _require_repo || return 1;
-  git status --short --branch
+## Purpose:
+##   Quick working tree summary: short status plus branch line.
+## Usage:
+##   g_status
+g_status() {
+  _require_repo || return 1
+  _run git status --short --branch
 }
 
-## g_submodules: show submodule SHA/status if the repo uses submodules.
+## Purpose:
+##   Display submodule SHA/status if present; otherwise print a helpful message.
+## Usage:
+##   g_submodules
 g_submodules() {
-  _require_repo || return 1;
-  git submodule status || echo "No submodules or not initialized."
+  _require_repo || return 1
+  _run_sh 'git submodule status || echo "No submodules or not initialized."'
 }
 
 ## .
