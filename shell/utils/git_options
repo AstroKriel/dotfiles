@@ -400,20 +400,20 @@ g_unpulled_commits() {
 ## Purpose:
 ##   List configured remotes and their URLs (unique lines).
 ## Usage:
-##   g_remotes
-g_remotes() {
+##   g_local_remotes
+g_local_remotes() {
   _require_repo || return 1
   _run_sh 'git remote -v | sort -u'
 }
 
 ## Defn:
-##   g_recent_commits [max_entries]
+##   g_show_recent_commits [max_entries]
 ## Purpose:
 ##   Show recent commits on the current branch (default 20).
 ## Usage:
-##   g_recent_commits
-##   g_recent_commits 50
-g_recent_commits() {
+##   g_show_recent_commits
+##   g_show_recent_commits 50
+g_show_recent_commits() {
   _require_repo || return 1
   local max_entries="${1:-20}"
   _bind_var max_entries "$max_entries"
