@@ -496,51 +496,6 @@ g_prune_gone_locals() {
   _bind_var to_delete "$gone"
   _log_step "deleting [gone] local branches (-d)"
   printf '%s\n' "$gone" | while IFS= read -r b; do [ -n "$b" ] && _run git branch -d -- "$b"; done
-  _log_outcome "deleted [gone] local branches"
-}
-
-## Defn:
-##   g_prune_merged_locals [base_ref]
-## Purpose:
-##   Delete local branches fully merged into <base_ref>. Defaults to the remote’s default branch, else HEAD.
-## Usage:
-##   g_prune_merged_locals
-##   g_prune_merged_locals origin/main
-g_prune_merged_locals() {
-  _require_repo || return 1
-  if g_is_detached; then
-    _die "operation not valid in detached HEAD state"
-    return 1
-  fi
-  _log_step "resolving base reference for merge checks"
-  local base="$1"
-  if [ -z "$base" ]; then
-    local r d
-    r=$(_get_default_remote_name) || r=""
-    d=$(_get_default_branch_name) || d=""
-    if [ -n "$r" ] && [ -n "$d" ]; then
-      base="$r/$d"
-    else
-      base="HEAD"
-    fi
-  fi
-  _bind_var base "$base"
-  _log_step "finding branches fully merged into $base"
-  local protect_regex='^(main|master|trunk|develop|development|release|stable)$'
-  local current_branch
-  local merged
-  current_branch="$(_current_branch)" || return 1
-  merged="$(_probe_and_capture_sh "
-    git branch --format='%(refname:short)' --merged \"$base\" \
-    | sed 's/^\\* \\?//' \
-    | grep -Ev \"$protect_regex\" \
-    | grep -v \"^$current_branch$\"
-  ")"
-  [ -z "$merged" ] && { _log_outcome "no fully merged local branches to delete"; return 0; }
-  _bind_var to_delete "$merged"
-  _log_step "deleting fully merged local branches (-d)"
-  printf '%s\n' "$merged" | while IFS= read -r b; do [ -n "$b" ] && _run git branch -d -- "$b"; done
-  _log_outcome "deleted fully merged local branches into $base"
 }
 
 ## Defn:
@@ -680,9 +635,11 @@ g_push() {
 ## Defn:
 ##   g_sync_branch [<remote>/<base_branch>]
 ## Purpose:
-##   FF-first sync of the current branch: pull --ff if upstream exists; else optionally merge an explicit base.
+##   FF-first sync of the current branch: if an explicit base is given, merge it;
+##   otherwise pull --ff from upstream if set.
 ## Usage:
 ##   g_sync_branch
+##   g_sync_branch origin/main
 ##   g_sync_branch origin/development
 ## Notes:
 ##   Requires a clean worktree unless GIT_ALLOW_DIRTY=1.
@@ -701,22 +658,20 @@ g_sync_branch() {
   _log_step "fetching from remote"
   _run git fetch --prune "$remote_name" || return $?
   _log_step "deciding on the sync method"
-  if _has_upstream; then
+  if [ -n "$1" ]; then
+    base_ref="$1"
+    case "$base_ref" in */*) : ;; *) _die "base must be remote-qualified, e.g. origin/main"; return 1 ;; esac
+    _bind_var base_ref "$base_ref"
+    _log_step "merging explicit base into current branch with --ff"
+    _run git merge --ff "$base_ref"
+    _log_outcome "synced by merging '$base_ref' into current branch (fast-forward if possible)"
+  elif _has_upstream; then
     _log_step "pulling with --ff"
     _run git pull --ff
     _log_outcome "synced via 'git pull --ff' (fast-forward if possible; merge if diverged by Git)"
   else
-    if [ -n "$1" ]; then
-      base_ref="$1"
-      case "$base_ref" in */*) : ;; *) _die "base must be remote-qualified, e.g. origin/development"; return 1 ;; esac
-      _bind_var base_ref "$base_ref"
-      _log_step "merging explicit base into current branch with --ff"
-      _run git merge --ff "$base_ref"
-      _log_outcome "synced by merging '$base_ref' into current branch (fast-forward if possible)"
-    else
-      _die "no upstream set; publish (g_push) or provide a base: g_sync_branch <remote>/<base_branch>"
-      return 1
-    fi
+    _die "no upstream set; publish (g_push) or provide a base: g_sync_branch <remote>/<base_branch>"
+    return 1
   fi
 }
 
