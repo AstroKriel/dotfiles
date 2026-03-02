@@ -165,7 +165,7 @@ g_set_global_config() {
   _run git config --global pull.ff true        || return $?
   _run git config --global merge.ff true       || return $?
   _run git config --global rerere.enabled true || return $?
-  printf "result: installed FF-first merge defaults globally in ~/.gitconfig"
+  printf "result: installed FF-first merge defaults globally in ~/.gitconfig\n"
 }
 
 ## Purpose:
@@ -219,7 +219,7 @@ _get_default_remote_name() {
     printf %s "origin"; return 0
   fi
   local first_remote
-  first_remote="$(_probe_and_capture_sh 'git remote | head -n1')"
+  first_remote="$(_probe_and_capture_sh 'git remote | head -n1')" || first_remote=""
   if [ -n "$first_remote" ]; then
     _log_outcome "selecting first configured remote: $first_remote"
     printf %s "$first_remote"; return 0
@@ -234,10 +234,15 @@ _get_default_remote_name() {
 _get_default_branch_name() {
   _require_remote || return 1
   local remote_name remote_head_ref default_branch_name
-  remote_name=$(_get_default_remote_name) || return 0
-  remote_head_ref="$(_probe_and_capture git symbolic-ref -q "refs/remotes/$remote_name/HEAD" 2>/dev/null)" || remote_head_ref=""
+  remote_name="$(_get_default_remote_name)" || return 0
+
+  ## NOTE: must use *_sh here so redirections work (2>/dev/null).
+  remote_head_ref="$(
+    _probe_and_capture_sh "git symbolic-ref -q 'refs/remotes/$remote_name/HEAD' 2>/dev/null" || true
+  )"
   [ -n "$remote_head_ref" ] || { _log_outcome "no remote default branch advertised"; printf ""; return 0; }
-  default_branch_name=${remote_head_ref#refs/remotes/$remote_name/}
+
+  default_branch_name="${remote_head_ref#refs/remotes/$remote_name/}"
   _log_outcome "remote default branch is '$default_branch_name'"
   printf %s "$default_branch_name"
 }
@@ -258,9 +263,10 @@ _has_upstream() {
 _current_branch() {
   _require_repo || return 1
   local name
-  name="$(_probe_and_capture git rev-parse --abbrev-ref HEAD)"
+  name="$(_probe_and_capture git rev-parse --abbrev-ref HEAD)" || return 1
   if [ "$name" = "HEAD" ]; then
-    local sha; sha="$(_probe_and_capture git rev-parse --short HEAD)"
+    local sha
+    sha="$(_probe_and_capture git rev-parse --short HEAD)" || return 1
     _log_outcome "detached HEAD at $sha"
     printf 'DETACHED@%s' "$sha"
   else
@@ -297,19 +303,16 @@ _ensure_clean_worktree() {
 ##   if g_is_detached; then echo "HEAD is detached"; fi
 g_is_detached() {
   _require_repo || return 1
-
   _log_step "checking whether HEAD is attached to a branch"
   local ref
   ref="$(_probe_and_capture git symbolic-ref -q HEAD || true)"
   _bind_var ref "${ref:-<empty>}"
-
   if [ -z "$ref" ]; then
     _log_outcome "HEAD is detached (not on any branch)"
     return 0
-  else
-    _log_outcome "HEAD is attached to branch '${ref#refs/heads/}'"
-    return 1
   fi
+  _log_outcome "HEAD is attached to branch '${ref#refs/heads/}'"
+  return 1
 }
 
 ## Purpose:
@@ -334,7 +337,7 @@ g_show_upstream() {
     _log_outcome "upstream detected: $upstream_ref"
   else
     _log_outcome "no upstream configured for current branch"
-    echo "upstream:     (none)"
+    printf "upstream:     (none)\n"
   fi
 }
 
@@ -368,7 +371,7 @@ g_ahead_behind() {
   _log_step "fetching latest refs from remote"
   _run git fetch --quiet || return $?
   _log_step "computing ahead/behind vs upstream"
-  counts="$(_run_and_capture git rev-list --left-right --count HEAD..."$upstream_ref")" || return $?
+  counts="$(_run_and_capture git rev-list --left-right --count "HEAD...$upstream_ref")" || return $?
   if [ -z "$counts" ] && [ "${GIT_DRYRUN:-0}" = "1" ]; then return 0; fi
   read -r ahead behind <<< "$counts"
   _bind_var ahead  "$ahead"
@@ -394,7 +397,7 @@ g_unpulled_commits() {
   _log_step "fetching latest from remote"
   _run git fetch --quiet || return $?
   _log_step "listing commits present upstream but missing locally"
-  _run git log --oneline HEAD.."$upstream_ref"
+  _run git log --oneline "HEAD..$upstream_ref"
 }
 
 ## Purpose:
@@ -491,11 +494,59 @@ g_prune_gone_locals() {
   _run git fetch --prune --quiet || return $?
   _log_step "finding local branches with [gone] upstream"
   local gone
-  gone="$(_probe_and_capture_sh "git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | awk '/\\[gone\\]/{print \$1}'")"
+  gone="$(_probe_and_capture_sh "git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads | awk '/\\[gone\\]/{print \$1}'")" || gone=""
   [ -z "$gone" ] && { _log_outcome "no [gone] local branches"; return 0; }
   _bind_var to_delete "$gone"
   _log_step "deleting [gone] local branches (-d)"
-  printf '%s\n' "$gone" | while IFS= read -r b; do [ -n "$b" ] && _run git branch -d -- "$b"; done
+  printf '%s\n' "$gone" | while IFS= read -r b; do
+    [ -n "$b" ] && _run git branch -d -- "$b"
+  done
+  _log_outcome "deleted [gone] local branches"
+}
+
+## Defn:
+##   g_prune_merged_locals [base_ref]
+## Purpose:
+##   Delete local branches that are already merged into base_ref.
+##   Default base_ref: <default-remote>/<remote-default-branch> if detectable; otherwise origin/main.
+## Usage:
+##   g_prune_merged_locals
+##   g_prune_merged_locals origin/main
+g_prune_merged_locals() {
+  _require_repo || return 1
+  if g_is_detached; then
+    _die "operation not valid in detached HEAD state"
+    return 1
+  fi
+  local base_ref remote_name default_branch to_delete current
+  base_ref="${1:-}"
+  if [ -z "$base_ref" ]; then
+    remote_name="$(_get_default_remote_name)" || return 1
+    default_branch="$(_get_default_branch_name)"
+    if [ -n "$default_branch" ]; then
+      base_ref="$remote_name/$default_branch"
+    else
+      base_ref="origin/main"
+    fi
+  fi
+  case "$base_ref" in */*) : ;; *) _die "base_ref must be remote-qualified, e.g. origin/main"; return 1 ;; esac
+  _bind_var base_ref "$base_ref"
+  current="$(_probe_and_capture git rev-parse --abbrev-ref HEAD)" || return 1
+  _log_step "finding local branches merged into '$base_ref' (excluding current branch and main/master)"
+  to_delete="$(
+    _probe_and_capture_sh "
+      git branch --merged '$base_ref' --format='%(refname:short)' \
+      | grep -v -E '^(($current)|main|master)$' \
+      || true
+    "
+  )"
+  [ -z "$to_delete" ] && { _log_outcome "no merged local branches to delete"; return 0; }
+  _bind_var to_delete "$to_delete"
+  _log_step "deleting merged local branches (-d)"
+  printf '%s\n' "$to_delete" | while IFS= read -r b; do
+    [ -n "$b" ] && _run git branch -d -- "$b"
+  done
+  _log_outcome "deleted merged local branches"
 }
 
 ## Defn:
@@ -535,7 +586,9 @@ g_track_remote_branch() {
   case "$1" in */*) : ;; *) _die "argument must be remote-qualified, e.g. origin/feature-x"; return 1 ;; esac
   local remote_branch="$1"
   local local_branch="${2:-${remote_branch#*/}}"
-  _log_step "fetching latest remote refs"; _bind_var remote_branch "$remote_branch"; _bind_var local_branch "$local_branch"
+  _log_step "fetching latest remote refs"
+  _bind_var remote_branch "$remote_branch"
+  _bind_var local_branch "$local_branch"
   _run git fetch --prune "${remote_branch%%/*}" || return $?
   _log_step "creating local branch and setting it to track the remote branch"
   _run git switch -c "$local_branch" --track "$remote_branch"
@@ -556,12 +609,12 @@ g_create_branch_from_default() {
   local new_branch="$1" remote_name base_branch
   _bind_var new_branch "$new_branch"
   _log_step "selecting default remote"
-  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
+  remote_name="$(_get_default_remote_name)" || { _die "not inside a git repo"; return 1; }
   _bind_var remote_name "$remote_name"
   _log_step "fetching remote refs"
   _run git fetch --prune "$remote_name" || return $?
   _log_step "discovering remote default branch (<remote>/HEAD)"
-  base_branch=$(_get_default_branch_name)
+  base_branch="$(_get_default_branch_name)"
   if [ -z "$base_branch" ]; then
     cat >&2 <<EOF
 No remote default branch is set (refs/remotes/${remote_name}/HEAD unknown).
@@ -590,12 +643,16 @@ EOF
 ##   g_create_branch_from_remote hotfix-1 origin/release-1.4
 g_create_branch_from_remote() {
   _require_remote || return 1
-  [ -z "$1" ] || [ -z "$2" ] && { _die "usage: g_create_branch_from_remote <new_branch> <remote>/<base_branch>"; return 1; }
+  if [ -z "$1" ] || [ -z "$2" ]; then
+    _die "usage: g_create_branch_from_remote <new_branch> <remote>/<base_branch>"
+    return 1
+  fi
   local new_branch="$1" start_ref="$2" remote_name
   case "$start_ref" in */*) : ;; *) _die "startpoint must be remote-qualified, e.g. origin/development"; return 1 ;; esac
-  _bind_var new_branch "$new_branch"; _bind_var start_ref "$start_ref"
+  _bind_var new_branch "$new_branch"
+  _bind_var start_ref "$start_ref"
   _log_step "selecting default remote"
-  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return 1; }
+  remote_name="$(_get_default_remote_name)" || { _die "not inside a git repo"; return 1; }
   _bind_var remote_name "$remote_name"
   _log_step "fetching remote refs"
   _run git fetch --prune "$remote_name" || return $?
@@ -620,7 +677,8 @@ g_push() {
     return 1
   fi
   _log_step "publishing current branch"
-  local remote_name; remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
+  local remote_name
+  remote_name="$(_get_default_remote_name)" || { _die "not inside a git repo"; return $?; }
   _bind_var remote_name "$remote_name"
   _log_step "detecting whether upstream is already set"
   if _has_upstream; then
@@ -651,7 +709,7 @@ g_sync_branch() {
   fi
   local remote_name base_ref
   _log_step "identifying default remote"
-  remote_name=$(_get_default_remote_name) || { _die "not inside a git repo"; return $?; }
+  remote_name="$(_get_default_remote_name)" || { _die "not inside a git repo"; return $?; }
   _bind_var remote_name "$remote_name"
   _log_step "verifying clean worktree (unless GIT_ALLOW_DIRTY=1)"
   _ensure_clean_worktree || return $?
@@ -673,6 +731,36 @@ g_sync_branch() {
     _die "no upstream set; publish (g_push) or provide a base: g_sync_branch <remote>/<base_branch>"
     return 1
   fi
+}
+
+##
+## === MODULE SELF-CHECK
+##
+
+## Defn:
+##   g_self_check
+## Purpose:
+##   Basic sanity checks for this helper module: required tools and required functions.
+g_self_check() {
+  command -v git >/dev/null 2>&1 || { _die "git not found in PATH"; return 1; }
+  local need=(
+    _log _log_step _log_outcome _bind_var _die
+    _run _run_sh _run_and_capture
+    _probe _probe_sh _probe_and_capture _probe_and_capture_sh
+    _require_repo _require_remote _get_default_remote_name _get_default_branch_name
+    _has_upstream _current_branch _ensure_clean_worktree
+    g_is_detached g_show_upstream g_branches_status g_ahead_behind g_unpulled_commits
+    g_local_remotes g_show_recent_commits g_submodules_status g_rename_last_commit
+    g_delete_local_branch g_prune_gone_locals g_prune_merged_locals g_cleanup_local_branches
+    g_track_remote_branch g_create_branch_from_default g_create_branch_from_remote
+    g_push g_sync_branch
+  )
+  local missing=0 f
+  for f in "${need[@]}"; do
+    declare -F "$f" >/dev/null 2>&1 || { printf 'missing function: %s\n' "$f" >&2; missing=1; }
+  done
+  [ "$missing" -eq 0 ] || { _die "selfcheck failed"; return 1; }
+  _log_outcome "selfcheck passed"
 }
 
 ## .
