@@ -1,5 +1,5 @@
 alefragnani.project-manager
-compulim.indent4to2
+anthropic.claude-code
 eamodio.gitlens
 h5web.vscode-h5web
 llvm-vs-code-extensions.vscode-clangd

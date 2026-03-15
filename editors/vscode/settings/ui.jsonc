@@ -13,5 +13,6 @@
   "workbench.tree.renderIndentGuides": "always",
   "workbench.editor.enablePreview": false,
   "workbench.navigationControl.enabled": false,
-  "window.commandCenter": false
+  "window.commandCenter": false,
+  "claudeCode.preferredLocation": "panel"
 }

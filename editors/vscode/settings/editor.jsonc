@@ -12,7 +12,7 @@
   "editor.guides.bracketPairsHorizontal": "active",
   
   "search.seedWithSelection": true,
-  "editor.find.addExtraSpaceOnTop": false,
+  "editor.find.addExtraSpaceOnTop": true,
   "editor.scrollBeyondTop": false,
   "editor.scrollBeyondLastLine": false,
 
