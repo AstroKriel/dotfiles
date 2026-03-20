@@ -1,4 +1,5 @@
 import shutil
+import sys
 import argparse
 from pathlib import Path
 from utils.logging import log_message
@@ -13,6 +14,7 @@ TOOLS = {
     "emacs": {
         "name": "Emacs (GUI)",
         "brew": "emacs --cask",
+        "mac_app": "Emacs.app",
         "dotfiles_dir": DOTFILES_DIR / "emacs",
         "target_dir": HOME_DIR / ".doom.d",
         "clone_repo": {
@@ -42,12 +44,14 @@ TOOLS = {
     "kitty": {
         "name": "Kitty terminal",
         "brew": "kitty --cask",
+        "mac_app": "kitty.app",
         "dotfiles_dir": DOTFILES_DIR / "kitty",
         "target_dir": CONFIG_DIR / "kitty",
     },
     "ghostty": {
         "name": "Ghostty terminal",
         "brew": "ghostty --cask",
+        "mac_app": "Ghostty.app",
         "dotfiles_dir": DOTFILES_DIR / "ghostty",
         "target_dir": CONFIG_DIR / "ghostty",
     },
@@ -71,7 +75,13 @@ def check_installed_tools():
     _log_message("Checking installed tools...")
     available = set()
     for command, meta in TOOLS.items():
-        if shutil.which(command):
+        mac_app = meta.get("mac_app")
+        found_via_app = (
+            sys.platform == "darwin"
+            and mac_app is not None
+            and Path("/Applications") / mac_app
+        )
+        if shutil.which(command) or (found_via_app and found_via_app.exists()):
             _log_message(f"Found {meta['name']} ({command}) in your `$PATH`.")
             available.add(command)
         else:
