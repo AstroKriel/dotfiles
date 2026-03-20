@@ -1,10 +1,9 @@
 import os
 import shutil
 import argparse
-import subprocess
 from pathlib import Path
 from utils.logging import log_message
-from utils.shell_ops import create_symlink, backup_file
+from utils.shell_ops import create_symlink, backup_file, run_command
 
 SCRIPT_NAME = Path(__file__).name
 SHELL_DIR = Path(__file__).resolve().parent / "shell"
@@ -50,14 +49,13 @@ def change_login_shell(
     ## check if shell is already set
     current_shell = os.environ.get("SHELL", "")
     if current_shell != shell_path:
-        message = f"Changing login shell to: {shell_path}"
-        if dry_run:
-            ## print what would happen
-            _log_message(f"[dry-run] Would {message}")
-        else:
-            ## run chsh to update default shell
-            subprocess.run(["chsh", "-s", shell_path], check=True)
-            _log_message(message)
+        run_command(
+            args=["chsh", "-s", shell_path],
+            script_name=SCRIPT_NAME,
+            description=f"change login shell to: {shell_path}",
+            dry_run=dry_run,
+            capture_output=False,
+        )
     else:
         ## shell is already correctly set
         _log_message(f"Login shell is already set to: {shell_path}")

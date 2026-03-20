@@ -1,9 +1,8 @@
 import shutil
 import argparse
-import subprocess
 from pathlib import Path
 from utils.logging import log_message
-from utils.shell_ops import create_symlink, ensure_dir_exists
+from utils.shell_ops import create_symlink, ensure_dir_exists, run_command
 
 HOME_DIR = Path.home()
 SCRIPT_NAME = Path(__file__).name
@@ -93,22 +92,12 @@ def shallow_clone_repo(
     if output_dir.exists():
         _log_message(f"{repo_name} already exists under: {output_dir}")
         return
-    if dry_run:
-        _log_message(f"[dry-run] Would shallow clone {repo_name} under: {output_dir}")
-        return
-    _log_message(f"Cloning {repo_name} (shallow) under {output_dir}")
-    try:
-        subprocess.run(
-            args=["git", "clone", "--depth", "1", repo_url,
-                  str(output_dir)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        _log_message(f"Successfully cloned {repo_name} under: {output_dir}")
-    except subprocess.CalledProcessError as e:
-        error_output = e.stderr.strip() if e.stderr else "(no stderr output)"
-        _log_message(f"Failed to clone {repo_name} ({repo_url}) under: {output_dir}\n{error_output}")
+    run_command(
+        args=["git", "clone", "--depth", "1", repo_url, str(output_dir)],
+        script_name=SCRIPT_NAME,
+        description=f"clone {repo_name} (shallow) under {output_dir}",
+        dry_run=dry_run,
+    )
 
 
 def run_doom_sync(dry_run: bool):
@@ -116,18 +105,13 @@ def run_doom_sync(dry_run: bool):
     if not doom_bin.exists():
         _log_message(f"Doom binary not found at: {doom_bin}")
         return
-    if dry_run:
-        _log_message("[dry-run] Would run `doom sync`")
-        return
-    _log_message("Running `doom sync`")
-    try:
-        subprocess.run(
-            args=[str(doom_bin), "sync"],
-            check=True,
-        )
-        _log_message("Successfully ran `doom sync`")
-    except subprocess.CalledProcessError as e:
-        _log_message(f"Failed to run `doom sync` with exit code {e.returncode}")
+    run_command(
+        args=[str(doom_bin), "sync"],
+        script_name=SCRIPT_NAME,
+        description="doom sync",
+        dry_run=dry_run,
+        capture_output=False,
+    )
 
 
 def main():

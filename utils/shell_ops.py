@@ -1,6 +1,37 @@
+import subprocess
 from pathlib import Path
 from typing import Optional
 from utils.logging import get_timestamp, log_message
+
+
+def run_command(
+    *,
+    args: list,
+    script_name: str,
+    description: str,
+    dry_run: bool = False,
+    capture_output: bool = True,
+) -> bool:
+    """
+  Run a shell command with logging. Return True on success, False on failure.
+  """
+    if dry_run:
+        log_message(script_name=script_name, message=f"[dry-run] Would run: {description}")
+        return True
+    log_message(script_name=script_name, message=f"Running: {description}")
+    try:
+        subprocess.run(
+            args=args,
+            check=True,
+            capture_output=capture_output,
+            text=capture_output,
+        )
+        log_message(script_name=script_name, message=f"Done: {description}")
+        return True
+    except subprocess.CalledProcessError as e:
+        error_output = e.stderr.strip() if (capture_output and e.stderr) else "(no output captured)"
+        log_message(script_name=script_name, message=f"Failed: {description}\n{error_output}")
+        return False
 
 
 def ensure_dir_exists(

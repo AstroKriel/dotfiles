@@ -3,10 +3,9 @@ import sys
 import json
 import shutil
 import argparse
-import subprocess
 from pathlib import Path
 from utils.logging import log_message
-from utils.shell_ops import create_symlink, ensure_dir_exists
+from utils.shell_ops import create_symlink, ensure_dir_exists, run_command
 
 SCRIPT_NAME = Path(__file__).name
 DOTFILES_DIR = Path(__file__).resolve().parent / "editors"
@@ -95,21 +94,12 @@ def install_extensions(
         return
     extensions = [e for e in extensions_file.read_text().splitlines() if e.strip()]
     for ext in extensions:
-        if dry_run:
-            _log_message(f"[dry-run] Would install extension: {ext}")
-        else:
-            _log_message(f"Installing extension: {ext}")
-            try:
-                subprocess.run(
-                    args=[command, "--install-extension", ext],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                _log_message(f"Successfully installed extension: {ext}")
-            except subprocess.CalledProcessError as e:
-                error_output = e.stderr.strip() if e.stderr else "(no stderr output)"
-                _log_message(f"Failed to install extension {ext}\n{error_output}")
+        run_command(
+            args=[command, "--install-extension", ext],
+            script_name=SCRIPT_NAME,
+            description=f"install extension: {ext}",
+            dry_run=dry_run,
+        )
 
 
 def setup_editor(name, meta, dry_run):
