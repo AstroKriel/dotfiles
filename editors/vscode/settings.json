@@ -21,7 +21,7 @@
     "gutter",
     "overview"
   ],
-  "editor.minimap.enabled": true,
+  "editor.minimap.enabled": false,
   "editor.minimap.showSlider": "always",
   "editor.minimap.size": "fill",
   "editor.minimap.renderCharacters": true,
@@ -34,7 +34,7 @@
   "terminal.integrated.scrollback": 50000,
   "terminal.integrated.tabs.enabled": false,
   "terminal.integrated.copyOnSelection": true,
-  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.defaultProfile.osx": "bash",
   "terminal.integrated.sendKeybindingsToShell": true,
   "terminal.integrated.shellIntegration.enabled": false,
   "terminal.integrated.enableMultiLinePasteWarning": "never",
