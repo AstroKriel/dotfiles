@@ -54,5 +54,6 @@
   "workbench.editor.enablePreview": false,
   "workbench.navigationControl.enabled": false,
   "window.commandCenter": false,
-  "claudeCode.preferredLocation": "panel"
+  "claudeCode.preferredLocation": "panel",
+  "chat.extensionUnification.enabled": false
 }

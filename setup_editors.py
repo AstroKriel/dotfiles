@@ -3,6 +3,7 @@ import sys
 import json
 import shutil
 import argparse
+import subprocess
 from pathlib import Path
 from utils.logging import log_message
 from utils.shell_ops import create_symlink, ensure_dir_exists
@@ -21,6 +22,7 @@ EDITORS = {
             "settings": "dict",
             "keybindings": "list",
         },
+        "extensions": DOTFILES_DIR / "vscode" / "extensions.txt",
     },
     "zed": {
         "name": "Zed",
@@ -82,6 +84,34 @@ def merge_config_modules(
     return merged
 
 
+def install_extensions(
+    *,
+    command: str,
+    extensions_file: Path,
+    dry_run: bool,
+):
+    if not extensions_file.exists():
+        _log_message(f"No extensions file found at: {extensions_file}")
+        return
+    extensions = [e for e in extensions_file.read_text().splitlines() if e.strip()]
+    for ext in extensions:
+        if dry_run:
+            _log_message(f"[dry-run] Would install extension: {ext}")
+        else:
+            _log_message(f"Installing extension: {ext}")
+            try:
+                subprocess.run(
+                    args=[command, "--install-extension", ext],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+                _log_message(f"Successfully installed extension: {ext}")
+            except subprocess.CalledProcessError as e:
+                error_output = e.stderr.strip() if e.stderr else "(no stderr output)"
+                _log_message(f"Failed to install extension {ext}\n{error_output}")
+
+
 def setup_editor(name, meta, dry_run):
     _log_message(f"Started setting up {name}")
     ## check whether the editor is installed
@@ -120,6 +150,13 @@ def setup_editor(name, meta, dry_run):
             source_path=output_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,
+            dry_run=dry_run,
+        )
+    ## install extensions if defined
+    if "extensions" in meta:
+        install_extensions(
+            command=meta["command"],
+            extensions_file=meta["extensions"],
             dry_run=dry_run,
         )
 

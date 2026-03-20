@@ -122,7 +122,7 @@ brew install --cask visual-studio-code
 brew install --cask zed
 ```
 
-Then run the setup script to merge and symlink config files (skips any editor not installed):
+Then run the setup script to merge and symlink config files and install extensions (skips any editor not installed):
 
 ```bash
 uv run setup_editors.py
