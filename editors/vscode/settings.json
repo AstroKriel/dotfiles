@@ -1,3 +1,5 @@
+git add utils/shell_ops.py setup_editors.py setup_tools.py setup_shell.py
+git commit -m "move subprocess calls into run_command utility"
 {
   "editor.fontSize": 10,
   "markdown.preview.fontSize": 11,
@@ -55,5 +57,7 @@
   "workbench.navigationControl.enabled": false,
   "window.commandCenter": false,
   "claudeCode.preferredLocation": "panel",
-  "chat.extensionUnification.enabled": false
+  "chat.extensionUnification.enabled": false,
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1"
 }
