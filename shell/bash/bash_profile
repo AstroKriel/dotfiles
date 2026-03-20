@@ -1,0 +1,4 @@
+## source bashrc for login shells (macOS opens login shells by default)
+[[ -f "$HOME/.bashrc" ]] && source "$HOME/.bashrc"
+
+## .

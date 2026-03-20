@@ -10,7 +10,7 @@ SCRIPT_NAME = Path(__file__).name
 SHELL_DIR = Path(__file__).resolve().parent / "shell"
 HOME_DIR = Path.home()
 SHELL_FILES = {
-    "bash": ["bashrc", "bash_options", "bash_prompt", "inputrc"],
+    "bash": ["bash_profile", "bashrc", "bash_options", "bash_prompt", "inputrc"],
     "zsh": ["zshrc", "zsh_options", "zsh_prompt"],
     "utils": ["git_options", "shell_aliases", "shell_functions", "shell_options", "shell_paths"],
 }

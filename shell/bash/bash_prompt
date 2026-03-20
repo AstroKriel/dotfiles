@@ -23,11 +23,10 @@ parse_git_info() {
     remote_name=${remote_name%.git}
   fi
   ## normalize names for comparison: lowercase + remove underscores and dashes
+  ## `tr` is a POSIX character translator
   local repo_norm remote_norm
-  repo_norm=${repo_local,,}
-  repo_norm=${repo_norm//[_-]/}
-  remote_norm=${remote_name,,}
-  remote_norm=${remote_norm//[_-]/}
+  repo_norm=$(echo "$repo_local" | tr '[:upper:]' '[:lower:]' | tr -d '_-')
+  remote_norm=$(echo "$remote_name" | tr '[:upper:]' '[:lower:]' | tr -d '_-')
   ## decide display name:
   ## show alias form (local->remote) only if normalized names differ
   local repo_display=$repo_local
