@@ -1,12 +1,18 @@
 # dotfiles
 
-This guide walks through installing the dependencies and tools needed for a full dev environment on macOS or Linux.
+Notes for setting up my dev environment on a fresh macOS or Linux machine.
 
 This repo manages config for the following:
 
-- **Shell:** bash, zsh
-- **Editors:** [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev)
-- **Terminals:** [Ghostty](https://ghostty.org), [Kitty](https://sw.kovidgoyal.net/kitty/)
+- **Shell:**
+  - bash: works on almost all systems, including servers; a safe default
+  - zsh: more plugin-friendly, better suited for personal devices
+- **Editors:**
+  - [Visual Studio Code](https://code.visualstudio.com): rich, full-featured editor with broad extension support
+  - [Zed](https://zed.dev): minimal, fast editor built in Rust
+- **Terminals:**
+  - [Ghostty](https://ghostty.org): fast, native terminal emulator
+  - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - **Tools:**
   - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window
   - [Yazi](https://yazi-rs.github.io): terminal file manager
@@ -15,7 +21,7 @@ This repo manages config for the following:
 
 # Setup
 
-Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-7 clone the repo and run the setup scripts to configure your shell, editors, and tools.
+Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-7 clone the repo and run the setup scripts to configure the shell, editors, and tools.
 
 ## Step 1: Install Homebrew
 
@@ -37,7 +43,7 @@ sudo apt update && sudo apt install -y git build-essential
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-**Linux:** Homebrew installs to `/home/linuxbrew/.linuxbrew`, which is not on the default `$PATH`. The installer will print instructions at the end for how to add it; follow those before continuing.
+**Linux:** Homebrew installs to `/home/linuxbrew/.linuxbrew`, which is not on the default `$PATH`. The installer prints instructions at the end for how to add it; follow those before continuing.
 
 ## Step 2: Install uv
 
@@ -51,7 +57,7 @@ Restart your terminal so `uv` is in your `$PATH`.
 
 ## Step 3: Set up GitHub SSH access
 
-Generate an SSH key. Use a descriptive comment so you can identify it later. When prompted for a passphrase, just press Enter to skip it:
+Generate an SSH key. Use a descriptive comment to identify it later. When prompted for a passphrase, just press Enter to skip it:
 
 ```bash
 ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519_github -C "for github ssh access from <device-name> created on <YYYY-MM-DD>"
@@ -70,7 +76,7 @@ Host github.com
   IdentitiesOnly yes
 ```
 
-Copy the public key to your clipboard:
+Copy the public key to the clipboard:
 
 ```bash
 # macOS
@@ -80,7 +86,7 @@ pbcopy < ~/.ssh/id_ed25519_github.pub
 cat ~/.ssh/id_ed25519_github.pub
 ```
 
-Add it to your GitHub account: **Settings > SSH and GPG keys > New SSH key**.
+Add it to the GitHub account: **Settings > SSH and GPG keys > New SSH key**.
 
 Verify the connection:
 
@@ -90,7 +96,7 @@ ssh -T git@github.com
 
 You should see: `Hi <username>! You've successfully authenticated...`
 
-You can re-run this at any time to confirm access, or view your public key again with:
+Re-run this at any time to confirm access, or view the public key again with:
 
 ```bash
 cat ~/.ssh/id_ed25519_github.pub
@@ -98,31 +104,32 @@ cat ~/.ssh/id_ed25519_github.pub
 
 ## Step 4: Clone this repo
 
+The repo can be cloned anywhere; the setup scripts resolve paths relative to the repo. The home directory is a good default:
+
 ```bash
-git clone git@github.com:AstroKriel/dotfiles.git
-cd ~/dotfiles
+git clone git@github.com:AstroKriel/dotfiles.git ~/dotfiles
 ```
 
 ## Step 5: Set up your shell
 
-Choose `bash` or `zsh`:
+Choose `bash` or `zsh`, e.g.:
 
 ```bash
-uv run setup_shell.py bash
+uv run setup_shell.py zsh
 ```
 
-Open a new terminal to pick up the changes. Your aliases, prompt, and shell options will now be active.
+Open a new terminal to pick up the changes.
 
 ## Step 6: Set up editors
 
-Install whichever editors you want to use. Note: `--cask` is used for GUI applications (like editors and terminals); command-line tools are installed without it:
+Install whichever editors are needed. Note: `--cask` is used for GUI applications (like editors and terminals); command-line tools are installed without it:
 
 ```bash
 brew install --cask visual-studio-code
 brew install --cask zed
 ```
 
-Then run the setup script to merge and symlink config files and install extensions (skips any editor not installed):
+Then run the setup script to merge and symlink config files and install extensions (skips editors not installed):
 
 ```bash
 uv run setup_editors.py
@@ -130,7 +137,7 @@ uv run setup_editors.py
 
 ## Step 7: Set up tools
 
-Install whichever tools you want to use:
+Install whichever tools are needed:
 
 ```bash
 brew install neovim
@@ -155,7 +162,7 @@ uv run setup_tools.py --check-only
 
 # Verify your setup
 
-After completing all steps, confirm the key dependencies are available:
+After completing all steps, confirm the key dependencies are in place:
 
 ```bash
 brew --version         # Homebrew
@@ -164,7 +171,7 @@ uv --version           # uv
 ssh -T git@github.com  # GitHub SSH access (expect: "Hi <username>!")
 ```
 
-And confirm the shell config was applied correctly (`type` is a shell built-in that shows how a command is resolved):
+Confirm the shell config was applied correctly (`type` is a shell built-in that shows how a command is resolved):
 
 ```bash
 # when using bash
