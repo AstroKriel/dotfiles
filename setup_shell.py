@@ -1,25 +1,52 @@
-import os
-import shutil
+## { SCRIPT
+
+##
+## === DEPENDENCIES
+##
+
+## stdlib
 import argparse
+from dataclasses import dataclass
+import os
 from pathlib import Path
-from utils.logging import log_message
-from utils.shell_ops import create_symlink, backup_file, run_command
+import shutil
+
+## local
+from utils import logging, shell_actions
+
+##
+## === SHELL CONFIG
+##
 
 SCRIPT_NAME = Path(__file__).name
 SHELL_DIR = Path(__file__).resolve().parent / "shell"
 HOME_DIR = Path.home()
-SHELL_FILES = {
-    "bash": ["bash_profile", "bashrc", "bash_options", "bash_prompt", "inputrc"],
-    "zsh": ["zshrc", "zsh_options", "zsh_prompt"],
-    "utils": ["git_options", "shell_aliases", "shell_functions", "shell_options", "shell_paths"],
-}
+
+_log_message = logging.make_logger(SCRIPT_NAME)
 
 
-def _log_message(message: str):
-    log_message(
-        script_name=SCRIPT_NAME,
-        message=message,
-    )
+@dataclass
+class ShellConfig:
+    name: str
+    files: list[str]
+
+
+UTILS_FILES = ["git_options", "shell_aliases", "shell_functions", "shell_options", "shell_paths"]
+
+SHELLS = [
+    ShellConfig(
+        name="bash",
+        files=["bash_profile", "bashrc", "bash_options", "bash_prompt", "inputrc"],
+    ),
+    ShellConfig(
+        name="zsh",
+        files=["zshrc", "zsh_options", "zsh_prompt"],
+    ),
+]
+
+##
+## === SHELL HELPERS
+##
 
 
 def remove_file_if_exists(
@@ -28,7 +55,7 @@ def remove_file_if_exists(
     dry_run: bool,
 ):
     if target_path.exists() or target_path.is_symlink():
-        backup_file(
+        shell_actions.backup_file(
             target_path=target_path,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
@@ -49,7 +76,7 @@ def change_login_shell(
     ## check if shell is already set
     current_shell = os.environ.get("SHELL", "")
     if current_shell != shell_path:
-        run_command(
+        shell_actions.run_command(
             args=["chsh", "-s", shell_path],
             script_name=SCRIPT_NAME,
             description=f"change login shell to: {shell_path}",
@@ -60,56 +87,97 @@ def change_login_shell(
         ## shell is already correctly set
         _log_message(f"Login shell is already set to: {shell_path}")
 
+##
+## === PROGRAM MAIN
+##
 
-def main():
-    ## parse user inputs
-    parser = argparse.ArgumentParser(description="Symlink shell configuration files.")
-    parser.add_argument("shell", choices=["bash", "zsh"], help="Shell to activate")
-    parser.add_argument("--dry-run", action="store_true", help="Print actions without applying them")
-    args = parser.parse_args()
-    ## define parameters
-    chosen_shell = args.shell
-    dry_run = args.dry_run
-    other_shell = "zsh" if (chosen_shell == "bash") else "bash"
+
+def remove_symlinks(
+    *,
+    dry_run: bool,
+):
+    _log_message("Started removing shell config symlinks")
+    all_files = UTILS_FILES + [f for s in SHELLS for f in s.files]
+    for file_name in all_files:
+        shell_actions.remove_symlink(
+            target_path=HOME_DIR / f".{file_name}",
+            script_name=SCRIPT_NAME,
+            dry_run=dry_run,
+        )
+    _log_message("Finished removing shell config symlinks")
+
+
+def run(
+    *,
+    shell: str,
+    dry_run: bool,
+):
+    chosen = next(s for s in SHELLS if s.name == shell)
+    others = [s for s in SHELLS if s.name != shell]
     ## log start of script
     _log_message("Started running!")
     ## link shared config files
-    for file_name in SHELL_FILES["utils"]:
+    for file_name in UTILS_FILES:
         source_path = SHELL_DIR / "utils" / file_name
         target_path = HOME_DIR / f".{file_name}"
-        create_symlink(
+        shell_actions.create_symlink(
             source_path=source_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
     ## link config files for the selected shell env
-    for file_name in SHELL_FILES[chosen_shell]:
-        source_path = SHELL_DIR / chosen_shell / file_name
+    for file_name in chosen.files:
+        source_path = SHELL_DIR / chosen.name / file_name
         target_path = HOME_DIR / f".{file_name}"
-        create_symlink(
+        shell_actions.create_symlink(
             source_path=source_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
-    ## remove config files for the other shell env
-    for file_name in SHELL_FILES[other_shell]:
-        target_path = HOME_DIR / f".{file_name}"
-        remove_file_if_exists(
-            target_path=target_path,
-            dry_run=dry_run,
-        )
+    ## remove config files for other shell envs
+    for s in others:
+        for file_name in s.files:
+            remove_file_if_exists(
+                target_path=HOME_DIR / f".{file_name}",
+                dry_run=dry_run,
+            )
     ## update default login shell env
     change_login_shell(
-        shell=chosen_shell,
+        shell=chosen.name,
         dry_run=dry_run,
     )
     ## log end of script
     _log_message("Finished!")
 
 
+def main():
+    ## parse user inputs
+    parser = argparse.ArgumentParser(
+        description="Symlink shell configuration files.",
+    )
+    parser.add_argument(
+        "shell",
+        choices=[s.name for s in SHELLS],
+        help="Shell to activate",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print actions without applying them",
+    )
+    args = parser.parse_args()
+    run(
+        shell=args.shell,
+        dry_run=args.dry_run,
+    )
+
+##
+## === ENTRY POINT
+##
+
 if __name__ == "__main__":
     main()
 
-## .
+## } SCRIPT
