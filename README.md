@@ -1,25 +1,28 @@
-# dotfiles
+# DotFiles
 
-How I set up my dev environment on a fresh macOS or Linux machine.
+This repo is used to set up my dev environment on a fresh macOS or Linux machine, and managed through the four scripts discussed below, run via:
 
-This repo allows an interface to manage the following useful dev tools:
+```bash
+uv run <script>.py [args]
+```
 
-- **Shells:**
-  - [bash](https://www.gnu.org/software/bash/manual/bash.html): works on almost all systems, including servers; a safe default
-  - [zsh](https://zsh.sourceforge.io/Doc/): more plugin-friendly, better suited for personal devices
-- **Editors:**
-  - [Visual Studio Code](https://code.visualstudio.com): rich, full-featured editor with broad extension support
-  - [Zed](https://zed.dev): minimal, fast editor built in Rust
-- **Terminals:**
-  - [Ghostty](https://ghostty.org): fast, native terminal emulator
-  - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
-- **Tools:**
-  - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window
-  - [Yazi](https://yazi-rs.github.io): terminal file manager
-  - [Neovim](https://neovim.io): terminal-based text editor
-  - [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/): text editor with sensible batteries-included
+All scripts support `--dry-run` to preview what actions will be performed, before they are applied. For a first-time machine setup, see the [full setup guide](#full-setup-guide) below.
 
-# Setup
+`setup_shell.py` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or pick up config changes without touching tools or editors.
+
+`setup_tools.py` wires up configs for all installed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them; tools that are not on the system yet are skipped. Pass `--check-only` to report what's detected without making changes:
+- [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window
+- [Yazi](https://yazi-rs.github.io): terminal file manager
+- [Neovim](https://neovim.io): terminal-based text editor
+- [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/): text editor with sensible batteries-included
+- [Ghostty](https://ghostty.org): fast, native terminal emulator
+- [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
+
+`setup_editors.py` installs extensions and applies configs for [Visual Studio Code](https://code.visualstudio.com) and [Zed](https://zed.dev). Editors not yet on the system are skipped.
+
+`setup_env.py` runs the full setup chain (shell, tools, and editors) in one command. Pass `bash` or `zsh` for initial setup on a new machine, or `--remove-symlinks` to tear everything down.
+
+# Full Setup Guide
 
 Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-6 clone the repo, install tools, and run the setup scripts to configure the shell, editors, and tools.
 
@@ -57,7 +60,7 @@ Restart your terminal so `uv` is in your `$PATH`.
 
 ## Step 3: Set up GitHub SSH access
 
-Generate an SSH key. Use a descriptive comment to identify it later. When prompted for a passphrase, just press Enter to skip it:
+Generate an SSH key. Use a descriptive comment to identify it later. When prompted for a passphrase, you can set one for extra security, but note it down, since you will need to type it every time you use the key. If that sounds like friction you don't want, just press Enter to use an empty passphrase:
 
 ```bash
 ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519_github -C "for github ssh access from <device-name> created on <YYYY-MM-DD>"
@@ -96,12 +99,6 @@ ssh -T git@github.com
 
 You should see: `Hi <username>! You've successfully authenticated...`
 
-Re-run this at any time to confirm access, or view the public key again with:
-
-```bash
-cat ~/.ssh/id_ed25519_github.pub
-```
-
 ## Step 4: Clone this repo
 
 The repo can be cloned anywhere; the setup scripts resolve paths relative to the repo. The home directory is a good default:
@@ -132,8 +129,6 @@ brew install --cask emacs
 
 ## Step 6: Run setup
 
-Run the unified setup script, passing your chosen shell (`bash` or `zsh`). It configures the shell, symlinks all tool and editor configs, clones required plugin repos, and installs editor extensions. Any tools or editors not installed are skipped automatically:
-
 ```bash
 uv run setup_env.py zsh
 ```
@@ -159,47 +154,4 @@ type reload_bash
 
 # when using zsh
 type reload_zsh
-```
-
-# Dry run mode
-
-All setup scripts support `--dry-run` to preview actions without applying them:
-
-```bash
-uv run setup_env.py zsh --dry-run
-```
-
-# Teardown
-
-To remove all symlinks created by the setup scripts:
-
-```bash
-uv run setup_env.py --remove-symlinks
-```
-
-This removes the symlinks only. Any files that were backed up during setup (renamed with a timestamp) are left in place.
-
-# Running scripts individually
-
-`setup_env.py` is the recommended entry point, but each script can also be run on its own for targeted re-runs:
-
-```bash
-uv run setup_shell.py zsh
-uv run setup_editors.py
-uv run setup_tools.py
-```
-
-To check which tools are detected without applying any changes:
-
-```bash
-uv run setup_tools.py --check-only
-```
-
-Pass `-h` to any script to see all available arguments:
-
-```bash
-uv run setup_env.py -h
-uv run setup_shell.py -h
-uv run setup_editors.py -h
-uv run setup_tools.py -h
 ```
