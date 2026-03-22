@@ -104,7 +104,7 @@ You should see: `Hi <username>! You've successfully authenticated...`
 The repo can be cloned anywhere; the setup scripts resolve paths relative to the repo. The home directory is a good default:
 
 ```bash
-git clone git@github.com:AstroKriel/dotfiles.git ~/dotfiles
+git clone git@github.com:AstroKriel/DotFiles.git
 ```
 
 ## Step 5: Install tools and editors
