@@ -1,22 +1,22 @@
 # DotFiles
 
-This repo is used to set up my dev environment on a fresh macOS or Linux machine, and managed through the four scripts discussed below, run via:
+This repo is used to set up my dev environment on a fresh macOS or Linux machine, and managed through the four scripts discussed below, each run via:
 
 ```bash
 uv run <script>.py [args]
 ```
 
-All scripts support `--dry-run` to preview what actions will be performed, before they are applied. For a first-time machine setup, see the [full setup guide](#full-setup-guide) below.
+All scripts support `--dry-run` to preview what actions will be performed, without actually applying them. For a first-time machine setup, see the [full setup guide](#full-setup-guide) below.
 
-`setup_shell.py` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or pick up config changes without touching tools or editors.
+`setup_shell.py` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or to pick up config changes.
 
-`setup_tools.py` wires up configs for all installed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them; tools that are not on the system yet are skipped. Pass `--check-only` to report what's detected without making changes:
+`setup_tools.py` wires up configs for all installed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so tools that are not installed yet are skipped; pass `--check-only` to report what tools detected. The following tools are supported:
+- [Ghostty](https://ghostty.org): fast, native terminal emulator
+- [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window
 - [Yazi](https://yazi-rs.github.io): terminal file manager
 - [Neovim](https://neovim.io): terminal-based text editor
 - [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/): text editor with sensible batteries-included
-- [Ghostty](https://ghostty.org): fast, native terminal emulator
-- [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 
 `setup_editors.py` installs extensions and applies configs for [Visual Studio Code](https://code.visualstudio.com) and [Zed](https://zed.dev). Editors not yet on the system are skipped.
 
