@@ -1,39 +1,72 @@
-import re
-import sys
-import json
-import shutil
+## { SCRIPT
+
+##
+## === DEPENDENCIES
+##
+
+## stdlib
 import argparse
+from dataclasses import dataclass
+import json
 from pathlib import Path
-from utils.logging import log_message
-from utils.shell_ops import create_symlink, ensure_dir_exists, run_command
+import re
+import shutil
+import sys
+
+## local
+from utils import logging, shell_actions
+
+##
+## === EDITOR CONFIG
+##
 
 SCRIPT_NAME = Path(__file__).name
 DOTFILES_DIR = Path(__file__).resolve().parent / "editors"
 
-EDITORS = {
-    "vscode": {
-        "name": "Visual Studio Code",
-        "command": "code",
-        "brew": "visual-studio-code --cask",
-        "dotfiles_dir": DOTFILES_DIR / "vscode",
-        "target_dir": Path.home() / "Library/Application Support/Code/User",  # macOS
-        "files": {
+_log_message = logging.make_logger(SCRIPT_NAME)
+
+_VSCODE_TARGET_DIR = (
+    Path.home() / "Library/Application Support/Code/User"
+    if sys.platform == "darwin"
+    else Path.home() / ".config/Code/User"
+)
+
+
+@dataclass
+class EditorConfig:
+    name: str
+    command: str
+    brew: str
+    dotfiles_dir: Path
+    target_dir: Path
+    files: dict[str, str]
+    extensions: Path | None = None
+
+
+EDITORS: dict[str, EditorConfig] = {
+    "vscode": EditorConfig(
+        name="Visual Studio Code",
+        command="code",
+        brew="visual-studio-code --cask",
+        dotfiles_dir=DOTFILES_DIR / "vscode",
+        target_dir=_VSCODE_TARGET_DIR,
+        files={
             "settings": "dict",
             "keybindings": "list",
         },
-        "extensions": DOTFILES_DIR / "vscode" / "extensions.txt",
-    },
-    "zed": {
-        "name": "Zed",
-        "command": "zed",
-        "brew": "zed --cask",
-        "dotfiles_dir": DOTFILES_DIR / "zed",
-        "target_dir": Path.home() / ".config/zed/",
-        "files": {
+        extensions=DOTFILES_DIR / "vscode" / "extensions.txt",
+    ),
+    "zed": EditorConfig(
+        name="Zed",
+        command="zed",
+        brew="zed --cask",
+        dotfiles_dir=DOTFILES_DIR / "zed",
+        target_dir=Path.home() / ".config/zed/",
+        files={
             "settings": "dict",
             "keymap": "list",
         },
-    },
+    ),
 }
 
 ## see for details
@@ -45,12 +78,14 @@ MAC_KEYBIND_TARGET_DIR = Path.home() / "Library" / "KeyBindings"
 MAC_KEYBIND_SOURCE_PATH = DOTFILES_DIR / MAC_KEYBIND_FILE_NAME
 MAC_KEYBIND_TARGET_PATH = MAC_KEYBIND_TARGET_DIR / MAC_KEYBIND_FILE_NAME
 
+##
+## === EDITOR HELPERS
+##
 
-def _log_message(message: str):
-    log_message(script_name=SCRIPT_NAME, message=message)
 
-
-def filter_jsonc_comments(content: str) -> str:
+def filter_jsonc_comments(
+    content: str,
+) -> str:
     content = re.sub(r'/\*[\s\S]*?\*/', '', content)  # remove block comments
     content = re.sub(r'//[^\n\r]*', '', content)  # remove line comments
     return content
@@ -94,7 +129,7 @@ def install_extensions(
         return
     extensions = [e for e in extensions_file.read_text().splitlines() if e.strip()]
     for ext in extensions:
-        run_command(
+        shell_actions.run_command(
             args=[command, "--install-extension", ext],
             script_name=SCRIPT_NAME,
             description=f"install extension: {ext}",
@@ -102,27 +137,31 @@ def install_extensions(
         )
 
 
-def setup_editor(name, meta, dry_run):
-    _log_message(f"Started setting up {name}")
+def setup_editor(
+    *,
+    editor: EditorConfig,
+    dry_run: bool,
+):
+    _log_message(f"Started setting up {editor.name}")
     ## check whether the editor is installed
-    if shutil.which(meta["command"]):
-        _log_message(f"Found {meta['name']} ({meta['command']}) in your `$PATH`.")
+    if shutil.which(editor.command):
+        _log_message(f"Found {editor.name} ({editor.command}) in your `$PATH`.")
     else:
         _log_message(
-            f"{meta['command']} was not found in your `$PATH`.\n"
-            f"Install it via: `brew install {meta['brew']}`",
+            f"{editor.command} was not found in your `$PATH`.\n"
+            f"Install it via: `brew install {editor.brew}`",
         )
         return
-    for file_name, mode in meta["files"].items():
-        modules_dir = meta["dotfiles_dir"] / file_name
+    for file_name, mode in editor.files.items():
+        modules_dir = editor.dotfiles_dir / file_name
         merged_config = merge_config_modules(
             modules_dir=modules_dir,
             mode=mode,
         )
         if merged_config is None:
             return
-        output_path = meta["dotfiles_dir"] / f"{file_name}.json"
-        target_path = meta["target_dir"] / f"{file_name}.json"
+        output_path = editor.dotfiles_dir / f"{file_name}.json"
+        target_path = editor.target_dir / f"{file_name}.json"
         if dry_run:
             _log_message(f"[dry-run] Would write merged settings to: {output_path}")
         else:
@@ -130,51 +169,94 @@ def setup_editor(name, meta, dry_run):
                 json.dump(merged_config, f, indent=2)
             _log_message(f"Wrote merged config to: {output_path}")
         ## ensure target directory exists
-        ensure_dir_exists(
-            directory=meta["target_dir"],
+        shell_actions.ensure_dir_exists(
+            directory=editor.target_dir,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
         ## symlink merged config
-        create_symlink(
+        shell_actions.create_symlink(
             source_path=output_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
     ## install extensions if defined
-    if "extensions" in meta:
+    if editor.extensions is not None:
         install_extensions(
-            command=meta["command"],
-            extensions_file=meta["extensions"],
+            command=editor.command,
+            extensions_file=editor.extensions,
             dry_run=dry_run,
         )
 
+##
+## === PROGRAM MAIN
+##
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate and symlink vs-code settings.")
-    parser.add_argument("--dry-run", action="store_true", help="Print actions without applying them")
-    args = parser.parse_args()
-    dry_run = args.dry_run
-    for name, meta in EDITORS.items():
-        setup_editor(name, meta, dry_run)
+
+def remove_symlinks(
+    *,
+    dry_run: bool,
+):
+    _log_message("Started removing editor config symlinks")
+    for editor in EDITORS.values():
+        for file_name in editor.files:
+            shell_actions.remove_symlink(
+                target_path=editor.target_dir / f"{file_name}.json",
+                script_name=SCRIPT_NAME,
+                dry_run=dry_run,
+            )
+    if sys.platform.startswith("darwin"):
+        shell_actions.remove_symlink(
+            target_path=MAC_KEYBIND_TARGET_PATH,
+            script_name=SCRIPT_NAME,
+            dry_run=dry_run,
+        )
+    _log_message("Finished removing editor config symlinks")
+
+
+def run(
+    *,
+    dry_run: bool,
+):
+    for editor in EDITORS.values():
+        setup_editor(
+            editor=editor,
+            dry_run=dry_run,
+        )
     if sys.platform.startswith("darwin"):
         _log_message("Applying macOS keybindings (override to fix Electron shortcut conflict).")
-        ensure_dir_exists(
+        shell_actions.ensure_dir_exists(
             directory=MAC_KEYBIND_TARGET_DIR,
             script_name=SCRIPT_NAME,
-            dry_run=args.dry_run,
+            dry_run=dry_run,
         )
-        create_symlink(
+        shell_actions.create_symlink(
             source_path=MAC_KEYBIND_SOURCE_PATH,
             target_path=MAC_KEYBIND_TARGET_PATH,
             script_name=SCRIPT_NAME,
-            dry_run=args.dry_run,
+            dry_run=dry_run,
         )
     _log_message("Finished setting up editors.")
 
 
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate and symlink editor settings.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print actions without applying them",
+    )
+    args = parser.parse_args()
+    run(dry_run=args.dry_run)
+
+##
+## === ENTRY POINT
+##
+
 if __name__ == "__main__":
     main()
 
-## .
+## } SCRIPT

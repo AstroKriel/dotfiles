@@ -1,121 +1,157 @@
+## { SCRIPT
+
+##
+## === DEPENDENCIES
+##
+
+## stdlib
+import argparse
+from dataclasses import dataclass
+from enum import Enum, auto
+from pathlib import Path
 import shutil
 import sys
-import argparse
-from pathlib import Path
-from utils.logging import log_message
-from utils.shell_ops import create_symlink, ensure_dir_exists, run_command
+
+## local
+from utils import logging, shell_actions
+
+##
+## === TOOL CONFIG
+##
 
 HOME_DIR = Path.home()
 SCRIPT_NAME = Path(__file__).name
 DOTFILES_DIR = Path(__file__).resolve().parent / "tools"
 CONFIG_DIR = HOME_DIR / ".config"
 
-TOOLS = {
-    "emacs": {
-        "name": "Emacs (GUI)",
-        "brew": "emacs --cask",
-        "mac_app": "Emacs.app",
-        "dotfiles_dir": DOTFILES_DIR / "emacs",
-        "target_dir": HOME_DIR / ".doom.d",
-        "clone_repo": {
-            "name": "Doom-Emacs",
-            "url": "https://github.com/doomemacs/doomemacs",
-            "output": CONFIG_DIR / "emacs",
-        },
-        "post_setup": "doom_sync",
-    },
-    "tmux": {
-        "name": "Tmux",
-        "brew": "tmux",
-        "dotfiles_dir": DOTFILES_DIR / "tmux",
-        "target_dir": CONFIG_DIR / "tmux",
-        "clone_repo": {
-            "name": "TPM",
-            "url": "https://github.com/tmux-plugins/tpm",
-            "output": CONFIG_DIR / "tmux" / "plugins" / "tpm",
-        },
-    },
-    "nvim": {
-        "name": "Neovim",
-        "brew": "neovim",
-        "dotfiles_dir": DOTFILES_DIR / "nvim",
-        "target_dir": CONFIG_DIR / "nvim",
-    },
-    "kitty": {
-        "name": "Kitty terminal",
-        "brew": "kitty --cask",
-        "mac_app": "kitty.app",
-        "dotfiles_dir": DOTFILES_DIR / "kitty",
-        "target_dir": CONFIG_DIR / "kitty",
-    },
-    "ghostty": {
-        "name": "Ghostty terminal",
-        "brew": "ghostty --cask",
-        "mac_app": "Ghostty.app",
-        "dotfiles_dir": DOTFILES_DIR / "ghostty",
-        "target_dir": CONFIG_DIR / "ghostty",
-    },
-    "yazi": {
-        "name": "Yazi",
-        "brew": "yazi ffmpeg",
-        "dotfiles_dir": DOTFILES_DIR / "yazi",
-        "target_dir": CONFIG_DIR / "yazi",
-    },
+_log_message = logging.make_logger(SCRIPT_NAME)
+
+
+class PostSetup(Enum):
+    DOOM_SYNC = auto()
+
+
+@dataclass
+class RepoConfig:
+    name: str
+    url: str
+    output: Path
+
+
+@dataclass
+class ToolConfig:
+    name: str
+    brew: str
+    dotfiles_dir: Path
+    target_dir: Path
+    mac_app: str | None = None
+    clone_repo: RepoConfig | None = None
+    post_setup: PostSetup | None = None
+
+
+TOOLS: dict[str, ToolConfig] = {
+    "emacs": ToolConfig(
+        name="Emacs (GUI)",
+        brew="emacs --cask",
+        mac_app="Emacs.app",
+        dotfiles_dir=DOTFILES_DIR / "emacs",
+        target_dir=HOME_DIR / ".doom.d",
+        clone_repo=RepoConfig(
+            name="Doom-Emacs",
+            url="https://github.com/doomemacs/doomemacs",
+            output=CONFIG_DIR / "emacs",
+        ),
+        post_setup=PostSetup.DOOM_SYNC,
+    ),
+    "tmux": ToolConfig(
+        name="Tmux",
+        brew="tmux",
+        dotfiles_dir=DOTFILES_DIR / "tmux",
+        target_dir=CONFIG_DIR / "tmux",
+        clone_repo=RepoConfig(
+            name="TPM",
+            url="https://github.com/tmux-plugins/tpm",
+            output=CONFIG_DIR / "tmux" / "plugins" / "tpm",
+        ),
+    ),
+    "nvim": ToolConfig(
+        name="Neovim",
+        brew="neovim",
+        dotfiles_dir=DOTFILES_DIR / "nvim",
+        target_dir=CONFIG_DIR / "nvim",
+    ),
+    "kitty": ToolConfig(
+        name="Kitty terminal",
+        brew="kitty --cask",
+        mac_app="kitty.app",
+        dotfiles_dir=DOTFILES_DIR / "kitty",
+        target_dir=CONFIG_DIR / "kitty",
+    ),
+    "ghostty": ToolConfig(
+        name="Ghostty terminal",
+        brew="ghostty --cask",
+        mac_app="Ghostty.app",
+        dotfiles_dir=DOTFILES_DIR / "ghostty",
+        target_dir=CONFIG_DIR / "ghostty",
+    ),
+    "yazi": ToolConfig(
+        name="Yazi",
+        brew="yazi ffmpeg",
+        dotfiles_dir=DOTFILES_DIR / "yazi",
+        target_dir=CONFIG_DIR / "yazi",
+    ),
 }
 
-
-def _log_message(message: str):
-    log_message(
-        script_name=SCRIPT_NAME,
-        message=message,
-    )
+##
+## === TOOL HELPERS
+##
 
 
 def check_installed_tools():
     _log_message("Checking installed tools...")
     available = set()
-    for command, meta in TOOLS.items():
-        mac_app = meta.get("mac_app")
+    for command, tool in TOOLS.items():
         found_via_app = (
             sys.platform == "darwin"
-            and mac_app is not None
-            and Path("/Applications") / mac_app
+            and tool.mac_app is not None
+            and (Path("/Applications") / tool.mac_app).exists()
         )
-        if shutil.which(command) or (found_via_app and found_via_app.exists()):
-            _log_message(f"Found {meta['name']} ({command}) in your `$PATH`.")
+        if shutil.which(command) or found_via_app:
+            _log_message(f"Found {tool.name} ({command}) in your `$PATH`.")
             available.add(command)
         else:
             _log_message(
-                f"{meta['name']} was not found in your `$PATH`.\n"
-                f"Install it via: `brew install {meta['brew']}`",
+                f"{tool.name} was not found in your `$PATH`.\n"
+                f"Install it via: `brew install {tool.brew}`",
             )
     return available
 
 
 def shallow_clone_repo(
     *,
-    repo_name: str,
-    repo_url: str,
-    output_dir: Path,
+    repo: RepoConfig,
     dry_run: bool,
 ):
-    if output_dir.exists():
-        _log_message(f"{repo_name} already exists under: {output_dir}")
+    if repo.output.exists():
+        _log_message(f"{repo.name} already exists under: {repo.output}")
         return
-    run_command(
-        args=["git", "clone", "--depth", "1", repo_url, str(output_dir)],
+    shell_actions.run_command(
+        args=["git", "clone", "--depth", "1", repo.url, str(repo.output)],
         script_name=SCRIPT_NAME,
-        description=f"clone {repo_name} (shallow) under {output_dir}",
+        description=f"clone {repo.name} (shallow) under {repo.output}",
         dry_run=dry_run,
     )
 
 
-def run_doom_sync(dry_run: bool):
+def run_doom_sync(
+    *,
+    dry_run: bool,
+):
     doom_bin = CONFIG_DIR / "emacs" / "bin" / "doom"
     if not doom_bin.exists():
         _log_message(f"Doom binary not found at: {doom_bin}")
         return
-    run_command(
+    shell_actions.run_command(
         args=[str(doom_bin), "sync"],
         script_name=SCRIPT_NAME,
         description="doom sync",
@@ -123,55 +159,93 @@ def run_doom_sync(dry_run: bool):
         capture_output=False,
     )
 
+##
+## === PROGRAM MAIN
+##
 
-def main():
-    ## parse user inputs
-    parser = argparse.ArgumentParser(
-        description=
-        "Symlink config folders and clone needed repos for: Neovim, tmux, Emacs, ghostty, and kitty."
-    )
-    parser.add_argument("--dry-run", action="store_true", help="Print actions without applying them")
-    parser.add_argument("--check-only", action="store_true", help="Only check installed tools and exit")
-    args = parser.parse_args()
-    dry_run = args.dry_run
-    ## log start of script
-    _log_message("Started setting up tool configs")
-    available_tools = check_installed_tools()
-    if args.check_only:
-        _log_message("Check complete. Exiting due to `--check-only`")
-        return
-    ## symlink each config directory to ~/.config/
-    for tool in sorted(available_tools):
-        meta = TOOLS[tool]
-        ensure_dir_exists(
-            directory=meta["target_dir"].parent,
+
+def remove_symlinks(
+    *,
+    dry_run: bool,
+):
+    _log_message("Started removing tool config symlinks")
+    for tool in TOOLS.values():
+        shell_actions.remove_symlink(
+            target_path=tool.target_dir,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
-        create_symlink(
-            source_path=meta["dotfiles_dir"],
-            target_path=meta["target_dir"],
+    _log_message("Finished removing tool config symlinks")
+
+
+def run(
+    *,
+    dry_run: bool,
+    check_only: bool = False,
+):
+    ## log start of script
+    _log_message("Started setting up tool configs")
+    available_tools = check_installed_tools()
+    if check_only:
+        _log_message("Check complete. Exiting due to `--check-only`")
+        return
+    ## symlink each config directory to ~/.config/
+    for command in sorted(available_tools):
+        tool = TOOLS[command]
+        shell_actions.ensure_dir_exists(
+            directory=tool.target_dir.parent,
+            script_name=SCRIPT_NAME,
+            dry_run=dry_run,
+        )
+        shell_actions.create_symlink(
+            source_path=tool.dotfiles_dir,
+            target_path=tool.target_dir,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
     ## git clone repos
-    for tool in available_tools:
-        meta = TOOLS[tool]
-        if "clone_repo" in meta:
-            repo = meta["clone_repo"]
+    for command in available_tools:
+        tool = TOOLS[command]
+        if tool.clone_repo is not None:
             shallow_clone_repo(
-                repo_name=repo["name"],
-                repo_url=repo["url"],
-                output_dir=repo["output"],
+                repo=tool.clone_repo,
                 dry_run=dry_run,
             )
-    if "emacs" in available_tools and TOOLS["emacs"].get("post_setup") == "doom_sync":
-        run_doom_sync(dry_run)
+    ## run post-setup steps
+    for command in available_tools:
+        tool = TOOLS[command]
+        if tool.post_setup == PostSetup.DOOM_SYNC:
+            run_doom_sync(dry_run=dry_run)
     ## log end of script
     _log_message("Finished setting up tool configs")
 
 
+def main():
+    ## parse user inputs
+    parser = argparse.ArgumentParser(
+        description="Symlink config folders and clone needed repos for: Neovim, tmux, Emacs, ghostty, and kitty.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print actions without applying them",
+    )
+    parser.add_argument(
+        "--check-only",
+        action="store_true",
+        help="Only check installed tools and exit",
+    )
+    args = parser.parse_args()
+    run(
+        dry_run=args.dry_run,
+        check_only=args.check_only,
+    )
+
+##
+## === ENTRY POINT
+##
+
 if __name__ == "__main__":
     main()
 
-## .
+## } SCRIPT

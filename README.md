@@ -1,12 +1,12 @@
 # dotfiles
 
-Notes for setting up my dev environment on a fresh macOS or Linux machine.
+How I set up my dev environment on a fresh macOS or Linux machine.
 
-This repo manages config for the following:
+This repo allows an interface to manage the following useful dev tools:
 
-- **Shell:**
-  - bash: works on almost all systems, including servers; a safe default
-  - zsh: more plugin-friendly, better suited for personal devices
+- **Shells:**
+  - [bash](https://www.gnu.org/software/bash/manual/bash.html): works on almost all systems, including servers; a safe default
+  - [zsh](https://zsh.sourceforge.io/Doc/): more plugin-friendly, better suited for personal devices
 - **Editors:**
   - [Visual Studio Code](https://code.visualstudio.com): rich, full-featured editor with broad extension support
   - [Zed](https://zed.dev): minimal, fast editor built in Rust
@@ -21,7 +21,7 @@ This repo manages config for the following:
 
 # Setup
 
-Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-7 clone the repo and run the setup scripts to configure the shell, editors, and tools.
+Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-6 clone the repo, install tools, and run the setup scripts to configure the shell, editors, and tools.
 
 ## Step 1: Install Homebrew
 
@@ -110,55 +110,35 @@ The repo can be cloned anywhere; the setup scripts resolve paths relative to the
 git clone git@github.com:AstroKriel/dotfiles.git ~/dotfiles
 ```
 
-## Step 5: Set up your shell
+## Step 5: Install tools and editors
 
-Choose `bash` or `zsh`, e.g.:
-
-```bash
-uv run setup_shell.py zsh
-```
-
-Open a new terminal to pick up the changes.
-
-## Step 6: Set up editors
-
-Install whichever editors are needed. Note: `--cask` is used for GUI applications (like editors and terminals); command-line tools are installed without it:
+Install whichever tools and editors are needed. Note: `--cask` is used for GUI applications; command-line tools are installed without it:
 
 ```bash
+# editors
 brew install --cask visual-studio-code
 brew install --cask zed
-```
 
-Then run the setup script to merge and symlink config files and install extensions (skips editors not installed):
-
-```bash
-uv run setup_editors.py
-```
-
-## Step 7: Set up tools
-
-Install whichever tools are needed:
-
-```bash
-brew install neovim
-brew install tmux
-brew install --cask emacs
+# terminals
 brew install --cask ghostty
 brew install --cask kitty
+
+# tools
+brew install neovim
+brew install tmux
 brew install yazi ffmpeg
+brew install --cask emacs
 ```
 
-Then run the setup script to symlink config files. Any tools not installed will be skipped automatically:
+## Step 6: Run setup
+
+Run the unified setup script, passing your chosen shell (`bash` or `zsh`). It configures the shell, symlinks all tool and editor configs, clones required plugin repos, and installs editor extensions. Any tools or editors not installed are skipped automatically:
 
 ```bash
-uv run setup_tools.py
+uv run setup_env.py zsh
 ```
 
-To check which tools are detected without applying any changes:
-
-```bash
-uv run setup_tools.py --check-only
-```
+Open a new terminal to pick up the shell changes.
 
 # Verify your setup
 
@@ -186,14 +166,39 @@ type reload_zsh
 All setup scripts support `--dry-run` to preview actions without applying them:
 
 ```bash
-uv run setup_shell.py bash --dry-run
-uv run setup_editors.py --dry-run
-uv run setup_tools.py --dry-run
+uv run setup_env.py zsh --dry-run
+```
+
+# Teardown
+
+To remove all symlinks created by the setup scripts:
+
+```bash
+uv run setup_env.py --remove-symlinks
+```
+
+This removes the symlinks only. Any files that were backed up during setup (renamed with a timestamp) are left in place.
+
+# Running scripts individually
+
+`setup_env.py` is the recommended entry point, but each script can also be run on its own for targeted re-runs:
+
+```bash
+uv run setup_shell.py zsh
+uv run setup_editors.py
+uv run setup_tools.py
+```
+
+To check which tools are detected without applying any changes:
+
+```bash
+uv run setup_tools.py --check-only
 ```
 
 Pass `-h` to any script to see all available arguments:
 
 ```bash
+uv run setup_env.py -h
 uv run setup_shell.py -h
 uv run setup_editors.py -h
 uv run setup_tools.py -h
