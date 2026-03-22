@@ -1,12 +1,12 @@
 # dotfiles
 
-Notes for setting up my dev environment on a fresh macOS or Linux machine.
+How I set up my dev environment on a fresh macOS or Linux machine.
 
-This repo manages config for the following:
+This repo allows an interface to manage the following useful dev tools:
 
-- **Shell:**
-  - bash: works on almost all systems, including servers; a safe default
-  - zsh: more plugin-friendly, better suited for personal devices
+- **Shells:**
+  - [bash](https://www.gnu.org/software/bash/manual/bash.html): works on almost all systems, including servers; a safe default
+  - [zsh](https://zsh.sourceforge.io/Doc/): more plugin-friendly, better suited for personal devices
 - **Editors:**
   - [Visual Studio Code](https://code.visualstudio.com): rich, full-featured editor with broad extension support
   - [Zed](https://zed.dev): minimal, fast editor built in Rust
