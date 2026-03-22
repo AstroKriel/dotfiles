@@ -174,7 +174,7 @@ uv run setup_env.py zsh --dry-run
 To remove all symlinks created by the setup scripts:
 
 ```bash
-uv run setup_env.py --remove_symlinks
+uv run setup_env.py --remove-symlinks
 ```
 
 This removes the symlinks only. Any files that were backed up during setup (renamed with a timestamp) are left in place.

@@ -19,7 +19,7 @@ from utils import logging
 
 def run_command(
     *,
-    args: list,
+    args: list[str],
     script_name: str,
     description: str,
     dry_run: bool = False,

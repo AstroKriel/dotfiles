@@ -32,7 +32,7 @@ def main():
         "shell",
         nargs="?",
         choices=[s.name for s in setup_shell.SHELLS],
-        help="Shell to activate (required unless --remove_symlinks is specified)",
+        help="Shell to activate (required unless --remove-symlinks is specified)",
     )
     parser.add_argument(
         "--dry-run",
@@ -40,7 +40,7 @@ def main():
         help="Print actions without applying them",
     )
     parser.add_argument(
-        "--remove_symlinks",
+        "--remove-symlinks",
         action="store_true",
         help="Remove all dotfile symlinks",
     )
@@ -55,7 +55,7 @@ def main():
         setup_tools.run(dry_run=dry_run)
         setup_editors.run(dry_run=dry_run)
     else:
-        parser.error("shell is required unless --remove_symlinks is specified")
+        parser.error("shell is required unless --remove-symlinks is specified")
 
 ##
 ## === ENTRY POINT
