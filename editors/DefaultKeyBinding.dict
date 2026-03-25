@@ -1,6 +1,8 @@
 {
   "@^\UF702" = "noop:"; // Cmd+Ctrl+Left
   "@^\UF703" = "noop:"; // Cmd+Ctrl+Right
-  "@~^\UF702" = "noop:"; // Cmd+Opt+Left
-  "@~^\UF703" = "noop:"; // Cmd+Opt+Right
+  "@~\UF702" = "noop:";  // Cmd+Opt+Left
+  "@~\UF703" = "noop:";  // Cmd+Opt+Right
+  "@~^\UF702" = "noop:"; // Cmd+Opt+Ctrl+Left
+  "@~^\UF703" = "noop:"; // Cmd+Opt+Ctrl+Right
 }
