@@ -1,6 +1,6 @@
 # DotFiles
 
-This repo is used to set up my dev environment on a fresh macOS or Linux machine, and managed through the four scripts discussed below, each run via:
+This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the four scripts discussed below, where each is run via:
 
 ```bash
 uv run <script>.py [args]
