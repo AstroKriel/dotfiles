@@ -1,6 +1,6 @@
 term = "xterm-256color"
 background-blur-radius = 20
-background-opacity = 0.7
+background-opacity = 0.85
 copy-on-select = clipboard
 macos-option-as-alt = true
 font-feature = "-calt, -liga, -dlig"

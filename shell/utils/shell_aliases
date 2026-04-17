@@ -12,22 +12,26 @@ alias ktmux='tmux kill-server'
 export DHOME="$HOME"
 alias dhome='cd "$DHOME"'
 
-export DDOT="$DHOME/dotfiles"
+export DDOT="$DHOME/Projects/DotFiles"
 alias ddot='cd "$DDOT"'
 
 export DDWN="$DHOME/Downloads"
 alias ddwn='cd "$DDWN"'
 
-export DONED="$DHOME/OneDrive"
-alias doned='cd "$DONED"'
-
-export DPROJ="$DHOME/Documents/Projects"
+export DPROJ="$DHOME/Projects"
 alias dproj='cd "$DPROJ"'
 
-export DQUOKKA="$DPROJ/quokka"
-alias dquokka='cd "$DQUOKKA"'
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export DONED="$DHOME/OneDrive"
+  alias doned='cd "$DONED"'
+fi
 
-export DASGARD="$DPROJ/asgard"
-alias dasgard='cd "$DASGARD"'
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export DQUOKKA="$DPROJ/quokka"
+  alias dquokka='cd "$DQUOKKA"'
+
+  export DASGARD="$DPROJ/asgard"
+  alias dasgard='cd "$DASGARD"'
+fi
 
 ## .

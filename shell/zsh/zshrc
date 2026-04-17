@@ -17,6 +17,13 @@ source_if_present "$HOME/.shell_functions"
 source_if_present "$HOME/.shell_options"
 source_if_present "$HOME/.shell_paths"
 
+## ssh-agent via keychain (linux only)
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  if command -v keychain &>/dev/null; then
+    eval $(keychain --eval --quiet id_ed25519_github)
+  fi
+fi
+
 ## initialize completion
 autoload -Uz compinit && compinit
 

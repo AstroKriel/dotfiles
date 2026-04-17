@@ -28,6 +28,10 @@ setopt NO_BEEP
 WORDCHARS=${WORDCHARS//[=._\-\/]/}
 ## test with: alpha_beta-gamma.delta/epsilon:42+zeta=pi<omega>|theta&phi,chi;psi?omega!END
 
+## jump to start/end of line with ctrl + arrow-keys
+bindkey "^[[1;5D" beginning-of-line
+bindkey "^[[1;5C" end-of-line
+
 ## jump over words with option + arrow-keys
 ## for compatibility with integrated vscode terminal
 bindkey "\e[1;3D" backward-word
@@ -56,6 +60,8 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # use colors in completi
 ## Homebrew
 ## ---------------------
 
-export HOMEBREW_NO_ENV_HINTS=1
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  export HOMEBREW_NO_ENV_HINTS=1
+fi
 
 ## .

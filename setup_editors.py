@@ -58,7 +58,7 @@ EDITORS: dict[str, EditorConfig] = {
     ),
     "zed": EditorConfig(
         name="Zed",
-        command="zed",
+        command="zed" if sys.platform == "darwin" else "zeditor",
         brew="zed --cask",
         dotfiles_dir=DOTFILES_DIR / "zed",
         target_dir=Path.home() / ".config/zed/",
