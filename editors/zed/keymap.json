@@ -64,7 +64,9 @@
       "super-alt-ctrl-m": "project_panel::CollapseAllEntries",
       "super-alt-ctrl-=": "workspace::NewTerminal",
       "super-alt-ctrl-.": "zed::OpenSettings",
-      "super-alt-ctrl-k": "zed::OpenKeymap"
+      "super-alt-ctrl-k": "zed::OpenKeymap",
+      "super-alt-ctrl-p": "command_palette::Toggle",
+      "super-alt-ctrl-;": "projects::OpenRemote"
     }
   }
 ]
