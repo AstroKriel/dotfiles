@@ -1,4 +1,5 @@
 [
+  // Pane: tab navigation, close, reorder
   {
     "context": "Pane",
     "bindings": {
@@ -6,47 +7,26 @@
       "super-alt-right": "pane::ActivateNextItem",
       "super-alt-ctrl-left": "pane::SwapItemLeft",
       "super-alt-ctrl-right": "pane::SwapItemRight",
-      "super-alt-ctrl-[": [
-        "workspace::MoveItemToPaneInDirection",
-        {
-          "direction": "left"
-        }
-      ],
-      "super-alt-ctrl-]": [
-        "workspace::MoveItemToPaneInDirection",
-        {
-          "direction": "right"
-        }
-      ],
+      "super-alt-ctrl-[": ["workspace::MoveItemToPaneInDirection", { "direction": "left" }],
+      "super-alt-ctrl-]": ["workspace::MoveItemToPaneInDirection", { "direction": "right" }],
       "super-alt-w": "pane::CloseActiveItem",
       "super-alt-t": "pane::ReopenClosedItem",
-      "super-alt-ctrl-w": [
-        "pane::CloseOtherItems",
-        {
-          "close_pinned": false
-        }
-      ]
+      "super-alt-ctrl-w": ["pane::CloseOtherItems", { "close_pinned": false }]
     }
   },
+
+  // Editor: find & replace, toggles
   {
     "context": "Editor",
     "bindings": {
-      "super-alt-f": [
-        "buffer_search::Deploy",
-        {
-          "replace_enabled": false
-        }
-      ],
-      "super-alt-r": [
-        "buffer_search::Deploy",
-        {
-          "replace_enabled": true
-        }
-      ],
+      "super-alt-f": ["buffer_search::Deploy", { "replace_enabled": false }],
+      "super-alt-r": ["buffer_search::Deploy", { "replace_enabled": true }],
       "super-alt-k": "editor::ToggleSoftWrap",
       "super-alt-m": "editor::ToggleMinimap"
     }
   },
+
+  // Global: panels, navigation, search, terminal, settings
   {
     "bindings": {
       "super-alt-n": "workspace::NewFile",
