@@ -1,0 +1,16 @@
+[
+  {
+    "context": "Pane",
+    "bindings": {
+      "super-alt-left": "pane::ActivatePrevItem",
+      "super-alt-right": "pane::ActivateNextItem",
+      "super-alt-ctrl-left": "pane::SwapItemLeft",
+      "super-alt-ctrl-right": "pane::SwapItemRight",
+      "super-alt-ctrl-[": ["workspace::MoveItemToPaneInDirection", { "direction": "left" }],
+      "super-alt-ctrl-]": ["workspace::MoveItemToPaneInDirection", { "direction": "right" }],
+      "super-alt-w": "pane::CloseActiveItem",
+      "super-alt-t": "pane::ReopenClosedItem",
+      "super-alt-ctrl-w": ["pane::CloseOtherItems", { "close_pinned": false }]
+    }
+  }
+]

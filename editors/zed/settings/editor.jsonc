@@ -1,0 +1,9 @@
+{
+  "autosave": "on_focus_change",
+  "preview_tabs": {
+    "enabled": false
+  },
+  "edit_predictions": {
+    "mode": "subtle"
+  }
+}

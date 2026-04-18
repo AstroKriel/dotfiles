@@ -1,0 +1,13 @@
+[
+  {
+    "context": "Editor",
+    "bindings": {
+      "super-alt-f": ["buffer_search::Deploy", { "replace_enabled": false }],
+      "super-alt-r": ["buffer_search::Deploy", { "replace_enabled": true }],
+      "super-alt-k": "editor::ToggleSoftWrap",
+      "super-alt-m": "editor::ToggleMinimap",
+      "super-alt-up": "editor::AddSelectionAbove",
+      "super-alt-down": "editor::AddSelectionBelow"
+    }
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "ssh_connections": [
+    {
+      "host": "cita",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/nkriel"
+          ]
+        }
+      ]
+    }
+  ]
+}

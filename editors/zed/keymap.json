@@ -1,5 +1,48 @@
 [
   {
+    "context": "Editor",
+    "bindings": {
+      "super-alt-f": [
+        "buffer_search::Deploy",
+        {
+          "replace_enabled": false
+        }
+      ],
+      "super-alt-r": [
+        "buffer_search::Deploy",
+        {
+          "replace_enabled": true
+        }
+      ],
+      "super-alt-k": "editor::ToggleSoftWrap",
+      "super-alt-m": "editor::ToggleMinimap",
+      "super-alt-up": "editor::AddSelectionAbove",
+      "super-alt-down": "editor::AddSelectionBelow"
+    }
+  },
+  {
+    "bindings": {
+      "super-alt-n": "workspace::NewFile",
+      "super-alt-space": "workspace::ActivateLastPane",
+      "super-alt-[": "workspace::ToggleLeftDock",
+      "super-alt-]": "workspace::ToggleRightDock",
+      "super-alt-\\": "workspace::ToggleBottomDock",
+      "super-alt-/": "project_panel::ToggleFocus",
+      "super-alt-.": "git_panel::ToggleFocus",
+      "super-alt-'": "agent::ToggleFocus",
+      "super-alt-;": "terminal_panel::ToggleFocus",
+      "super-alt-o": "go_to_line::Toggle",
+      "super-alt-ctrl-o": "file_finder::Toggle",
+      "super-alt-ctrl-f": "workspace::NewSearch",
+      "super-alt-ctrl-m": "project_panel::CollapseAllEntries",
+      "super-alt-ctrl-;": "workspace::NewTerminal",
+      "super-alt-ctrl-.": "zed::OpenSettings",
+      "super-alt-ctrl-k": "zed::OpenKeymap",
+      "super-alt-ctrl-p": "command_palette::Toggle",
+      "super-alt-ctrl-/": "projects::OpenRemote"
+    }
+  },
+  {
     "context": "Pane",
     "bindings": {
       "super-alt-left": "pane::ActivatePrevItem",
@@ -26,47 +69,6 @@
           "close_pinned": false
         }
       ]
-    }
-  },
-  {
-    "context": "Editor",
-    "bindings": {
-      "super-alt-f": [
-        "buffer_search::Deploy",
-        {
-          "replace_enabled": false
-        }
-      ],
-      "super-alt-r": [
-        "buffer_search::Deploy",
-        {
-          "replace_enabled": true
-        }
-      ],
-      "super-alt-k": "editor::ToggleSoftWrap",
-      "super-alt-m": "editor::ToggleMinimap"
-    }
-  },
-  {
-    "bindings": {
-      "super-alt-n": "workspace::NewFile",
-      "super-alt-space": "workspace::ActivateLastPane",
-      "super-alt-[": "workspace::ToggleLeftDock",
-      "super-alt-]": "workspace::ToggleBottomDock",
-      "super-alt-\\": "workspace::ToggleRightDock",
-      "super-alt-/": "project_panel::ToggleFocus",
-      "super-alt-.": "git_panel::ToggleFocus",
-      "super-alt-'": "agent::ToggleFocus",
-      "super-alt-;": "terminal_panel::ToggleFocus",
-      "super-alt-o": "go_to_line::Toggle",
-      "super-alt-ctrl-o": "file_finder::Toggle",
-      "super-alt-ctrl-f": "workspace::NewSearch",
-      "super-alt-ctrl-m": "project_panel::CollapseAllEntries",
-      "super-alt-ctrl-=": "workspace::NewTerminal",
-      "super-alt-ctrl-.": "zed::OpenSettings",
-      "super-alt-ctrl-k": "zed::OpenKeymap",
-      "super-alt-ctrl-p": "command_palette::Toggle",
-      "super-alt-ctrl-;": "projects::OpenRemote"
     }
   }
 ]

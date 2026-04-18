@@ -1,1 +1,30 @@
-{}
+{
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
+  "autosave": "on_focus_change",
+  "preview_tabs": {
+    "enabled": false
+  },
+  "edit_predictions": {
+    "mode": "subtle"
+  },
+  "ssh_connections": [
+    {
+      "host": "cita",
+      "args": [],
+      "projects": [
+        {
+          "paths": [
+            "/home/nkriel"
+          ]
+        }
+      ]
+    }
+  ],
+  "terminal": {
+    "detect_venv": "off"
+  }
+}
