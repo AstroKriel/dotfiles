@@ -19,18 +19,8 @@ parse_git_info() {
     remote_name=${remote_url:t} # take last path component
     remote_name=${remote_name%.git} # strip .git suffix
   fi
-  ## normalize names for comparison: lowercase + remove underscores and dashes
-  local repo_norm remote_norm
-  repo_norm=${repo_local:l}
-  repo_norm=${repo_norm//[_-]/}
-  remote_norm=${remote_name:l}
-  remote_norm=${remote_norm//[_-]/}
-  ## decide display name:
-  ## show alias form (local->remote) only if normalized names differ
-  local repo_display=$repo_local
-  if [[ -n $remote_name && $remote_norm != $repo_norm ]]; then
-    repo_display="$repo_local->$remote_name"
-  fi
+  ## prefer the remote repo name; fall back to local folder name if no remote
+  local repo_display=${remote_name:-$repo_local}
   ## current branch or tag (fallback to 'detached' if neither)
   local branch
   branch=$(
