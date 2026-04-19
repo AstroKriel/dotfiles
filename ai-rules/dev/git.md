@@ -36,10 +36,10 @@ Scope answers *where* the change is. Granularity depends on how localised the ch
 
 | Situation | Scope |
 |---|---|
-| One file, localised change | function or class name: `add_colorbar` |
-| One file, broad change | filename with extension: `annotate_axis.py` |
+| One file, localised change | function or class name: `compute_stats` |
+| One file, broad change | filename with extension: `data_loader.py` |
 | Many files, shared concept | concept name: `linting`, `type annotations`, `imports` |
-| Folder rename | folder name with trailing slash: `coding/` |
+| Folder rename | folder name with trailing slash: `folder/` |
 | Repo-wide | omit scope entirely |
 
 ---
@@ -63,22 +63,22 @@ When suggesting commits, always present each one as a copy-pasteable shell block
 Single repository:
 
 ```bash
-git add src/annotate_axis.py
-git commit -m "fix(annotate_axis.py): broaden color params to accept RGBA tuples."
+git add src/data_loader.py
+git commit -m "fix(data_loader.py): handle missing file path by raising FileNotFoundError."
 ```
 
 Multiple repositories:
 
 ```bash
-cd ~/Projects/Asgard/sindri/submodules/jormi
-git add src/jormi/check_types.py
-git commit -m "fix(check_types.py): raise TypeError when type check fails."
+cd ~/Projects/lib-a
+git add src/lib_a/validate_inputs.py
+git commit -m "fix(validate_inputs.py): raise TypeError when input type is invalid."
 ```
 
 ```bash
-cd ~/Projects/Asgard/sindri/submodules/ww-quokka-sims
-git add src/ww_fields/compute_field_stats.py
-git commit -m "update(compute_field_stats.py): use jormi ensure_type for input validation."
+cd ~/Projects/app-b
+git add src/app_b/process_data.py
+git commit -m "update(process_data.py): use lib-a validate_inputs for type checking."
 ```
 
 ---
@@ -88,10 +88,10 @@ git commit -m "update(compute_field_stats.py): use jormi ensure_type for input v
 These illustrate the message format and wording style only, not the full shell workflow:
 
 ```
-fix(annotate_axis.py): broaden color params to accept RGBA tuples.
-refactor(annotate_axis.py): expand function signatures to one arg per line.
-fix(add_colorbar): broaden label_size to accept int; broaden color params to accept RGBA tuples.
-apply(linting): fix ruff and pyright warnings across ww_fields.
-rename(ww_plots): align module names with verb-noun convention.
+fix(data_loader.py): handle missing file path by raising FileNotFoundError.
+refactor(data_loader.py): expand function signatures to one arg per line.
+fix(compute_stats): accept int for bin_count; accept None for label.
+apply(linting): fix ruff and pyright warnings across src/.
+rename(plots/): align module names with verb-noun convention.
 add: initial repo structure.
 ```

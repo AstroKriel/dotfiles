@@ -46,7 +46,7 @@ name = "project-name"
 version = "0.1.0"
 description = "..."
 readme = "README.md"
-authors = [{ name = "Neco Kriel", email = "necokriel@gmail.com" }]
+authors = [{ name = "<name>", email = "<email>" }]
 requires-python = ">=3.11"
 dependencies = [...]
 ```
@@ -90,7 +90,7 @@ testpaths = ["utests"]
 |---|---|
 | Casing | `snake_case` for all filenames |
 | Pattern | verb-noun: `compute_array_stats.py`, `load_dataset.py`, `check_arrays.py`, `manage_log.py` |
-| Private modules | leading underscore: `_field_types.py`, `_farray_operators.py` |
+| Private modules | leading underscore: `_config_types.py`, `_data_operators.py` |
 | Packages | `ww_<concept>` prefix — `ww_` means "working with" and marks the public entry point for a concept: `ww_arrays`, `ww_fields`, `ww_plots` |
 
 ### Module Growth
@@ -220,7 +220,7 @@ Use strong verb prefixes, always. Never `calc_`, `process_`, or generic names:
 | `extract_*` | pull data from a larger structure |
 | `validate_*` | raise on invalid state (private use) |
 
-Private helpers use a leading underscore: `_get_bin_edges()`, `_validate_inputs()`, `_extract_3d_sarray()`.
+Private helpers use a leading underscore: `_get_bin_edges()`, `_validate_inputs()`, `_extract_column()`.
 
 ### Classes
 
@@ -229,8 +229,8 @@ Private classes use a leading underscore: `_Colours`, `_MessageStyle`. These ser
 Enums that are used as strings inherit from both `str` and `Enum`. Enums that are pure value holders inherit from `Enum` only:
 
 ```python
-class CartesianAxis_3D(str, Enum): ...  # used as strings
-class MessageType(Enum): ...            # pure value holder
+class SortOrder(str, Enum): ...   # used as strings
+class MessageType(Enum): ...      # pure value holder
 ```
 
 Enum members may hold dataclass instances as values to carry rich metadata per member:
@@ -249,7 +249,7 @@ class MessageType(Enum):
 | Rule | |
 |---|---|
 | Casing | `snake_case` exclusively, never camelCase |
-| Abbreviations | acceptable when well-known: `sarray`, `varray`, `sfield`, `vfield`, `rho`, `Ekin`, `ndim`, `cmap` |
+| Abbreviations | acceptable when well-known within the domain: `ndim`, `cmap`, `num_rows`, `col_index` |
 | Descriptive names | use subscript-style: `num_cells_x`, `bin_centers`, `axis_to_slice`, `field_key` |
 | Single-letter names | never, names must always indicate what is being worked with |
 | Abbreviated names | never, `language` not `lang`, `index` not `idx` |
@@ -332,9 +332,9 @@ Unit tests live under `utests/`, mirroring the source structure. Run via pytest.
 Test files are named `test_<module_name>.py`. Tests are organised into focused `unittest.TestCase` classes named after what they test:
 
 ```python
-class TestScalarField3D_Construction(unittest.TestCase):
+class TestDataLoader_Construction(unittest.TestCase):
 
-    def test_valid_construction_via_from_3d_sarray(
+    def test_valid_construction_via_from_dict(
         self,
     ): ...
 
@@ -342,18 +342,18 @@ class TestScalarField3D_Construction(unittest.TestCase):
         self,
     ): ...
 
-class TestScalarField3D_Properties(unittest.TestCase):
+class TestDataLoader_Properties(unittest.TestCase):
 
     def test_label_is_stored(
         self,
     ): ...
 
-    def test_sim_time_none_allowed(
+    def test_optional_field_accepts_none(
         self,
     ): ...
 ```
 
-Private helper functions for building test fixtures use a leading underscore: `_make_3d_udomain()`, `_make_sfield_3d()`.
+Private helper functions for building test fixtures use a leading underscore: `_make_config()`, `_make_dataset()`.
 
 Use `assertAlmostEqual()` for floating-point comparisons and `assertRaises()` for error cases:
 
@@ -364,9 +364,9 @@ def test_invalid_input_raises(
     with self.assertRaises(
         TypeError,
     ):
-        check_types.ensure_type(
-            param=42,
-            valid_types=str,
+        validate_inputs.ensure_type(
+            value=42,
+            expected_type=str,
         )
 ```
 
@@ -435,10 +435,10 @@ Mathematical notation is preferred over English prose where appropriate:
 
 ```python
 numpy.multiply(
-    varray[0],
-    varray[0],
+    values,
+    values,
     out=out,
-)  # out = v_x^2
+)  # out = values^2
 ```
 
 ---
