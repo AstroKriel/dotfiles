@@ -11,6 +11,9 @@
   "edit_predictions": {
     "mode": "subtle"
   },
+  "buffer_font_features": {
+    "calt": false
+  },
   "ssh_connections": [
     {
       "host": "cita",
