@@ -36,8 +36,8 @@ Scope answers *where* the change is. Granularity depends on how localised the ch
 
 | Situation | Scope |
 |---|---|
-| One file, localised change | function or class name: `compute_stats` |
-| One file, broad change | filename with extension: `data_loader.py` |
+| One file, localised change | function or class name: `fn_name`, `ClassName` |
+| One file, broad change | filename with extension: `file_name.py` |
 | Many files, shared concept | concept name: `linting`, `type annotations`, `imports` |
 | Folder rename | folder name with trailing slash: `folder/` |
 | Repo-wide | omit scope entirely |
@@ -70,15 +70,15 @@ git commit -m "fix(data_loader.py): handle missing file path by raising FileNotF
 Multiple repositories:
 
 ```bash
-cd ~/Projects/lib-a
-git add src/lib_a/validate_inputs.py
+cd ~/Projects/package-a
+git add src/package_a/validate_inputs.py
 git commit -m "fix(validate_inputs.py): raise TypeError when input type is invalid."
 ```
 
 ```bash
-cd ~/Projects/app-b
-git add src/app_b/process_data.py
-git commit -m "update(process_data.py): use lib-a validate_inputs for type checking."
+cd ~/Projects/package-b
+git add src/package_b/process_data.py
+git commit -m "update(process_data.py): use package-a validate_inputs for type checking."
 ```
 
 ---
