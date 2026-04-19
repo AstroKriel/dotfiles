@@ -105,7 +105,7 @@ ww_arrays/
     check_shapes.py
 ```
 
-jormi follows this pattern throughout: each module is named for the operation it performs (`check_types.py`, `ensure_type.py`, `load_config.py`), and when a concept expands, it becomes a package whose sub-modules each own one narrow responsibility. Prefer more smaller modules over one large module.
+Each module is named for the operation it performs (`parse_config.py`, `validate_schema.py`, `load_dataset.py`), and when a concept expands, it becomes a package whose sub-modules each own one narrow responsibility. Prefer more smaller modules over one large module.
 
 ---
 
@@ -195,7 +195,7 @@ Test files use `## { TEST` / `## } TEST` wrappers, following the same section st
 |---|---|
 | Order | `## stdlib` -> `## third-party` -> `## local` -> `## personal` |
 | `## local` | imports from within the current project |
-| `## personal` | imports from personal libraries under sindri (e.g. jormi) |
+| `## personal` | imports from personal shared libraries |
 | Per line | one import per line |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
 | Long imports | use parentheses with trailing commas |
