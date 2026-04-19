@@ -55,7 +55,36 @@ Scope answers *where* the change is. Granularity depends on how localised the ch
 
 ---
 
-## Examples
+## Presenting Commits
+
+When suggesting commits, always present each one as a copy-pasteable shell block containing both the `git add` and `git commit` commands. If the work spans multiple repositories, prepend a `cd` command to each block.
+
+Single repository:
+
+```bash
+git add src/annotate_axis.py
+git commit -m "fix(annotate_axis.py): broaden color params to accept RGBA tuples."
+```
+
+Multiple repositories:
+
+```bash
+cd ~/Projects/Asgard/sindri/submodules/jormi
+git add src/jormi/check_types.py
+git commit -m "fix(check_types.py): raise TypeError when type check fails."
+```
+
+```bash
+cd ~/Projects/Asgard/sindri/submodules/ww-quokka-sims
+git add src/ww_fields/compute_field_stats.py
+git commit -m "update(compute_field_stats.py): use jormi ensure_type for input validation."
+```
+
+---
+
+## Commit Message Examples
+
+These illustrate the message format and wording style only, not the full shell workflow:
 
 ```
 fix(annotate_axis.py): broaden color params to accept RGBA tuples.
