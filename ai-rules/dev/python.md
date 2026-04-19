@@ -91,7 +91,21 @@ testpaths = ["utests"]
 | Casing | `snake_case` for all filenames |
 | Pattern | verb-noun: `compute_array_stats.py`, `load_dataset.py`, `check_arrays.py`, `manage_log.py` |
 | Private modules | leading underscore: `_field_types.py`, `_farray_operators.py` |
-| Subpackages | project-specific prefix + plural noun: `ww_arrays`, `ww_fields`, `ww_plots` |
+| Packages | `ww_<concept>` prefix — `ww_` means "working with" and marks the public entry point for a concept: `ww_arrays`, `ww_fields`, `ww_plots` |
+
+### Module Growth
+
+A single module promoted to a package keeps its name. Sub-modules highlight the sub-concept using the same verb-noun convention:
+
+```
+ww_arrays/
+    __init__.py
+    compute_stats.py
+    load_datasets.py
+    check_shapes.py
+```
+
+jormi follows this pattern throughout: each module is named for the operation it performs (`check_types.py`, `ensure_type.py`, `load_config.py`), and when a concept expands, it becomes a package whose sub-modules each own one narrow responsibility. Prefer more smaller modules over one large module.
 
 ---
 
