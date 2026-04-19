@@ -13,7 +13,7 @@ All scripts support `--dry-run` to preview what actions will be performed, witho
 `setup_tools.py` wires up configs for all installed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so tools that are not installed yet are skipped; pass `--check-only` to report what tools detected. The following tools are supported:
 - [Ghostty](https://ghostty.org): fast, native terminal emulator
 - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
-- [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window
+- [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
 - [Yazi](https://yazi-rs.github.io): terminal file manager
 - [Neovim](https://neovim.io): terminal-based text editor
 - [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/): text editor with sensible batteries-included
