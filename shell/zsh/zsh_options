@@ -40,6 +40,9 @@ bindkey "\e[1;3C" forward-word
 bindkey "^[^[[D" backward-word
 bindkey "^[^[[C" forward-word
 
+## forward-delete with delete key
+bindkey "^[[3~" delete-char
+
 ## up/down arrows search history by prefix
 autoload -Uz up-line-or-beginning-search
 autoload -Uz down-line-or-beginning-search
