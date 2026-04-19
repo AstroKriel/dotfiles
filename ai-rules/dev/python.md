@@ -91,7 +91,7 @@ testpaths = ["utests"]
 | Casing | `snake_case` for all filenames |
 | Pattern | verb-noun: `compute_array_stats.py`, `load_dataset.py`, `check_arrays.py`, `manage_log.py` |
 | Private modules | leading underscore: `_config_types.py`, `_data_operators.py` |
-| Packages | `ww_<concept>` prefix — `ww_` means "working with" and marks the public entry point for a concept: `ww_arrays`, `ww_fields`, `ww_plots` |
+| Packages | `ww_<concept>` prefix; `ww_` means "working with" and marks the public entry point for a concept: `ww_arrays`, `ww_fields`, `ww_plots` |
 
 ### Module Growth
 
