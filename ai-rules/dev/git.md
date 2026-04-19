@@ -39,6 +39,7 @@ Scope answers *where* the change is. Granularity depends on how localised the ch
 | One file, localised change | function or class name: `add_colorbar` |
 | One file, broad change | filename with extension: `annotate_axis.py` |
 | Many files, shared concept | concept name: `linting`, `type annotations`, `imports` |
+| Folder rename | folder name with trailing slash: `coding/` |
 | Repo-wide | omit scope entirely |
 
 ---
