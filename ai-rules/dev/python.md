@@ -185,7 +185,65 @@ if __name__ == "__main__":
 ## } SCRIPT
 ```
 
-Test files use `## { TEST` / `## } TEST` wrappers, following the same section structure.
+Unit test files use `## { TEST` / `## } TEST` wrappers with a `## === TEST SUITE` section instead of `## === PROGRAM MAIN`, and `unittest.main()` as the entry point:
+
+```python
+## { TEST
+
+##
+## === DEPENDENCIES
+##
+
+## stdlib
+import unittest
+
+## local
+...
+
+##
+## === TEST SUITE
+##
+
+class TestFoo_Bar(unittest.TestCase):
+    ...
+
+##
+## === ENTRY POINT
+##
+
+if __name__ == "__main__":
+    unittest.main()
+
+## } TEST
+```
+
+Validation test files follow the script structure exactly, using `## { TEST` / `## } TEST` wrappers and a descriptive section header in place of `## === PROGRAM MAIN`:
+
+```python
+## { TEST
+
+##
+## === DEPENDENCIES
+##
+
+...
+
+##
+## === CONVERGENCE TEST: foo bar
+##
+
+def main() -> None:
+    ...
+
+##
+## === ENTRY POINT
+##
+
+if __name__ == "__main__":
+    main()
+
+## } TEST
+```
 
 ---
 
