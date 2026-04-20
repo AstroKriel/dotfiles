@@ -60,22 +60,22 @@ extraPaths = ["src"]
 
 ## --- rules to enforce
 reportMissingImports = true
-reportMissingTypeStubs = false                   # third-party packages rarely ship stubs
+reportMissingTypeStubs = false  # third-party packages rarely ship stubs
 
 ## --- rules to suppress
-reportExplicitAny = "none"                       # numpy/scipy code uses Any extensively; unavoidable
-reportAny = "none"                               # noisy cascade of the above
-reportUnknownMemberType = "none"                 # cascade from untyped third-party stubs
-reportUnknownVariableType = "none"               # cascade from untyped third-party stubs
-reportUnknownArgumentType = "none"               # cascade from untyped third-party stubs
-reportImplicitStringConcatenation = "none"       # valid style for long error messages
-reportImplicitOverride = "none"                  # too verbose to require @override on every override
-reportUnusedCallResult = "none"                  # ensure_*/check_* are called for side effects
-reportPrivateUsage = "none"                      # tests legitimately access private members
-reportUninitializedInstanceVariable = "none"     # false positive: pyright misses variables set in setUp()
-enableTypeIgnoreComments = true                  # honour "# type: ignore" (basedpyright defaults to false)
-reportIgnoreCommentWithoutRule = "none"          # test files use bare "# type: ignore" intentionally
-reportUnnecessaryTypeIgnoreComment = "none"      # suppress warnings about stale ignore comments
+reportExplicitAny = "none"  # numpy/scipy code uses Any extensively; unavoidable
+reportAny = "none"  # noisy cascade of the above
+reportUnknownMemberType = "none"  # cascade from untyped third-party stubs
+reportUnknownVariableType = "none"  # cascade from untyped third-party stubs
+reportUnknownArgumentType = "none"  # cascade from untyped third-party stubs
+reportImplicitStringConcatenation = "none"  # valid style for long error messages
+reportImplicitOverride = "none"  # too verbose to require @override on every override
+reportUnusedCallResult = "none"  # ensure_*/check_* are called for side effects
+reportPrivateUsage = "none"  # tests legitimately access private members
+reportUninitializedInstanceVariable = "none"  # false positive: pyright misses variables set in setUp()
+enableTypeIgnoreComments = true  # honour "# type: ignore" (basedpyright defaults to false)
+reportIgnoreCommentWithoutRule = "none"  # test files use bare "# type: ignore" intentionally
+reportUnnecessaryTypeIgnoreComment = "none"  # suppress warnings about stale ignore comments
 ```
 
 Configure pytest with the src layout in mind:
@@ -535,6 +535,7 @@ Fields
 |---|---|
 | Standalone marker | `##` (double hash); harder to accidentally uncomment than `#` |
 | Inline marker | `#` (single hash) when the comment sits to the right of code on the same line |
+| Spacing | two spaces between code and the `#` marker; do not align inline comments across lines |
 | Case | lowercase, unless referring to a named thing: a function, class, constant, or variable |
 | Length | a few words to one sentence; never a paragraph |
 | Purpose | only three reasons to comment: section structure, non-obvious constraints or invariants, and algorithmic decisions where the why is not derivable from the code |
