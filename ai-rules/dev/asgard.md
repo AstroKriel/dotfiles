@@ -49,6 +49,8 @@ Once a project has matured and the dependency has stabilised, switch to a pinned
 <package-name> = { git = "https://github.com/AstroKriel/<package-name>", rev = "<commit-hash>" }
 ```
 
+Do **not** add `[tool.hatch.metadata] allow-direct-references = true` when using `[tool.uv.sources]`. That flag is only needed when a direct URL reference is written inline in the `dependencies` list (e.g. `"jormi @ file://..."`). With `[tool.uv.sources]`, the `dependencies` list contains only a plain package name and hatchling never sees the path.
+
 ---
 
 ## Imports
