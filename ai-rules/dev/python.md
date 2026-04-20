@@ -10,24 +10,6 @@ These rules define how Python code is written across all personal projects. They
 
 uv is used for all Python package and project management.
 
-### Personal Libraries
-
-Personal libraries live under `Asgard/sindri/submodules/`. jormi is the primary shared utility library, providing `check_*`, `ensure_*`, type helpers, field utilities, and more. Before writing any new validation, type-checking, or utility logic, check jormi first. New projects should depend on jormi and reuse what it offers rather than reimplementing it.
-
-During active development, personal libraries are referenced as editable installs in `pyproject.toml`:
-
-```toml
-[tool.uv.sources]
-jormi = { path = "../submodules/jormi", editable = true }
-```
-
-Once the project has matured and the dependency on a personal library has stabilised, switch to a pinned git commit version:
-
-```toml
-[tool.uv.sources]
-jormi = { git = "https://github.com/AstroKriel/jormi", rev = "abc1234" }
-```
-
 ### pyproject.toml
 
 Use hatchling as the build backend:
@@ -251,9 +233,8 @@ if __name__ == "__main__":
 
 | Rule | |
 |---|---|
-| Order | `## stdlib` -> `## third-party` -> `## local` -> `## personal` |
+| Order | `## stdlib` -> `## third-party` -> `## local` |
 | `## local` | imports from within the current project |
-| `## personal` | imports from personal shared libraries |
 | Per line | one import per line |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
 | Long imports | use parentheses with trailing commas |
