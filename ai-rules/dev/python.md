@@ -42,18 +42,40 @@ dev = [
 ]
 ```
 
+For personal libraries installed as editable local dependencies, declare them in `[tool.uv.sources]`. Do **not** add `[tool.hatch.metadata] allow-direct-references = true` — that is only needed for direct URL references written inline in the `dependencies` list; `[tool.uv.sources]` is resolved by uv and hatchling never sees the path:
+
+```toml
+dependencies = ["<package-name>"]
+
+[tool.uv.sources]
+<package-name> = { path = "<relative-path>", editable = true }
+```
+
 Use basedpyright for type checking (not mypy, not pyright). Include all relevant source and test directories. Suppressed rules must have an inline comment explaining why:
 
 ```toml
 [tool.pyright]
 include = ["src", "utests", "vtests"]
 extraPaths = ["src"]
+
+## --- rules to enforce
 reportMissingImports = true
-reportMissingTypeStubs = false        # suppress missing stub warnings for third-party packages
-reportExplicitAny = "none"            # numpy/scipy use Any extensively
-reportUnknownMemberType = "none"      # cascade from untyped dependencies
-reportUnknownVariableType = "none"    # cascade from untyped dependencies
-reportUnknownArgumentType = "none"    # cascade from untyped dependencies
+reportMissingTypeStubs = false                   # third-party packages rarely ship stubs
+
+## --- rules to suppress
+reportExplicitAny = "none"                       # numpy/scipy code uses Any extensively; unavoidable
+reportAny = "none"                               # noisy cascade of the above
+reportUnknownMemberType = "none"                 # cascade from untyped third-party stubs
+reportUnknownVariableType = "none"               # cascade from untyped third-party stubs
+reportUnknownArgumentType = "none"               # cascade from untyped third-party stubs
+reportImplicitStringConcatenation = "none"       # valid style for long error messages
+reportImplicitOverride = "none"                  # too verbose to require @override on every override
+reportUnusedCallResult = "none"                  # ensure_*/check_* are called for side effects
+reportPrivateUsage = "none"                      # tests legitimately access private members
+reportUninitializedInstanceVariable = "none"     # false positive: pyright misses variables set in setUp()
+enableTypeIgnoreComments = true                  # honour "# type: ignore" (basedpyright defaults to false)
+reportIgnoreCommentWithoutRule = "none"          # test files use bare "# type: ignore" intentionally
+reportUnnecessaryTypeIgnoreComment = "none"      # suppress warnings about stale ignore comments
 ```
 
 Configure pytest with the src layout in mind:
@@ -233,7 +255,8 @@ if __name__ == "__main__":
 
 | Rule | |
 |---|---|
-| Order | `## stdlib` -> `## third-party` -> `## local` |
+| Order | `## stdlib` -> `## third-party` -> `## personal` -> `## local` |
+| `## personal` | your own separately-packaged libraries, installed as dependencies |
 | `## local` | imports from within the current project |
 | Per line | one import per line |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
@@ -431,13 +454,82 @@ Code should be self-documenting. A comment is an admission that the code alone i
 
 ### Docstrings
 
+**When to write:**
+
+| Scope | Rule |
+|---|---|
+| Public functions and methods | always |
+| Private functions and methods | never — rely on type hints and inline comments |
+| Classes and dataclasses | always — one sentence describing what the class represents |
+
+**Format:**
+
+One-liners have the opening and closing `"""` on the same line. Multi-line docstrings open with `"""` and the text immediately on the first line; the closing `"""` sits on its own line with no trailing blank line before it:
+
+```python
+"""Compute the root-mean-square of a NumPy array."""
+
+"""
+Compute the y-intercept b for the line y = slope * x + b
+passing through a reference point (x_ref, y_ref).
+"""
+```
+
+**Opening sentence:**
+
+Always present. Use imperative or declarative voice: *"Compute X"*, *"Return X"*, *"Ensure X raises if..."*. Must fit on one line. Sentence case, ends with a period. If the function name already communicates the intent fully, keep the docstring as short as possible.
+
+**Second paragraph:**
+
+Add only when the opening sentence leaves something genuinely unclear — edge case behaviour, what triggers a raise, a non-obvious side effect, or an important constraint. 2–4 sentences max. Never use it to restate what the type annotations already say.
+
+**Parameters section:**
+
+Add when there are four or more parameters *and* their constraints or relationships are not clear from the type hints alone. Use the `Fields ---` style below. Only document what the type annotation does not already say — valid ranges, what `None` means, dependencies between parameters:
+
+```python
+"""
+Short purpose sentence.
+
+Parameters
+---
+- `param_name`:
+    What it expects; constraints; what None means if applicable.
+
+- `other_param`:
+    Only used when `param_name` is not None.
+"""
+```
+
+**Dataclass fields:**
+
+Add a `Fields ---` section when field names alone do not convey their constraints or expected shape:
+
+```python
+"""
+Estimated 1D probability density function from binned data.
+
+Fields
+---
+- `bin_centers`:
+    1D array of bin center positions; must be finite.
+
+- `densities`:
+    1D array of probability densities; must be finite, same length as
+    `bin_centers`, and normalised so the integral equals 1.
+"""
+```
+
+**Style:**
+
 | Rule | |
 |---|---|
-| Public functions | short prose docstring: one or two sentences, declarative, ends with a period |
-| Private functions | no docstring, rely on type hints and inline comments |
-| Classes | one-liner describing what the class represents |
+| Names and values | backticks: `` `param_name` ``, `` `True` ``, `` `None` `` |
+| Inline math | code style: `` `y = A * x^b` `` |
+| Types | never repeat in the docstring — the signature already has them |
+| Format | never use numpy/sphinx-style `Parameters:\n-----------` blocks |
 
-### Inline Comments
+### Comments
 
 | Rule | |
 |---|---|
