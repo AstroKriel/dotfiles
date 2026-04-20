@@ -343,6 +343,7 @@ class MessageType(Enum):
 | Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; keyword-only arguments enforced with `*` for any function with more than one parameter |
 | Call sites | every argument on its own line with a trailing comma, even for single-argument calls |
 | Size | typically 20-80 lines, single-responsibility |
+| Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
 | Validation | always separated into `ensure_*` / `check_*` / `_validate_*` helpers, called before any logic |
 | Helpers | private (`_` prefix), each doing exactly one sub-task |
 | Structure | public functions read as a recipe: validate -> sub-task 1 -> sub-task 2 -> return |
