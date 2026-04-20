@@ -1,4 +1,14 @@
 {
+  "agent": {
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "claude-sonnet-4-6",
+      "enable_thinking": true,
+      "effort": "high"
+    },
+    "favorite_models": [],
+    "model_parameters": []
+  },
   "agent_servers": {
     "claude-acp": {
       "type": "registry"
@@ -11,6 +21,8 @@
   "edit_predictions": {
     "mode": "subtle"
   },
+  "buffer_font_size": 15,
+  "ui_font_size": 15,
   "buffer_font_features": {
     "calt": false
   },
