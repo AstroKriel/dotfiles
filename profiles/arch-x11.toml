@@ -1,0 +1,25 @@
+shell = "zsh"
+
+platforms = [
+  "linux",
+  "arch",
+  "x11",
+  "xfce",
+  "lightdm",
+]
+
+editors = [
+  "zed",
+]
+
+tools = [
+  "ghostty",
+  "tmux",
+  "yazi",
+]
+
+extras = [
+  "x11-mouse-buttons",
+  "x11-touchpad-gestures",
+  "x11-locale-profile",
+]

@@ -11,4 +11,7 @@ tools/tmux/plugins/
 editors/vscode/settings.json
 editors/vscode/keybindings.json
 
+## local system profile selector
+this-system.toml
+
 ## .

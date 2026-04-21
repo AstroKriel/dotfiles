@@ -8,9 +8,17 @@ uv run <script>.py [args]
 
 All scripts support `--dry-run` to preview what actions will be performed, without actually applying them. For a first-time machine setup, see the [full setup guide](#full-setup-guide) below.
 
+The active system profile is selected by `this-system.toml`, which is intentionally ignored by git. Usually this should be a symlink to a tracked profile under `profiles/`:
+
+```bash
+ln -s profiles/arch-x11.toml this-system.toml
+```
+
+Pass `--profile <name>` to use `profiles/<name>.toml` directly for one command.
+
 `setup_shell.py` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or to pick up config changes.
 
-`setup_tools.py` wires up configs for all installed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so tools that are not installed yet are skipped; pass `--check-only` to report what tools detected. The following tools are supported:
+`setup_tools.py` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped; pass `--check-only` to report what subscribed tools are detected. The following tools are supported:
 - [Ghostty](https://ghostty.org): fast, native terminal emulator
 - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
@@ -18,7 +26,7 @@ All scripts support `--dry-run` to preview what actions will be performed, witho
 - [Neovim](https://neovim.io): terminal-based text editor
 - [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/): text editor with sensible batteries-included
 
-`setup_editors.py` installs extensions and applies configs for [Visual Studio Code](https://code.visualstudio.com) and [Zed](https://zed.dev). Editors not yet on the system are skipped.
+`setup_editors.py` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com) and [Zed](https://zed.dev). Subscribed editors not yet on the system are skipped.
 
 `setup_extras.py` applies optional platform-specific configs, such as macOS keybindings.
 

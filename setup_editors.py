@@ -14,6 +14,7 @@ import shutil
 import sys
 
 ## local
+from utils import profiles
 from utils import logging, shell_actions
 
 ##
@@ -180,6 +181,22 @@ def setup_editor(
             dry_run=dry_run,
         )
 
+
+def get_selected_editors(
+    *,
+    selected: tuple[str, ...] | None,
+) -> dict[str, EditorConfig]:
+    """Return editor configs selected by the active system profile."""
+    if selected is None:
+        return EDITORS
+    unknown = sorted(set(selected) - set(EDITORS))
+    if unknown:
+        raise KeyError(f"Unknown editor(s): {', '.join(unknown)}")
+    return {
+        editor_key: EDITORS[editor_key]
+        for editor_key in selected
+    }
+
 ##
 ## === PROGRAM MAIN
 ##
@@ -188,9 +205,11 @@ def setup_editor(
 def remove_symlinks(
     *,
     dry_run: bool,
+    selected: tuple[str, ...] | None = None,
 ):
     _log_message("Started removing editor config symlinks")
-    for editor in EDITORS.values():
+    selected_editors = get_selected_editors(selected=selected)
+    for editor in selected_editors.values():
         for file_name in editor.files:
             shell_actions.remove_symlink(
                 target_path=editor.target_dir / f"{file_name}.json",
@@ -203,8 +222,10 @@ def remove_symlinks(
 def run(
     *,
     dry_run: bool,
+    selected: tuple[str, ...] | None = None,
 ):
-    for editor in EDITORS.values():
+    selected_editors = get_selected_editors(selected=selected)
+    for editor in selected_editors.values():
         setup_editor(
             editor=editor,
             dry_run=dry_run,
@@ -221,8 +242,16 @@ def main():
         action="store_true",
         help="Print actions without applying them",
     )
+    parser.add_argument(
+        "--profile",
+        help="Load selected editors from profiles/<name>.toml",
+    )
     args = parser.parse_args()
-    run(dry_run=args.dry_run)
+    profile = profiles.load_profile(profile_name=args.profile)
+    run(
+        dry_run=args.dry_run,
+        selected=profile.editors if profile is not None else None,
+    )
 
 ##
 ## === ENTRY POINT

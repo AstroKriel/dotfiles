@@ -13,6 +13,7 @@ import shutil
 import sys
 
 ## local
+from utils import profiles
 from utils import logging, shell_actions
 
 ##
@@ -107,10 +108,31 @@ TOOLS: dict[str, ToolConfig] = {
 ##
 
 
-def check_installed_tools():
+def get_selected_tools(
+    *,
+    selected: tuple[str, ...] | None,
+) -> dict[str, ToolConfig]:
+    """Return tool configs selected by the active system profile."""
+    if selected is None:
+        return TOOLS
+    unknown = sorted(set(selected) - set(TOOLS))
+    if unknown:
+        raise KeyError(f"Unknown tool(s): {', '.join(unknown)}")
+    return {
+        tool_key: TOOLS[tool_key]
+        for tool_key in selected
+    }
+
+
+def check_installed_tools(
+    *,
+    selected: tuple[str, ...] | None,
+):
+    """Return subscribed tools that are installed on this system."""
     _log_message("Checking installed tools...")
     available = set()
-    for command, tool in TOOLS.items():
+    selected_tools = get_selected_tools(selected=selected)
+    for command, tool in selected_tools.items():
         found_via_app = (
             sys.platform == "darwin"
             and tool.mac_app is not None
@@ -167,9 +189,11 @@ def run_doom_sync(
 def remove_symlinks(
     *,
     dry_run: bool,
+    selected: tuple[str, ...] | None = None,
 ):
     _log_message("Started removing tool config symlinks")
-    for tool in TOOLS.values():
+    selected_tools = get_selected_tools(selected=selected)
+    for tool in selected_tools.values():
         shell_actions.remove_symlink(
             target_path=tool.target_dir,
             script_name=SCRIPT_NAME,
@@ -182,10 +206,11 @@ def run(
     *,
     dry_run: bool,
     check_only: bool = False,
+    selected: tuple[str, ...] | None = None,
 ):
     ## log start of script
     _log_message("Started setting up tool configs")
-    available_tools = check_installed_tools()
+    available_tools = check_installed_tools(selected=selected)
     if check_only:
         _log_message("Check complete. Exiting due to `--check-only`")
         return
@@ -235,10 +260,16 @@ def main():
         action="store_true",
         help="Only check installed tools and exit",
     )
+    parser.add_argument(
+        "--profile",
+        help="Load selected tools from profiles/<name>.toml",
+    )
     args = parser.parse_args()
+    profile = profiles.load_profile(profile_name=args.profile)
     run(
         dry_run=args.dry_run,
         check_only=args.check_only,
+        selected=profile.tools if profile is not None else None,
     )
 
 ##
