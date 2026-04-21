@@ -25,15 +25,15 @@ export DPROJ="$DHOME/Projects"
 alias dproj='cd "$DPROJ"'
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  export DONED="$DHOME/OneDrive"
-  alias doned='cd "$DONED"'
-fi
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
   export DQUOKKA="$DPROJ/quokka"
   alias dquokka='cd "$DQUOKKA"'
 
   export DASGARD="$DPROJ/asgard"
+  alias dasgard='cd "$DASGARD"'
+fi
+
+if [[ "$OSTYPE" == "linux"* ]]; then
+  export DASGARD="$DPROJ/Asgard"
   alias dasgard='cd "$DASGARD"'
 fi
 
