@@ -56,6 +56,34 @@ Scope answers *where* the change is. Granularity depends on how localised the ch
 
 ---
 
+## Branch Naming
+
+```
+verb/short-description
+```
+
+For shared repos (multiple contributors), prepend your username:
+
+```
+username/verb/short-description
+```
+
+| Rule | |
+|---|---|
+| Case | lowercase throughout |
+| Separators | `/` for namespaces, `-` for words within a namespace |
+| Length | max 50 characters |
+| Characters | alphanumeric, `-`, and `/` only |
+| Purpose | one branch per logical change |
+
+Use the same verbs as commits: `add`, `fix`, `refactor`, `update`, `remove`, etc.
+
+**Avoid:** dates, vague names (`wip`, `temp`, `fix-stuff`), and anything longer than needed.
+
+**Lifecycle:** delete branches after merging; rebase onto `main` before opening a PR.
+
+---
+
 ## Presenting Commits
 
 When suggesting commits, always present each one as a copy-pasteable shell block containing both the `git add` and `git commit` commands. If the work spans multiple repositories, prepend a `cd` command to each block.
@@ -80,6 +108,31 @@ cd ~/Projects/package-b
 git add src/package_b/process_data.py
 git commit -m "update(process_data.py): use package-a validate_inputs for type checking."
 ```
+
+---
+
+## Git Helpers
+
+Use the `git_helpers` CLI (`~/Projects/GitHelpers`) for git operations where a command exists. Fall back to raw `git` only when no equivalent command exists. Full reference: `~/Projects/GitHelpers/README.md`.
+
+**Common commands:**
+
+| Task | Command |
+|---|---|
+| Push (auto-sets upstream) | `git_helpers push` |
+| Sync branch with upstream | `git_helpers sync-branch [remote/branch]` |
+| Create branch from main | `git_helpers create-branch-from-default <name>` |
+| Create branch from specific remote | `git_helpers create-branch-from-remote <name> <remote/branch>` |
+| Delete local branch | `git_helpers delete-local-branch <name>` |
+| Prune gone remotes | `git_helpers prune-gone-locals` |
+| Prune merged locals | `git_helpers prune-merged-locals [remote/branch]` |
+| Full branch cleanup | `git_helpers cleanup-local-branches [remote/branch]` |
+| Stash work | `git_helpers stash-work [name]` |
+| Unstash work | `git_helpers unstash-work [name]` |
+| Amend last commit | `git_helpers amend-last-commit [msg]` |
+| Branch status overview | `git_helpers show-branches-status` |
+
+**Global flags:** `--dry-run` to preview commands without executing; `--allow-dirty` to skip clean worktree check.
 
 ---
 
