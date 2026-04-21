@@ -7,7 +7,6 @@
 ## stdlib
 import argparse
 from dataclasses import dataclass
-from enum import Enum, auto
 from pathlib import Path
 import shutil
 import sys
@@ -28,10 +27,6 @@ CONFIG_DIR = HOME_DIR / ".config"
 _log_message = logging.make_logger(SCRIPT_NAME)
 
 
-class PostSetup(Enum):
-    DOOM_SYNC = auto()
-
-
 @dataclass
 class RepoConfig:
     name: str
@@ -47,23 +42,9 @@ class ToolConfig:
     target_dir: Path
     mac_app: str | None = None
     clone_repo: RepoConfig | None = None
-    post_setup: PostSetup | None = None
 
 
 TOOLS: dict[str, ToolConfig] = {
-    "emacs": ToolConfig(
-        name="Emacs (GUI)",
-        brew="emacs --cask",
-        mac_app="Emacs.app",
-        dotfiles_dir=DOTFILES_DIR / "emacs",
-        target_dir=HOME_DIR / ".doom.d",
-        clone_repo=RepoConfig(
-            name="Doom-Emacs",
-            url="https://github.com/doomemacs/doomemacs",
-            output=CONFIG_DIR / "emacs",
-        ),
-        post_setup=PostSetup.DOOM_SYNC,
-    ),
     "tmux": ToolConfig(
         name="Tmux",
         brew="tmux",
@@ -74,12 +55,6 @@ TOOLS: dict[str, ToolConfig] = {
             url="https://github.com/tmux-plugins/tpm",
             output=CONFIG_DIR / "tmux" / "plugins" / "tpm",
         ),
-    ),
-    "nvim": ToolConfig(
-        name="Neovim",
-        brew="neovim",
-        dotfiles_dir=DOTFILES_DIR / "nvim",
-        target_dir=CONFIG_DIR / "nvim",
     ),
     "kitty": ToolConfig(
         name="Kitty terminal",
@@ -165,22 +140,6 @@ def shallow_clone_repo(
     )
 
 
-def run_doom_sync(
-    *,
-    dry_run: bool,
-):
-    doom_bin = CONFIG_DIR / "emacs" / "bin" / "doom"
-    if not doom_bin.exists():
-        _log_message(f"Doom binary not found at: {doom_bin}")
-        return
-    shell_actions.run_command(
-        args=[str(doom_bin), "sync"],
-        script_name=SCRIPT_NAME,
-        description="doom sync",
-        dry_run=dry_run,
-        capture_output=False,
-    )
-
 ##
 ## === PROGRAM MAIN
 ##
@@ -236,11 +195,6 @@ def run(
                 repo=tool.clone_repo,
                 dry_run=dry_run,
             )
-    ## run post-setup steps
-    for command in available_tools:
-        tool = TOOLS[command]
-        if tool.post_setup == PostSetup.DOOM_SYNC:
-            run_doom_sync(dry_run=dry_run)
     ## log end of script
     _log_message("Finished setting up tool configs")
 
@@ -248,7 +202,7 @@ def run(
 def main():
     ## parse user inputs
     parser = argparse.ArgumentParser(
-        description="Symlink config folders and clone needed repos for: Neovim, tmux, Emacs, ghostty, and kitty.",
+        description="Symlink subscribed tool config folders and clone needed repos.",
     )
     parser.add_argument(
         "--dry-run",

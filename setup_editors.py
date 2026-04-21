@@ -7,6 +7,7 @@
 ## stdlib
 import argparse
 from dataclasses import dataclass
+from enum import Enum, auto
 import json
 from pathlib import Path
 import re
@@ -22,7 +23,9 @@ from utils import logging, shell_actions
 ##
 
 SCRIPT_NAME = Path(__file__).name
+HOME_DIR = Path.home()
 DOTFILES_DIR = Path(__file__).resolve().parent / "editors"
+CONFIG_DIR = HOME_DIR / ".config"
 
 _log_message = logging.make_logger(SCRIPT_NAME)
 
@@ -33,6 +36,17 @@ _VSCODE_TARGET_DIR = (
 )
 
 
+class PostSetup(Enum):
+    DOOM_SYNC = auto()
+
+
+@dataclass
+class RepoConfig:
+    name: str
+    url: str
+    output: Path
+
+
 @dataclass
 class EditorConfig:
     name: str
@@ -40,8 +54,11 @@ class EditorConfig:
     brew: str
     dotfiles_dir: Path
     target_dir: Path
-    files: dict[str, str]
+    files: dict[str, str] | None = None
     extensions: Path | None = None
+    mac_app: str | None = None
+    clone_repo: RepoConfig | None = None
+    post_setup: PostSetup | None = None
 
 
 EDITORS: dict[str, EditorConfig] = {
@@ -56,6 +73,27 @@ EDITORS: dict[str, EditorConfig] = {
             "keybindings": "list",
         },
         extensions=DOTFILES_DIR / "vscode" / "extensions.txt",
+    ),
+    "nvim": EditorConfig(
+        name="Neovim",
+        command="nvim",
+        brew="neovim",
+        dotfiles_dir=DOTFILES_DIR / "nvim",
+        target_dir=CONFIG_DIR / "nvim",
+    ),
+    "emacs": EditorConfig(
+        name="Emacs (GUI)",
+        command="emacs",
+        brew="emacs --cask",
+        mac_app="Emacs.app",
+        dotfiles_dir=DOTFILES_DIR / "emacs",
+        target_dir=HOME_DIR / ".doom.d",
+        clone_repo=RepoConfig(
+            name="Doom-Emacs",
+            url="https://github.com/doomemacs/doomemacs",
+            output=CONFIG_DIR / "emacs",
+        ),
+        post_setup=PostSetup.DOOM_SYNC,
     ),
     "zed": EditorConfig(
         name="Zed",
@@ -129,6 +167,39 @@ def install_extensions(
         )
 
 
+def shallow_clone_repo(
+    *,
+    repo: RepoConfig,
+    dry_run: bool,
+) -> None:
+    if repo.output.exists():
+        _log_message(f"{repo.name} already exists under: {repo.output}")
+        return
+    shell_actions.run_command(
+        args=["git", "clone", "--depth", "1", repo.url, str(repo.output)],
+        script_name=SCRIPT_NAME,
+        description=f"clone {repo.name} (shallow) under {repo.output}",
+        dry_run=dry_run,
+    )
+
+
+def run_doom_sync(
+    *,
+    dry_run: bool,
+) -> None:
+    doom_bin = CONFIG_DIR / "emacs" / "bin" / "doom"
+    if not doom_bin.exists():
+        _log_message(f"Doom binary not found at: {doom_bin}")
+        return
+    shell_actions.run_command(
+        args=[str(doom_bin), "sync"],
+        script_name=SCRIPT_NAME,
+        description="doom sync",
+        dry_run=dry_run,
+        capture_output=False,
+    )
+
+
 def setup_editor(
     *,
     editor: EditorConfig,
@@ -136,13 +207,58 @@ def setup_editor(
 ):
     _log_message(f"Started setting up {editor.name}")
     ## check whether the editor is installed
-    if shutil.which(editor.command):
+    found_via_app = (
+        sys.platform == "darwin"
+        and editor.mac_app is not None
+        and (Path("/Applications") / editor.mac_app).exists()
+    )
+    if shutil.which(editor.command) or found_via_app:
         _log_message(f"Found {editor.name} ({editor.command}) in your `$PATH`.")
     else:
         _log_message(
             f"{editor.command} was not found in your `$PATH`.\n"
             f"Install it via: `brew install {editor.brew}`",
         )
+        return
+    if editor.files is None:
+        shell_actions.ensure_dir_exists(
+            directory=editor.target_dir.parent,
+            script_name=SCRIPT_NAME,
+            dry_run=dry_run,
+        )
+        shell_actions.create_symlink(
+            source_path=editor.dotfiles_dir,
+            target_path=editor.target_dir,
+            script_name=SCRIPT_NAME,
+            dry_run=dry_run,
+        )
+    else:
+        setup_editor_files(
+            editor=editor,
+            dry_run=dry_run,
+        )
+    if editor.clone_repo is not None:
+        shallow_clone_repo(
+            repo=editor.clone_repo,
+            dry_run=dry_run,
+        )
+    if editor.post_setup == PostSetup.DOOM_SYNC:
+        run_doom_sync(dry_run=dry_run)
+    ## install extensions if defined
+    if editor.extensions is not None:
+        install_extensions(
+            command=editor.command,
+            extensions_file=editor.extensions,
+            dry_run=dry_run,
+        )
+
+
+def setup_editor_files(
+    *,
+    editor: EditorConfig,
+    dry_run: bool,
+) -> None:
+    if editor.files is None:
         return
     for file_name, mode in editor.files.items():
         modules_dir = editor.dotfiles_dir / file_name
@@ -171,13 +287,6 @@ def setup_editor(
             source_path=output_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,
-            dry_run=dry_run,
-        )
-    ## install extensions if defined
-    if editor.extensions is not None:
-        install_extensions(
-            command=editor.command,
-            extensions_file=editor.extensions,
             dry_run=dry_run,
         )
 
@@ -210,12 +319,19 @@ def remove_symlinks(
     _log_message("Started removing editor config symlinks")
     selected_editors = get_selected_editors(selected=selected)
     for editor in selected_editors.values():
-        for file_name in editor.files:
+        if editor.files is None:
             shell_actions.remove_symlink(
-                target_path=editor.target_dir / f"{file_name}.json",
+                target_path=editor.target_dir,
                 script_name=SCRIPT_NAME,
                 dry_run=dry_run,
             )
+        else:
+            for file_name in editor.files:
+                shell_actions.remove_symlink(
+                    target_path=editor.target_dir / f"{file_name}.json",
+                    script_name=SCRIPT_NAME,
+                    dry_run=dry_run,
+                )
     _log_message("Finished removing editor config symlinks")
 
 
@@ -235,7 +351,7 @@ def run(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate and symlink editor settings.",
+        description="Generate and symlink subscribed editor settings.",
     )
     parser.add_argument(
         "--dry-run",

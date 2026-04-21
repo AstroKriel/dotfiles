@@ -23,10 +23,8 @@ Pass `--profile <name>` to use `profiles/<name>.toml` directly for one command.
 - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
 - [Yazi](https://yazi-rs.github.io): terminal file manager
-- [Neovim](https://neovim.io): terminal-based text editor
-- [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/): text editor with sensible batteries-included
 
-`setup_editors.py` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com) and [Zed](https://zed.dev). Subscribed editors not yet on the system are skipped.
+`setup_editors.py` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped.
 
 `setup_extras.py` applies optional platform-specific configs, such as macOS keybindings.
 
@@ -125,16 +123,16 @@ Install whichever tools and editors are needed. Note: `--cask` is used for GUI a
 # editors
 brew install --cask visual-studio-code
 brew install --cask zed
+brew install neovim
+brew install --cask emacs
 
 # terminals
 brew install --cask ghostty
 brew install --cask kitty
 
 # tools
-brew install neovim
 brew install tmux
 brew install yazi ffmpeg
-brew install --cask emacs
 ```
 
 ## Step 6: Run setup
