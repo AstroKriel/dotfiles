@@ -17,7 +17,9 @@
       "super-alt-k": "editor::ToggleSoftWrap",
       "super-alt-m": "editor::ToggleMinimap",
       "super-alt-up": "editor::AddSelectionAbove",
-      "super-alt-down": "editor::AddSelectionBelow"
+      "super-alt-down": "editor::AddSelectionBelow",
+      "super-alt-ctrl-up": "editor::MoveLineUp",
+      "super-alt-ctrl-down": "editor::MoveLineDown"
     }
   },
   {
