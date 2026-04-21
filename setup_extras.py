@@ -31,25 +31,25 @@ class ExtraConfig:
 
 
 EXTRAS: dict[str, ExtraConfig] = {
-    "macos-disable-navigation-keys": ExtraConfig(
+    "disable-navigation-keys.dict": ExtraConfig(
         name="macOS disabled navigation keys",
         source_path=EXTRAS_DIR / "macos" / "disable-navigation-keys.dict",
         target_path=Path.home() / "Library" / "KeyBindings" / "DefaultKeyBinding.dict",
         requires=("macos",),
     ),
-    "xbindkeys-mouse-buttons": ExtraConfig(
+    "mouse-workspace-buttons.xbindkeysrc": ExtraConfig(
         name="xbindkeys mouse buttons",
         source_path=EXTRAS_DIR / "arch-x11" / "mouse-workspace-buttons.xbindkeysrc",
         target_path=Path.home() / ".xbindkeysrc",
         requires=("linux", "x11"),
     ),
-    "libinput-gestures-workspaces": ExtraConfig(
+    "touchpad-workspace-gestures.conf": ExtraConfig(
         name="libinput-gestures workspaces",
         source_path=EXTRAS_DIR / "arch-x11" / "touchpad-workspace-gestures.conf",
         target_path=Path.home() / ".config" / "libinput-gestures.conf",
         requires=("linux", "x11", "xfce"),
     ),
-    "lightdm-xprofile-locale": ExtraConfig(
+    "lightdm-locale.xprofile": ExtraConfig(
         name="LightDM xprofile locale",
         source_path=EXTRAS_DIR / "arch-x11" / "lightdm-locale.xprofile",
         target_path=Path.home() / ".xprofile",
