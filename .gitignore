@@ -7,10 +7,6 @@ __pycache__/
 ## tmux plugins
 tools/tmux/plugins/
 
-## generated vscode config (merged from editors/vscode/settings/ and editors/vscode/keybindings/)
-editors/vscode/settings.json
-editors/vscode/keybindings.json
-
 ## local system profile selector
 this-system.toml
 
