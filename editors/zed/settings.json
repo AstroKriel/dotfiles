@@ -2,9 +2,9 @@
   "agent": {
     "default_model": {
       "provider": "zed.dev",
-      "model": "claude-sonnet-4-6",
+      "model": "gpt-5.4-pro",
       "enable_thinking": true,
-      "effort": "high"
+      "effort": "medium"
     },
     "favorite_models": [],
     "model_parameters": []
