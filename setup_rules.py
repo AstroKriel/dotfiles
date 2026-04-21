@@ -16,8 +16,8 @@ from utils import logging, shell_actions
 ##
 
 SCRIPT_NAME = Path(__file__).name
-RULES_DIR = Path(__file__).resolve().parent / "ai-rules"
-TARGET_DIR = Path.home() / ".ai-rules"
+RULES_DIR = Path(__file__).resolve().parent / "rules"
+TARGET_DIR = Path.home() / ".rules"
 
 _log_message = logging.make_logger(SCRIPT_NAME)
 
@@ -30,7 +30,7 @@ def link_all_rules(
     *,
     dry_run: bool,
 ) -> None:
-    """Symlink all rule files from the dotfiles into ~/.ai-rules/, preserving substructure."""
+    """Symlink all rule files from the dotfiles into ~/.rules/, preserving substructure."""
     for source_path in sorted(RULES_DIR.rglob("*.md")):
         relative_path = source_path.relative_to(RULES_DIR)
         target_path = TARGET_DIR / relative_path
@@ -62,7 +62,7 @@ def run(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Symlink all AI rule files into ~/.ai-rules/, preserving substructure.",
+        description="Symlink all rule files into ~/.rules/, preserving substructure.",
     )
     parser.add_argument(
         "--dry-run",
