@@ -86,11 +86,12 @@ Use the same verbs as commits: `add`, `fix`, `refactor`, `update`, `remove`, etc
 
 ## Presenting Commits
 
-When suggesting commits, always present each one as a copy-pasteable shell block containing both the `git add` and `git commit` commands. If the work spans multiple repositories, prepend a `cd` command to each block.
+When suggesting commits, always present each one as a copy-pasteable shell block containing both the `git add` and `git commit` commands. Always use `cd` to navigate into the repo — never use `git -C`.
 
 Single repository:
 
 ```bash
+cd ~/Projects/my-repo
 git add src/data_loader.py
 git commit -m "fix(data_loader.py): handle missing file path by raising FileNotFoundError."
 ```
