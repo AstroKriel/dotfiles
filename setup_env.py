@@ -10,6 +10,7 @@ from pathlib import Path
 
 ## local
 import setup_editors
+import setup_extras
 import setup_shell
 import setup_tools
 
@@ -50,10 +51,12 @@ def main():
         setup_shell.remove_symlinks(dry_run=dry_run)
         setup_tools.remove_symlinks(dry_run=dry_run)
         setup_editors.remove_symlinks(dry_run=dry_run)
+        setup_extras.remove_symlinks(dry_run=dry_run)
     elif args.shell:
         setup_shell.run(shell=args.shell, dry_run=dry_run)
         setup_tools.run(dry_run=dry_run)
         setup_editors.run(dry_run=dry_run)
+        setup_extras.run(dry_run=dry_run)
     else:
         parser.error("shell is required unless --remove-symlinks is specified")
 

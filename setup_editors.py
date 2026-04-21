@@ -69,15 +69,6 @@ EDITORS: dict[str, EditorConfig] = {
     ),
 }
 
-## see for details
-## https://kevinyank.com/posts/fix-system-beep-vscode/
-## https://blog.victormendonca.com/2020/04/27/how-to-change-macos-key-bindings/
-## https://gist.github.com/trusktr/1e5e516df4e8032cbc3d
-MAC_KEYBIND_FILE_NAME = "DefaultKeyBinding.dict"
-MAC_KEYBIND_TARGET_DIR = Path.home() / "Library" / "KeyBindings"
-MAC_KEYBIND_SOURCE_PATH = DOTFILES_DIR / MAC_KEYBIND_FILE_NAME
-MAC_KEYBIND_TARGET_PATH = MAC_KEYBIND_TARGET_DIR / MAC_KEYBIND_FILE_NAME
-
 ##
 ## === EDITOR HELPERS
 ##
@@ -206,12 +197,6 @@ def remove_symlinks(
                 script_name=SCRIPT_NAME,
                 dry_run=dry_run,
             )
-    if sys.platform.startswith("darwin"):
-        shell_actions.remove_symlink(
-            target_path=MAC_KEYBIND_TARGET_PATH,
-            script_name=SCRIPT_NAME,
-            dry_run=dry_run,
-        )
     _log_message("Finished removing editor config symlinks")
 
 
@@ -222,19 +207,6 @@ def run(
     for editor in EDITORS.values():
         setup_editor(
             editor=editor,
-            dry_run=dry_run,
-        )
-    if sys.platform.startswith("darwin"):
-        _log_message("Applying macOS keybindings (override to fix Electron shortcut conflict).")
-        shell_actions.ensure_dir_exists(
-            directory=MAC_KEYBIND_TARGET_DIR,
-            script_name=SCRIPT_NAME,
-            dry_run=dry_run,
-        )
-        shell_actions.create_symlink(
-            source_path=MAC_KEYBIND_SOURCE_PATH,
-            target_path=MAC_KEYBIND_TARGET_PATH,
-            script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
     _log_message("Finished setting up editors.")

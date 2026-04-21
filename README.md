@@ -1,6 +1,6 @@
 # DotFiles
 
-This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the four scripts discussed below, where each is run via:
+This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the scripts discussed below, where each is run via:
 
 ```bash
 uv run <script>.py [args]
@@ -20,11 +20,13 @@ All scripts support `--dry-run` to preview what actions will be performed, witho
 
 `setup_editors.py` installs extensions and applies configs for [Visual Studio Code](https://code.visualstudio.com) and [Zed](https://zed.dev). Editors not yet on the system are skipped.
 
-`setup_env.py` runs the full setup chain (shell, tools, and editors) in one command. Pass `bash` or `zsh` for initial setup on a new machine, or `--remove-symlinks` to tear everything down.
+`setup_extras.py` applies optional platform-specific configs, such as macOS keybindings.
+
+`setup_env.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `bash` or `zsh` for initial setup on a new machine, or `--remove-symlinks` to tear everything down.
 
 # Full Setup Guide
 
-Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-6 clone the repo, install tools, and run the setup scripts to configure the shell, editors, and tools.
+Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-6 clone the repo, install tools, and run the setup scripts to configure the shell, editors, tools, and extras.
 
 ## Step 1: Install Homebrew
 
