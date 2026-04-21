@@ -31,7 +31,7 @@ class ShellConfig:
     files: list[str]
 
 
-UTILS_FILES = ["git_options", "shell_aliases", "shell_functions", "shell_options", "shell_paths"]
+UTILS_FILES = ["shell_aliases", "shell_functions", "shell_options", "shell_paths"]
 
 SHELLS = [
     ShellConfig(
