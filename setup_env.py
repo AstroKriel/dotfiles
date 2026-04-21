@@ -7,6 +7,7 @@
 ## stdlib
 import argparse
 from pathlib import Path
+from typing import cast
 
 ## local
 import setup_editors
@@ -123,22 +124,24 @@ def main():
         help="Validate profile subscriptions and exit without applying changes",
     )
     args = parser.parse_args()
-    dry_run = args.dry_run
-    logging.configure(write_to_file=not (dry_run or args.check_profile))
+    dry_run = bool(args.dry_run)
+    remove_symlinks = bool(args.remove_symlinks)
+    check_profile = bool(args.check_profile)
+    profile_name = cast(str | None, args.profile)
+    shell_override = cast(str | None, args.shell)
+    logging.configure(write_to_file=not (dry_run or check_profile))
     profile = profiles.load_profile(
-        profile_name=args.profile,
-        required=not args.remove_symlinks,
+        profile_name=profile_name,
+        required=not remove_symlinks,
     )
-    if args.check_profile:
+    if check_profile:
         if profile is None:
             parser.error("profile is required for --check-profile")
+            raise SystemExit(2)
         if not validate_profile(profile=profile):
             raise SystemExit(1)
         return
-    shell = args.shell or (profile.shell if profile is not None else None)
-    if shell is None and not args.remove_symlinks:
-        parser.error("shell is required unless set by profile or --remove-symlinks is specified")
-    if args.remove_symlinks:
+    if remove_symlinks:
         setup_shell.remove_symlinks(
             dry_run=dry_run,
         )
@@ -154,24 +157,31 @@ def main():
             dry_run=dry_run,
             selected=profile.extras if profile is not None else None,
         )
-    else:
-        setup_shell.run(
-            shell=shell,
-            dry_run=dry_run,
-        )
-        setup_tools.run(
-            dry_run=dry_run,
-            selected=profile.tools,
-        )
-        setup_editors.run(
-            dry_run=dry_run,
-            selected=profile.editors,
-        )
-        setup_extras.run(
-            dry_run=dry_run,
-            selected=profile.extras,
-            platform_tags=profile.platforms,
-        )
+        return
+    if profile is None:
+        parser.error("profile is required unless --remove-symlinks is specified")
+        raise SystemExit(2)
+    shell = shell_override or profile.shell
+    if shell is None:
+        parser.error("shell is required unless set by profile")
+        raise SystemExit(2)
+    setup_shell.run(
+        shell=shell,
+        dry_run=dry_run,
+    )
+    setup_tools.run(
+        dry_run=dry_run,
+        selected=profile.tools,
+    )
+    setup_editors.run(
+        dry_run=dry_run,
+        selected=profile.editors,
+    )
+    setup_extras.run(
+        dry_run=dry_run,
+        selected=profile.extras,
+        platform_tags=profile.platforms,
+    )
 
 ##
 ## === ENTRY POINT
