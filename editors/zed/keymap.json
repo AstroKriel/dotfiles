@@ -47,7 +47,7 @@
   {
     "context": "Pane",
     "bindings": {
-      "super-alt-left": "pane::ActivatePrevItem",
+      "super-alt-left": "pane::ActivatePreviousItem",
       "super-alt-right": "pane::ActivateNextItem",
       "super-alt-ctrl-left": "pane::SwapItemLeft",
       "super-alt-ctrl-right": "pane::SwapItemRight",
