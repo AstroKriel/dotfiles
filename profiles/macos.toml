@@ -1,0 +1,19 @@
+shell = "zsh"
+
+platforms = [
+  "macos",
+]
+
+editors = [
+  "zed",
+]
+
+tools = [
+  "ghostty",
+  "tmux",
+  "yazi",
+]
+
+extras = [
+  "macos/disable-navigation-keys.dict",
+]

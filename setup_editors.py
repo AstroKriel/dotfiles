@@ -306,6 +306,28 @@ def get_selected_editors(
         for editor_key in selected
     }
 
+
+def resolve_selected_editors(
+    *,
+    profile_selected: tuple[str, ...] | None,
+    requested: tuple[str, ...],
+    include_all: bool,
+) -> tuple[str, ...] | None:
+    if include_all:
+        return None
+    if not requested:
+        return profile_selected
+    get_selected_editors(selected=requested)
+    if profile_selected is None:
+        return requested
+    unavailable = sorted(set(requested) - set(profile_selected))
+    if unavailable:
+        raise KeyError(
+            "Requested editor(s) are not subscribed by the active profile: "
+            f"{', '.join(unavailable)}",
+        )
+    return requested
+
 ##
 ## === PROGRAM MAIN
 ##
@@ -316,6 +338,7 @@ def remove_symlinks(
     dry_run: bool,
     selected: tuple[str, ...] | None = None,
 ):
+    logging.configure(write_to_file=not dry_run)
     _log_message("Started removing editor config symlinks")
     selected_editors = get_selected_editors(selected=selected)
     for editor in selected_editors.values():
@@ -340,6 +363,7 @@ def run(
     dry_run: bool,
     selected: tuple[str, ...] | None = None,
 ):
+    logging.configure(write_to_file=not dry_run)
     selected_editors = get_selected_editors(selected=selected)
     for editor in selected_editors.values():
         setup_editor(
@@ -362,11 +386,30 @@ def main():
         "--profile",
         help="Load selected editors from profiles/<name>.toml",
     )
+    parser.add_argument(
+        "--editor",
+        action="append",
+        choices=sorted(EDITORS),
+        default=[],
+        help="Apply one subscribed editor. Can be passed multiple times",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Apply all known editors, ignoring profile editor subscriptions",
+    )
     args = parser.parse_args()
+    if args.all and args.editor:
+        parser.error("--all cannot be combined with --editor")
     profile = profiles.load_profile(profile_name=args.profile)
+    selected = resolve_selected_editors(
+        profile_selected=profile.editors if profile is not None else None,
+        requested=tuple(args.editor),
+        include_all=args.all,
+    )
     run(
         dry_run=args.dry_run,
-        selected=profile.editors if profile is not None else None,
+        selected=selected,
     )
 
 ##

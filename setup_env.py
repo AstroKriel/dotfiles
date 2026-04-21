@@ -14,12 +14,79 @@ import setup_extras
 import setup_shell
 import setup_tools
 from utils import profiles
+from utils import logging
 
 ##
 ## === SCRIPT CONFIG
 ##
 
 SCRIPT_NAME = Path(__file__).name
+
+_log_message = logging.make_logger(SCRIPT_NAME)
+
+##
+## === PROFILE VALIDATION
+##
+
+
+def validate_profile(
+    *,
+    profile: profiles.SystemProfile,
+) -> bool:
+    """Validate profile subscriptions without changing the system."""
+    is_valid = True
+    known_shells = {shell.name for shell in setup_shell.SHELLS}
+    if profile.shell is not None and profile.shell not in known_shells:
+        _log_message(f"Unknown shell: {profile.shell}")
+        is_valid = False
+    checks = [
+        ("editor", profile.editors, setup_editors.EDITORS),
+        ("tool", profile.tools, setup_tools.TOOLS),
+        ("extra", profile.extras, setup_extras.EXTRAS),
+    ]
+    for label, selected, available in checks:
+        unknown = sorted(set(selected) - set(available))
+        if unknown:
+            _log_message(f"Unknown {label}(s): {', '.join(unknown)}")
+            is_valid = False
+    for editor_key in profile.editors:
+        editor = setup_editors.EDITORS.get(editor_key)
+        if editor is None:
+            continue
+        if not editor.dotfiles_dir.exists():
+            _log_message(f"Missing editor source directory: {editor.dotfiles_dir}")
+            is_valid = False
+        if editor.files is None:
+            continue
+        for file_name in editor.files:
+            modules_dir = editor.dotfiles_dir / file_name
+            if not modules_dir.exists():
+                _log_message(f"Missing editor module directory: {modules_dir}")
+                is_valid = False
+    for tool_key in profile.tools:
+        tool = setup_tools.TOOLS.get(tool_key)
+        if tool is None:
+            continue
+        if not tool.dotfiles_dir.exists():
+            _log_message(f"Missing tool source directory: {tool.dotfiles_dir}")
+            is_valid = False
+    for extra_key in profile.extras:
+        extra = setup_extras.EXTRAS.get(extra_key)
+        if extra is None:
+            continue
+        if not extra.source_path.exists():
+            _log_message(f"Missing extra source file: {extra.source_path}")
+            is_valid = False
+        missing_tags = sorted(set(extra.requires) - set(profile.platforms))
+        if missing_tags:
+            _log_message(
+                f"Extra `{extra_key}` is missing platform tag(s): "
+                f"{', '.join(missing_tags)}",
+            )
+            is_valid = False
+    if is_valid:
+        _log_message("Profile validation passed.")
+    return is_valid
 
 ##
 ## === PROGRAM MAIN
@@ -50,12 +117,24 @@ def main():
         "--profile",
         help="Load selected configs from profiles/<name>.toml",
     )
+    parser.add_argument(
+        "--check-profile",
+        action="store_true",
+        help="Validate profile subscriptions and exit without applying changes",
+    )
     args = parser.parse_args()
     dry_run = args.dry_run
+    logging.configure(write_to_file=not (dry_run or args.check_profile))
     profile = profiles.load_profile(
         profile_name=args.profile,
         required=not args.remove_symlinks,
     )
+    if args.check_profile:
+        if profile is None:
+            parser.error("profile is required for --check-profile")
+        if not validate_profile(profile=profile):
+            raise SystemExit(1)
+        return
     shell = args.shell or (profile.shell if profile is not None else None)
     if shell is None and not args.remove_symlinks:
         parser.error("shell is required unless set by profile or --remove-symlinks is specified")

@@ -31,25 +31,25 @@ class ExtraConfig:
 
 
 EXTRAS: dict[str, ExtraConfig] = {
-    "disable-navigation-keys.dict": ExtraConfig(
+    "macos/disable-navigation-keys.dict": ExtraConfig(
         name="macOS disabled navigation keys",
         source_path=EXTRAS_DIR / "macos" / "disable-navigation-keys.dict",
         target_path=Path.home() / "Library" / "KeyBindings" / "DefaultKeyBinding.dict",
         requires=("macos",),
     ),
-    "mouse-workspace-buttons.xbindkeysrc": ExtraConfig(
+    "arch-x11/mouse-workspace-buttons.xbindkeysrc": ExtraConfig(
         name="xbindkeys mouse buttons",
         source_path=EXTRAS_DIR / "arch-x11" / "mouse-workspace-buttons.xbindkeysrc",
         target_path=Path.home() / ".xbindkeysrc",
         requires=("linux", "x11"),
     ),
-    "touchpad-workspace-gestures.conf": ExtraConfig(
+    "arch-x11/touchpad-workspace-gestures.conf": ExtraConfig(
         name="libinput-gestures workspaces",
         source_path=EXTRAS_DIR / "arch-x11" / "touchpad-workspace-gestures.conf",
         target_path=Path.home() / ".config" / "libinput-gestures.conf",
         requires=("linux", "x11", "xfce"),
     ),
-    "lightdm-locale.xprofile": ExtraConfig(
+    "arch-x11/lightdm-locale.xprofile": ExtraConfig(
         name="LightDM xprofile locale",
         source_path=EXTRAS_DIR / "arch-x11" / "lightdm-locale.xprofile",
         target_path=Path.home() / ".xprofile",
@@ -115,6 +115,28 @@ def get_selected_extras(
         for extra_key in selected
     }
 
+
+def resolve_selected_extras(
+    *,
+    profile_selected: tuple[str, ...] | None,
+    requested: tuple[str, ...],
+    include_all: bool,
+) -> tuple[str, ...] | None:
+    if include_all:
+        return None
+    if not requested:
+        return profile_selected
+    get_selected_extras(selected=requested)
+    if profile_selected is None:
+        return requested
+    unavailable = sorted(set(requested) - set(profile_selected))
+    if unavailable:
+        raise KeyError(
+            "Requested extra(s) are not subscribed by the active profile: "
+            f"{', '.join(unavailable)}",
+        )
+    return requested
+
 ##
 ## === PROGRAM MAIN
 ##
@@ -125,6 +147,7 @@ def remove_symlinks(
     dry_run: bool,
     selected: tuple[str, ...] | None = None,
 ) -> None:
+    logging.configure(write_to_file=not dry_run)
     _log_message("Started removing extra config symlinks")
     selected_extras = get_selected_extras(selected=selected)
     for extra in selected_extras.values():
@@ -142,6 +165,7 @@ def run(
     selected: tuple[str, ...] | None = None,
     platform_tags: tuple[str, ...] | None = None,
 ) -> None:
+    logging.configure(write_to_file=not dry_run)
     _log_message("Started setting up extra configs")
     selected_extras = get_selected_extras(selected=selected)
     for extra in selected_extras.values():
@@ -166,11 +190,30 @@ def main() -> None:
         "--profile",
         help="Load selected extras from profiles/<name>.toml",
     )
+    parser.add_argument(
+        "--extra",
+        action="append",
+        choices=sorted(EXTRAS),
+        default=[],
+        help="Apply one subscribed extra. Can be passed multiple times",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Apply all known extras, ignoring profile extra subscriptions",
+    )
     args = parser.parse_args()
+    if args.all and args.extra:
+        parser.error("--all cannot be combined with --extra")
     profile = profiles.load_profile(profile_name=args.profile)
+    selected = resolve_selected_extras(
+        profile_selected=profile.extras if profile is not None else None,
+        requested=tuple(args.extra),
+        include_all=args.all,
+    )
     run(
         dry_run=args.dry_run,
-        selected=profile.extras if profile is not None else None,
+        selected=selected,
         platform_tags=profile.platforms if profile is not None else None,
     )
 

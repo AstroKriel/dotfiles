@@ -16,19 +16,29 @@ ln -s profiles/arch-x11.toml this-system.toml
 
 Pass `--profile <name>` to use `profiles/<name>.toml` directly for one command.
 
+Profiles subscribe to repo-visible config names. Editors and tools use their folder names, while extras use paths relative to `extras/`:
+
+```toml
+editors = ["zed"]
+tools = ["ghostty"]
+extras = ["arch-x11/touchpad-workspace-gestures.conf"]
+```
+
 `setup_shell.py` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or to pick up config changes.
 
-`setup_tools.py` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped; pass `--check-only` to report what subscribed tools are detected. The following tools are supported:
+`setup_tools.py` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped; pass `--check-only` to report what subscribed tools are detected. Use `--tool <name>` for a one-off subscribed tool, or `--all` to ignore tool subscriptions. The following tools are supported:
 - [Ghostty](https://ghostty.org): fast, native terminal emulator
 - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
 - [Yazi](https://yazi-rs.github.io): terminal file manager
 
-`setup_editors.py` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped.
+`setup_editors.py` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped. Use `--editor <name>` for a one-off subscribed editor, or `--all` to ignore editor subscriptions.
 
-`setup_extras.py` applies optional platform-specific configs, such as macOS keybindings.
+For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `keybindings/`, then run `uv run setup_editors.py` to regenerate the tracked JSON files. Do not hand-edit generated `settings.json`, `keymap.json`, or `keybindings.json` as canonical config.
 
-`setup_env.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `bash` or `zsh` for initial setup on a new machine, or `--remove-symlinks` to tear everything down.
+`setup_extras.py` applies optional platform-specific configs, such as macOS keybindings. Use `--extra <extras-relative-path>` for a one-off subscribed extra, or `--all` to ignore extra subscriptions.
+
+`setup_env.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `bash` or `zsh` for initial setup on a new machine, `--check-profile` to validate the selected profile without changing the system, or `--remove-symlinks` to tear everything down.
 
 # Full Setup Guide
 

@@ -96,6 +96,7 @@ def remove_symlinks(
     *,
     dry_run: bool,
 ):
+    logging.configure(write_to_file=not dry_run)
     _log_message("Started removing shell config symlinks")
     all_files = UTILS_FILES + [f for s in SHELLS for f in s.files]
     for file_name in all_files:
@@ -112,6 +113,7 @@ def run(
     shell: str,
     dry_run: bool,
 ):
+    logging.configure(write_to_file=not dry_run)
     chosen = next(s for s in SHELLS if s.name == shell)
     others = [s for s in SHELLS if s.name != shell]
     ## log start of script

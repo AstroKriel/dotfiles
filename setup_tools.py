@@ -99,6 +99,28 @@ def get_selected_tools(
     }
 
 
+def resolve_selected_tools(
+    *,
+    profile_selected: tuple[str, ...] | None,
+    requested: tuple[str, ...],
+    include_all: bool,
+) -> tuple[str, ...] | None:
+    if include_all:
+        return None
+    if not requested:
+        return profile_selected
+    get_selected_tools(selected=requested)
+    if profile_selected is None:
+        return requested
+    unavailable = sorted(set(requested) - set(profile_selected))
+    if unavailable:
+        raise KeyError(
+            "Requested tool(s) are not subscribed by the active profile: "
+            f"{', '.join(unavailable)}",
+        )
+    return requested
+
+
 def check_installed_tools(
     *,
     selected: tuple[str, ...] | None,
@@ -150,6 +172,7 @@ def remove_symlinks(
     dry_run: bool,
     selected: tuple[str, ...] | None = None,
 ):
+    logging.configure(write_to_file=not dry_run)
     _log_message("Started removing tool config symlinks")
     selected_tools = get_selected_tools(selected=selected)
     for tool in selected_tools.values():
@@ -167,6 +190,7 @@ def run(
     check_only: bool = False,
     selected: tuple[str, ...] | None = None,
 ):
+    logging.configure(write_to_file=not dry_run)
     ## log start of script
     _log_message("Started setting up tool configs")
     available_tools = check_installed_tools(selected=selected)
@@ -218,12 +242,31 @@ def main():
         "--profile",
         help="Load selected tools from profiles/<name>.toml",
     )
+    parser.add_argument(
+        "--tool",
+        action="append",
+        choices=sorted(TOOLS),
+        default=[],
+        help="Apply one subscribed tool. Can be passed multiple times",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Apply all known tools, ignoring profile tool subscriptions",
+    )
     args = parser.parse_args()
+    if args.all and args.tool:
+        parser.error("--all cannot be combined with --tool")
     profile = profiles.load_profile(profile_name=args.profile)
+    selected = resolve_selected_tools(
+        profile_selected=profile.tools if profile is not None else None,
+        requested=tuple(args.tool),
+        include_all=args.all,
+    )
     run(
         dry_run=args.dry_run,
         check_only=args.check_only,
-        selected=profile.tools if profile is not None else None,
+        selected=selected,
     )
 
 ##
