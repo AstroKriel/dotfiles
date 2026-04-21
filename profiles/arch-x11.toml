@@ -19,7 +19,7 @@ tools = [
 ]
 
 extras = [
-  "x11-mouse-buttons",
-  "x11-touchpad-gestures",
-  "x11-locale-profile",
+  "xbindkeys-mouse-buttons",
+  "libinput-gestures-workspaces",
+  "lightdm-xprofile-locale",
 ]

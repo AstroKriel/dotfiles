@@ -37,21 +37,21 @@ EXTRAS: dict[str, ExtraConfig] = {
         target_path=Path.home() / "Library" / "KeyBindings" / "DefaultKeyBinding.dict",
         requires=("macos",),
     ),
-    "x11-mouse-buttons": ExtraConfig(
-        name="X11 mouse buttons",
-        source_path=EXTRAS_DIR / "arch-x11" / "xbindkeysrc",
+    "xbindkeys-mouse-buttons": ExtraConfig(
+        name="xbindkeys mouse buttons",
+        source_path=EXTRAS_DIR / "arch-x11" / "mouse-workspace-buttons.xbindkeysrc",
         target_path=Path.home() / ".xbindkeysrc",
         requires=("linux", "x11"),
     ),
-    "x11-touchpad-gestures": ExtraConfig(
-        name="X11 touchpad gestures",
-        source_path=EXTRAS_DIR / "arch-x11" / "libinput-gestures.conf",
+    "libinput-gestures-workspaces": ExtraConfig(
+        name="libinput-gestures workspaces",
+        source_path=EXTRAS_DIR / "arch-x11" / "touchpad-workspace-gestures.conf",
         target_path=Path.home() / ".config" / "libinput-gestures.conf",
         requires=("linux", "x11", "xfce"),
     ),
-    "x11-locale-profile": ExtraConfig(
-        name="X11 locale profile",
-        source_path=EXTRAS_DIR / "arch-x11" / "xprofile",
+    "lightdm-xprofile-locale": ExtraConfig(
+        name="LightDM xprofile locale",
+        source_path=EXTRAS_DIR / "arch-x11" / "lightdm-locale.xprofile",
         target_path=Path.home() / ".xprofile",
         requires=("linux", "x11", "lightdm"),
     ),

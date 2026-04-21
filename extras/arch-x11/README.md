@@ -6,9 +6,9 @@ Optional user-level X11/XFCE configs for the Arch Framework 13 setup.
 
 | Extra | Target | Purpose | Dependencies |
 |---|---|---|---|
-| `x11-mouse-buttons` | `~/.xbindkeysrc` | Maps Logitech side buttons to previous/next workspace | `xbindkeys`, `xdotool` |
-| `x11-touchpad-gestures` | `~/.config/libinput-gestures.conf` | Maps three-finger swipes to previous/next workspace | `libinput-gestures`, `xdotool` |
-| `x11-locale-profile` | `~/.xprofile` | Sets `LC_TIME=en_GB.UTF-8` for XFCE/LightDM | generated `en_GB.UTF-8` locale |
+| `xbindkeys-mouse-buttons` | `~/.xbindkeysrc` | Maps Logitech side buttons to previous/next workspace | `xbindkeys`, `xdotool` |
+| `libinput-gestures-workspaces` | `~/.config/libinput-gestures.conf` | Maps three-finger swipes to previous/next workspace | `libinput-gestures`, `xdotool` |
+| `lightdm-xprofile-locale` | `~/.xprofile` | Sets `LC_TIME=en_GB.UTF-8` for XFCE/LightDM | generated `en_GB.UTF-8` locale |
 
 ## One-Time Setup
 
