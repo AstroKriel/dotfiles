@@ -10,10 +10,15 @@
     "model_parameters": []
   },
   "agent_servers": {
+    "codex-acp": {
+      "type": "registry"
+    },
     "claude-acp": {
       "type": "registry"
     }
   },
+  "agent_ui_font_size": 14,
+  "agent_buffer_font_size": 12,
   "autosave": "on_focus_change",
   "preview_tabs": {
     "enabled": false
@@ -21,25 +26,21 @@
   "edit_predictions": {
     "mode": "subtle"
   },
-  "buffer_font_size": 15,
-  "ui_font_size": 15,
+  "buffer_font_family": ".ZedMono",
+  "buffer_font_size": 12,
+  "ui_font_family": ".ZedSans",
+  "ui_font_size": 14,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark"
+  },
   "buffer_font_features": {
     "calt": false
   },
-  "ssh_connections": [
-    {
-      "host": "cita",
-      "args": [],
-      "projects": [
-        {
-          "paths": [
-            "/home/nkriel"
-          ]
-        }
-      ]
-    }
-  ],
   "terminal": {
+    "font_family": ".ZedMono",
+    "font_size": 12,
     "detect_venv": "off"
   }
 }

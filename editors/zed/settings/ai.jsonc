@@ -1,7 +1,22 @@
 {
+  "agent": {
+    "default_model": {
+      "provider": "zed.dev",
+      "model": "gpt-5.4-pro",
+      "enable_thinking": true,
+      "effort": "medium"
+    },
+    "favorite_models": [],
+    "model_parameters": []
+  },
   "agent_servers": {
+    "codex-acp": {
+      "type": "registry"
+    },
     "claude-acp": {
       "type": "registry"
     }
-  }
+  },
+  "agent_ui_font_size": 14,
+  "agent_buffer_font_size": 12
 }
