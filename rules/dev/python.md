@@ -260,6 +260,7 @@ if __name__ == "__main__":
 | `## local` | imports from within the current project |
 | Per line | one import per line |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
+| Module imports | import the module, not individual functions: `from jormi.ww_types import check_types` then `check_types.ensure_nonempty_string(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site — use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
 | Long imports | use parentheses with trailing commas |
 
 ---
@@ -341,7 +342,7 @@ class MessageType(Enum):
 | Rule | |
 |---|---|
 | Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; keyword-only arguments enforced with `*` for any function with more than one parameter |
-| Call sites | every argument on its own line with a trailing comma, even for single-argument calls |
+| Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line |
 | Size | typically 20-80 lines, single-responsibility |
 | Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
 | Validation | always separated into `ensure_*` / `check_*` / `_validate_*` helpers, called before any logic |
