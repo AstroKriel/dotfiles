@@ -11,7 +11,7 @@
       "super-alt-'": "agent::ToggleFocus",
       "super-alt-;": "terminal_panel::ToggleFocus",
       "super-alt-o": "go_to_line::Toggle",
-      "ctrl-alt-super-'": "multi_workspace::ToggleWorkspaceSidebar",
+      "super-alt-ctrl-'": "multi_workspace::ToggleWorkspaceSidebar",
       "super-alt-ctrl-o": "file_finder::Toggle",
       "super-alt-ctrl-f": "workspace::NewSearch",
       "super-alt-ctrl-m": "project_panel::CollapseAllEntries",
