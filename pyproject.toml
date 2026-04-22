@@ -13,7 +13,7 @@ dev = [
 ]
 
 [tool.pyright]
-include = ["setup_files.py", "setup", "utils"]
+include = ["setup_configs.py", "setup", "utils"]
 
 ## --- rules to enforce
 reportMissingImports = true

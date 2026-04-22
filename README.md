@@ -3,7 +3,7 @@
 This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the scripts discussed below. The main entry point is run as:
 
 ```bash
-uv run setup_files.py [args]
+uv run setup_configs.py [args]
 ```
 
 Layer modules can be run directly with `uv run -m setup.<layer> [args]`.
@@ -26,7 +26,7 @@ tools = ["ghostty"]
 extras = ["arch-x11/touchpad-workspace-gestures.conf"]
 ```
 
-`setup_files.py` is the main entry point. It orchestrates the profile-backed layer modules under `setup/`: shell, tools, editors, and extras.
+`setup_configs.py` is the main entry point. It orchestrates the profile-backed layer modules under `setup/`: shell, tools, editors, and extras.
 
 `uv run -m setup.shell` sets the login shell from `this-system.toml` and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to pick up shell config changes.
 
@@ -44,7 +44,7 @@ For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `key
 
 `uv run -m setup.rules` links tracked rule files into `~/.rules/`.
 
-`setup_files.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `--check-profile` to validate `this-system.toml` without changing the system, or `--remove-symlinks` to tear everything down.
+`setup_configs.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `--check-profile` to validate `this-system.toml` without changing the system, or `--remove-symlinks` to tear everything down.
 
 # Full Setup Guide
 
@@ -156,7 +156,7 @@ brew install yazi ffmpeg
 ```bash
 cd DotFiles
 ln -s profiles/arch-x11.toml this-system.toml
-uv run setup_files.py
+uv run setup_configs.py
 ```
 
 Open a new terminal to pick up the shell changes.
@@ -188,5 +188,5 @@ Python project metadata and tooling live in `pyproject.toml`. Run the main check
 
 ```bash
 uv run basedpyright
-uv run python -m py_compile setup_files.py setup/*.py utils/*.py
+uv run python -m py_compile setup_configs.py setup/*.py utils/*.py
 ```
