@@ -47,7 +47,8 @@ class ToolConfig:
 
 
 TOOLS: dict[str, ToolConfig] = {
-    "tmux": ToolConfig(
+    "tmux":
+    ToolConfig(
         name="Tmux",
         brew="tmux",
         dotfiles_dir=DOTFILES_DIR / "tmux",
@@ -58,21 +59,24 @@ TOOLS: dict[str, ToolConfig] = {
             output=CONFIG_DIR / "tmux" / "plugins" / "tpm",
         ),
     ),
-    "kitty": ToolConfig(
+    "kitty":
+    ToolConfig(
         name="Kitty terminal",
         brew="kitty --cask",
         mac_app="kitty.app",
         dotfiles_dir=DOTFILES_DIR / "kitty",
         target_dir=CONFIG_DIR / "kitty",
     ),
-    "ghostty": ToolConfig(
+    "ghostty":
+    ToolConfig(
         name="Ghostty terminal",
         brew="ghostty --cask",
         mac_app="Ghostty.app",
         dotfiles_dir=DOTFILES_DIR / "ghostty",
         target_dir=CONFIG_DIR / "ghostty",
     ),
-    "yazi": ToolConfig(
+    "yazi":
+    ToolConfig(
         name="Yazi",
         brew="yazi ffmpeg",
         dotfiles_dir=DOTFILES_DIR / "yazi",
@@ -95,10 +99,7 @@ def get_selected_tools(
     unknown_tool_keys = sorted(set(tool_keys) - set(TOOLS))
     if unknown_tool_keys:
         raise KeyError(f"Unknown `--which` tool(s): {', '.join(unknown_tool_keys)}")
-    return {
-        tool_key: TOOLS[tool_key]
-        for tool_key in tool_keys
-    }
+    return {tool_key: TOOLS[tool_key] for tool_key in tool_keys}
 
 
 def resolve_selected_tools(
@@ -122,24 +123,40 @@ def resolve_selected_tools(
 def check_installed_tools(
     *,
     tool_keys: tuple[str, ...] | None,
+    dry_run: bool,
 ) -> set[str]:
     """Return subscribed tools that are installed on this system."""
-    _log_message("Checking installed tools...")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Checking installed tools...",
+            dry_run=dry_run,
+        ),
+    )
     installed_tool_keys: set[str] = set()
     selected_tool_configs = get_selected_tools(tool_keys=tool_keys)
     for command, tool in selected_tool_configs.items():
         found_via_app = (
-            sys.platform == "darwin"
-            and tool.mac_app is not None
+            sys.platform == "darwin" and tool.mac_app is not None
             and (Path("/Applications") / tool.mac_app).exists()
         )
         if shutil.which(command) or found_via_app:
-            _log_message(f"Found {tool.name} ({command}) in your `$PATH`.")
+            _log_message(
+                log_messages.format_dry_run(
+                    message=f"Found {tool.name} ({command}) in your `$PATH`.",
+                    dry_run=dry_run,
+                ),
+            )
             installed_tool_keys.add(command)
         else:
-            _log_message(
+            message = (
                 f"{tool.name} was not found in your `$PATH`.\n"
-                f"Install it via: `brew install {tool.brew}`",
+                f"Install it via: `brew install {tool.brew}`"
+            )
+            _log_message(
+                log_messages.format_dry_run(
+                    message=message,
+                    dry_run=dry_run,
+                ),
             )
     return installed_tool_keys
 
@@ -150,10 +167,16 @@ def shallow_clone_repo(
     dry_run: bool,
 ):
     if repo.output.exists():
-        _log_message(f"{repo.name} already exists under: {repo.output}")
+        _log_message(
+            log_messages.format_dry_run(
+                message=f"{repo.name} already exists under: {repo.output}",
+                dry_run=dry_run,
+            ),
+        )
         return
     apply_shell_actions.run_command(
-        args=["git", "clone", "--depth", "1", repo.url, str(repo.output)],
+        args=["git", "clone", "--depth", "1", repo.url,
+              str(repo.output)],
         script_name=SCRIPT_NAME,
         description=f"clone {repo.name} (shallow) under {repo.output}",
         dry_run=dry_run,
@@ -171,7 +194,12 @@ def remove_symlinks(
     tool_keys: tuple[str, ...] | None = None,
 ):
     log_messages.configure(write_to_file=not dry_run)
-    _log_message("Started removing tool config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started removing tool config symlinks",
+            dry_run=dry_run,
+        ),
+    )
     selected_tool_configs = get_selected_tools(tool_keys=tool_keys)
     for tool in selected_tool_configs.values():
         apply_shell_actions.remove_symlink(
@@ -179,7 +207,12 @@ def remove_symlinks(
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
-    _log_message("Finished removing tool config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished removing tool config symlinks",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def run(
@@ -189,13 +222,24 @@ def run(
     tool_keys: tuple[str, ...] | None = None,
 ):
     log_messages.configure(write_to_file=not dry_run)
-    ## log start of script
-    _log_message("Started setting up tool configs")
-    installed_tool_keys = check_installed_tools(tool_keys=tool_keys)
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started setting up tool configs",
+            dry_run=dry_run,
+        ),
+    )
+    installed_tool_keys = check_installed_tools(
+        tool_keys=tool_keys,
+        dry_run=dry_run,
+    )
     if check_only:
-        _log_message("Check complete. Exiting due to `--check-only`")
+        _log_message(
+            log_messages.format_dry_run(
+                message="Check complete. Exiting due to `--check-only`",
+                dry_run=dry_run,
+            ),
+        )
         return
-    ## symlink each config directory to ~/.config/
     for command in sorted(installed_tool_keys):
         tool = TOOLS[command]
         apply_shell_actions.ensure_dir_exists(
@@ -209,7 +253,6 @@ def run(
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
-    ## git clone repos
     for command in installed_tool_keys:
         tool = TOOLS[command]
         if tool.clone_repo is not None:
@@ -217,8 +260,12 @@ def run(
                 repo=tool.clone_repo,
                 dry_run=dry_run,
             )
-    ## log end of script
-    _log_message("Finished setting up tool configs")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished setting up tool configs",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def main():
@@ -271,6 +318,7 @@ def main():
         check_only=check_only,
         tool_keys=tool_keys,
     )
+
 
 ##
 ## === ENTRY POINT

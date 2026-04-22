@@ -32,9 +32,8 @@ CONFIG_DIR = HOME_DIR / ".config"
 _log_message = log_messages.make_logger(SCRIPT_NAME)
 
 _VSCODE_TARGET_DIR = (
-    Path.home() / "Library/Application Support/Code/User"
-    if sys.platform == "darwin"
-    else Path.home() / ".config/Code/User"
+    Path.home() / "Library/Application Support/Code/User" if sys.platform == "darwin" else Path.home() /
+    ".config/Code/User"
 )
 
 
@@ -64,7 +63,8 @@ class EditorConfig:
 
 
 EDITORS: dict[str, EditorConfig] = {
-    "vscode": EditorConfig(
+    "vscode":
+    EditorConfig(
         name="Visual Studio Code",
         command="code",
         brew="visual-studio-code --cask",
@@ -76,14 +76,16 @@ EDITORS: dict[str, EditorConfig] = {
         },
         extensions=DOTFILES_DIR / "vscode" / "extensions.txt",
     ),
-    "nvim": EditorConfig(
+    "nvim":
+    EditorConfig(
         name="Neovim",
         command="nvim",
         brew="neovim",
         dotfiles_dir=DOTFILES_DIR / "nvim",
         target_dir=CONFIG_DIR / "nvim",
     ),
-    "emacs": EditorConfig(
+    "emacs":
+    EditorConfig(
         name="Emacs (GUI)",
         command="emacs",
         brew="emacs --cask",
@@ -97,7 +99,8 @@ EDITORS: dict[str, EditorConfig] = {
         ),
         post_setup=PostSetup.DOOM_SYNC,
     ),
-    "zed": EditorConfig(
+    "zed":
+    EditorConfig(
         name="Zed",
         command="zed" if sys.platform == "darwin" else "zeditor",
         brew="zed --cask",
@@ -188,7 +191,8 @@ def shallow_clone_repo(
         _log_message(f"{repo.name} already exists under: {repo.output}")
         return
     apply_shell_actions.run_command(
-        args=["git", "clone", "--depth", "1", repo.url, str(repo.output)],
+        args=["git", "clone", "--depth", "1", repo.url,
+              str(repo.output)],
         script_name=SCRIPT_NAME,
         description=f"clone {repo.name} (shallow) under {repo.output}",
         dry_run=dry_run,
@@ -217,19 +221,33 @@ def setup_editor(
     editor: EditorConfig,
     dry_run: bool,
 ):
-    _log_message(f"Started setting up {editor.name}")
-    ## check whether the editor is installed
+    _log_message(
+        log_messages.format_dry_run(
+            message=f"Started setting up {editor.name}",
+            dry_run=dry_run,
+        ),
+    )
     found_via_app = (
-        sys.platform == "darwin"
-        and editor.mac_app is not None
+        sys.platform == "darwin" and editor.mac_app is not None
         and (Path("/Applications") / editor.mac_app).exists()
     )
     if shutil.which(editor.command) or found_via_app:
-        _log_message(f"Found {editor.name} ({editor.command}) in your `$PATH`.")
-    else:
         _log_message(
+            log_messages.format_dry_run(
+                message=f"Found {editor.name} ({editor.command}) in your `$PATH`.",
+                dry_run=dry_run,
+            ),
+        )
+    else:
+        message = (
             f"{editor.command} was not found in your `$PATH`.\n"
-            f"Install it via: `brew install {editor.brew}`",
+            f"Install it via: `brew install {editor.brew}`"
+        )
+        _log_message(
+            log_messages.format_dry_run(
+                message=message,
+                dry_run=dry_run,
+            ),
         )
         return
     if editor.files is None:
@@ -313,10 +331,7 @@ def get_selected_editors(
     unknown_editor_keys = sorted(set(editor_keys) - set(EDITORS))
     if unknown_editor_keys:
         raise KeyError(f"Unknown `--which` editor(s): {', '.join(unknown_editor_keys)}")
-    return {
-        editor_key: EDITORS[editor_key]
-        for editor_key in editor_keys
-    }
+    return {editor_key: EDITORS[editor_key] for editor_key in editor_keys}
 
 
 def resolve_selected_editors(
@@ -336,6 +351,7 @@ def resolve_selected_editors(
         )
     return requested_editor_keys
 
+
 ##
 ## === PROGRAM MAIN
 ##
@@ -347,7 +363,12 @@ def remove_symlinks(
     editor_keys: tuple[str, ...] | None = None,
 ):
     log_messages.configure(write_to_file=not dry_run)
-    _log_message("Started removing editor config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started removing editor config symlinks",
+            dry_run=dry_run,
+        ),
+    )
     selected_editor_configs = get_selected_editors(editor_keys=editor_keys)
     for editor in selected_editor_configs.values():
         if editor.files is None:
@@ -363,7 +384,12 @@ def remove_symlinks(
                     script_name=SCRIPT_NAME,
                     dry_run=dry_run,
                 )
-    _log_message("Finished removing editor config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished removing editor config symlinks",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def run(
@@ -378,7 +404,12 @@ def run(
             editor=editor,
             dry_run=dry_run,
         )
-    _log_message("Finished setting up editors.")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished setting up editors.",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def main():
@@ -423,6 +454,7 @@ def main():
         dry_run=dry_run,
         editor_keys=editor_keys,
     )
+
 
 ##
 ## === ENTRY POINT

@@ -50,6 +50,16 @@ def configure(
     _write_to_file = write_to_file
 
 
+def format_dry_run(
+    *,
+    message: str,
+    dry_run: bool,
+) -> str:
+    if dry_run:
+        return f"[dry-run] {message}"
+    return message
+
+
 def make_logger(
     script_name: str,
 ) -> Callable[[str], None]:

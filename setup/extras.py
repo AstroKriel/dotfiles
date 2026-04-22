@@ -33,25 +33,29 @@ class ExtraConfig:
 
 
 EXTRAS: dict[str, ExtraConfig] = {
-    "macos/disable-navigation-keys.dict": ExtraConfig(
+    "macos/disable-navigation-keys.dict":
+    ExtraConfig(
         name="macOS disabled navigation keys",
         source_path=EXTRAS_DIR / "macos" / "disable-navigation-keys.dict",
         target_path=Path.home() / "Library" / "KeyBindings" / "DefaultKeyBinding.dict",
-        requires=("macos",),
+        requires=("macos", ),
     ),
-    "arch-x11/mouse-workspace-buttons.xbindkeysrc": ExtraConfig(
+    "arch-x11/mouse-workspace-buttons.xbindkeysrc":
+    ExtraConfig(
         name="xbindkeys mouse buttons",
         source_path=EXTRAS_DIR / "arch-x11" / "mouse-workspace-buttons.xbindkeysrc",
         target_path=Path.home() / ".xbindkeysrc",
         requires=("linux", "x11"),
     ),
-    "arch-x11/touchpad-workspace-gestures.conf": ExtraConfig(
+    "arch-x11/touchpad-workspace-gestures.conf":
+    ExtraConfig(
         name="libinput-gestures workspaces",
         source_path=EXTRAS_DIR / "arch-x11" / "touchpad-workspace-gestures.conf",
         target_path=Path.home() / ".config" / "libinput-gestures.conf",
         requires=("linux", "x11", "xfce"),
     ),
-    "arch-x11/lightdm-locale.xprofile": ExtraConfig(
+    "arch-x11/lightdm-locale.xprofile":
+    ExtraConfig(
         name="LightDM xprofile locale",
         source_path=EXTRAS_DIR / "arch-x11" / "lightdm-locale.xprofile",
         target_path=Path.home() / ".xprofile",
@@ -83,8 +87,8 @@ def setup_extra(
 ) -> None:
     """Symlink one extra config file if the active profile satisfies its requirements."""
     if not extra_requirements_are_met(
-        extra=extra,
-        platform_tags=platform_tags,
+            extra=extra,
+            platform_tags=platform_tags,
     ):
         missing = sorted(set(extra.requires) - set(platform_tags or ()))
         _log_message(f"Skipping {extra.name}; missing profile platform tag(s): {', '.join(missing)}")
@@ -112,10 +116,7 @@ def get_selected_extras(
     unknown_extra_keys = sorted(set(extra_keys) - set(EXTRAS))
     if unknown_extra_keys:
         raise KeyError(f"Unknown `--which` extra(s): {', '.join(unknown_extra_keys)}")
-    return {
-        extra_key: EXTRAS[extra_key]
-        for extra_key in extra_keys
-    }
+    return {extra_key: EXTRAS[extra_key] for extra_key in extra_keys}
 
 
 def resolve_selected_extras(
@@ -135,6 +136,7 @@ def resolve_selected_extras(
         )
     return requested_extra_keys
 
+
 ##
 ## === PROGRAM MAIN
 ##
@@ -146,7 +148,12 @@ def remove_symlinks(
     extra_keys: tuple[str, ...] | None = None,
 ) -> None:
     log_messages.configure(write_to_file=not dry_run)
-    _log_message("Started removing extra config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started removing extra config symlinks",
+            dry_run=dry_run,
+        ),
+    )
     selected_extra_configs = get_selected_extras(extra_keys=extra_keys)
     for extra in selected_extra_configs.values():
         apply_shell_actions.remove_symlink(
@@ -154,7 +161,12 @@ def remove_symlinks(
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
-    _log_message("Finished removing extra config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished removing extra config symlinks",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def run(
@@ -164,7 +176,12 @@ def run(
     platform_tags: tuple[str, ...] | None = None,
 ) -> None:
     log_messages.configure(write_to_file=not dry_run)
-    _log_message("Started setting up extra configs")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started setting up extra configs",
+            dry_run=dry_run,
+        ),
+    )
     selected_extra_configs = get_selected_extras(extra_keys=extra_keys)
     for extra in selected_extra_configs.values():
         setup_extra(
@@ -172,7 +189,12 @@ def run(
             dry_run=dry_run,
             platform_tags=platform_tags,
         )
-    _log_message("Finished setting up extra configs")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished setting up extra configs",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def main() -> None:
@@ -218,6 +240,7 @@ def main() -> None:
         extra_keys=extra_keys,
         platform_tags=profile.platforms,
     )
+
 
 ##
 ## === ENTRY POINT

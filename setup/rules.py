@@ -48,6 +48,7 @@ def link_all_rules(
             dry_run=dry_run,
         )
 
+
 ##
 ## === PROGRAM MAIN
 ##
@@ -74,6 +75,7 @@ def main() -> None:
     args = parser.parse_args()
     dry_run = cast(bool, args.dry_run)
     run(dry_run=dry_run)
+
 
 ##
 ## === ENTRY POINT

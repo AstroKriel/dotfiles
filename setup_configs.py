@@ -92,6 +92,7 @@ def validate_profile(
         _log_message("Profile validation passed.")
     return is_valid
 
+
 ##
 ## === PROGRAM MAIN
 ##
@@ -173,6 +174,7 @@ def main():
         extra_keys=profile.extras,
         platform_tags=profile.platforms,
     )
+
 
 ##
 ## === ENTRY POINT

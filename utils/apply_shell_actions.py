@@ -96,7 +96,10 @@ def backup_file(
             resolved = target_path.resolve()
             log_messages.log_message(
                 script_name=script_name,
-                message=f"{target_path} (symlink) -> {resolved}",
+                message=log_messages.format_dry_run(
+                    message=f"{target_path} (symlink) -> {resolved}",
+                    dry_run=dry_run,
+                ),
             )
         except Exception as e:
             ## broken or unresolvable symlink
@@ -125,7 +128,10 @@ def backup_file(
     if backup_path:
         log_messages.log_message(
             script_name=script_name,
-            message=f"{target_path} -> {backup_path}",
+            message=log_messages.format_dry_run(
+                message=f"{target_path} -> {backup_path}",
+                dry_run=dry_run,
+            ),
         )
     return backup_path
 
@@ -162,7 +168,10 @@ def create_symlink(
     if _already_linked_correctly(target_path=target_path, source_path=source_path):
         log_messages.log_message(
             script_name=script_name,
-            message=f"Already correctly linked: {target_path}",
+            message=log_messages.format_dry_run(
+                message=f"Already correctly linked: {target_path}",
+                dry_run=dry_run,
+            ),
         )
         return
     ## target points to something else

@@ -74,7 +74,12 @@ def change_login_shell(
     shell_path = shutil.which(shell)
     if not shell_path:
         ## `shell` not found
-        _log_message(f"`shell` value `{shell}` was not found in `$PATH`.")
+        _log_message(
+            log_messages.format_dry_run(
+                message=f"`shell` value `{shell}` was not found in `$PATH`.",
+                dry_run=dry_run,
+            ),
+        )
         return
     ## check if `shell` is already set
     current_shell = os.environ.get("SHELL", "")
@@ -88,7 +93,13 @@ def change_login_shell(
         )
     else:
         ## `shell` is already correctly set
-        _log_message(f"Login shell is already set to: {shell_path}")
+        _log_message(
+            log_messages.format_dry_run(
+                message=f"Login shell is already set to: {shell_path}",
+                dry_run=dry_run,
+            ),
+        )
+
 
 ##
 ## === PROGRAM MAIN
@@ -100,7 +111,12 @@ def remove_symlinks(
     dry_run: bool,
 ):
     log_messages.configure(write_to_file=not dry_run)
-    _log_message("Started removing shell config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started removing shell config symlinks",
+            dry_run=dry_run,
+        ),
+    )
     all_files = UTILS_FILES + [f for s in SHELLS for f in s.files]
     for file_name in all_files:
         apply_shell_actions.remove_symlink(
@@ -108,7 +124,12 @@ def remove_symlinks(
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
-    _log_message("Finished removing shell config symlinks")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished removing shell config symlinks",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def run(
@@ -119,8 +140,12 @@ def run(
     log_messages.configure(write_to_file=not dry_run)
     chosen = next(s for s in SHELLS if s.name == shell)
     others = [s for s in SHELLS if s.name != shell]
-    ## log start of script
-    _log_message("Started running!")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started running!",
+            dry_run=dry_run,
+        ),
+    )
     ## link shared config files
     for file_name in UTILS_FILES:
         source_path = SHELL_DIR / "utils" / file_name
@@ -153,8 +178,12 @@ def run(
         shell=chosen.name,
         dry_run=dry_run,
     )
-    ## log end of script
-    _log_message("Finished!")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished!",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def main():
@@ -181,6 +210,7 @@ def main():
         shell=profile.shell,
         dry_run=dry_run,
     )
+
 
 ##
 ## === ENTRY POINT
