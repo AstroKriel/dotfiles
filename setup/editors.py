@@ -294,40 +294,40 @@ def setup_editor_files(
 
 def get_selected_editors(
     *,
-    selected: tuple[str, ...] | None,
+    editor_keys: tuple[str, ...] | None,
 ) -> dict[str, EditorConfig]:
     """Return editor configs selected by the active system profile."""
-    if selected is None:
+    if editor_keys is None:
         return EDITORS
-    unknown = sorted(set(selected) - set(EDITORS))
-    if unknown:
-        raise KeyError(f"Unknown editor(s): {', '.join(unknown)}")
+    unknown_editor_keys = sorted(set(editor_keys) - set(EDITORS))
+    if unknown_editor_keys:
+        raise KeyError(f"Unknown editor(s): {', '.join(unknown_editor_keys)}")
     return {
         editor_key: EDITORS[editor_key]
-        for editor_key in selected
+        for editor_key in editor_keys
     }
 
 
 def resolve_selected_editors(
     *,
-    profile_selected: tuple[str, ...] | None,
-    requested: tuple[str, ...],
+    subscribed_editor_keys: tuple[str, ...] | None,
+    requested_editor_keys: tuple[str, ...],
     include_all: bool,
 ) -> tuple[str, ...] | None:
     if include_all:
         return None
-    if not requested:
-        return profile_selected
-    get_selected_editors(selected=requested)
-    if profile_selected is None:
-        return requested
-    unavailable = sorted(set(requested) - set(profile_selected))
-    if unavailable:
+    if not requested_editor_keys:
+        return subscribed_editor_keys
+    get_selected_editors(editor_keys=requested_editor_keys)
+    if subscribed_editor_keys is None:
+        return requested_editor_keys
+    unsubscribed_editor_keys = sorted(set(requested_editor_keys) - set(subscribed_editor_keys))
+    if unsubscribed_editor_keys:
         raise KeyError(
             "Requested editor(s) are not subscribed by the active profile: "
-            f"{', '.join(unavailable)}",
+            f"{', '.join(unsubscribed_editor_keys)}",
         )
-    return requested
+    return requested_editor_keys
 
 ##
 ## === PROGRAM MAIN
@@ -337,12 +337,12 @@ def resolve_selected_editors(
 def remove_symlinks(
     *,
     dry_run: bool,
-    selected: tuple[str, ...] | None = None,
+    editor_keys: tuple[str, ...] | None = None,
 ):
     log_messages.configure(write_to_file=not dry_run)
     _log_message("Started removing editor config symlinks")
-    selected_editors = get_selected_editors(selected=selected)
-    for editor in selected_editors.values():
+    selected_editor_configs = get_selected_editors(editor_keys=editor_keys)
+    for editor in selected_editor_configs.values():
         if editor.files is None:
             apply_shell_actions.remove_symlink(
                 target_path=editor.target_dir,
@@ -362,11 +362,11 @@ def remove_symlinks(
 def run(
     *,
     dry_run: bool,
-    selected: tuple[str, ...] | None = None,
+    editor_keys: tuple[str, ...] | None = None,
 ):
     log_messages.configure(write_to_file=not dry_run)
-    selected_editors = get_selected_editors(selected=selected)
-    for editor in selected_editors.values():
+    selected_editor_configs = get_selected_editors(editor_keys=editor_keys)
+    for editor in selected_editor_configs.values():
         setup_editor(
             editor=editor,
             dry_run=dry_run,
@@ -403,14 +403,14 @@ def main():
     if args.all and args.editor:
         parser.error("--all cannot be combined with --editor")
     profile = load_profiles.load_profile(profile_name=args.profile)
-    selected = resolve_selected_editors(
-        profile_selected=profile.editors if profile is not None else None,
-        requested=tuple(args.editor),
+    editor_keys = resolve_selected_editors(
+        subscribed_editor_keys=profile.editors if profile is not None else None,
+        requested_editor_keys=tuple(args.editor),
         include_all=args.all,
     )
     run(
         dry_run=args.dry_run,
-        selected=selected,
+        editor_keys=editor_keys,
     )
 
 ##

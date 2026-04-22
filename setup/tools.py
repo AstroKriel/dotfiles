@@ -86,51 +86,51 @@ TOOLS: dict[str, ToolConfig] = {
 
 def get_selected_tools(
     *,
-    selected: tuple[str, ...] | None,
+    tool_keys: tuple[str, ...] | None,
 ) -> dict[str, ToolConfig]:
     """Return tool configs selected by the active system profile."""
-    if selected is None:
+    if tool_keys is None:
         return TOOLS
-    unknown = sorted(set(selected) - set(TOOLS))
-    if unknown:
-        raise KeyError(f"Unknown tool(s): {', '.join(unknown)}")
+    unknown_tool_keys = sorted(set(tool_keys) - set(TOOLS))
+    if unknown_tool_keys:
+        raise KeyError(f"Unknown tool(s): {', '.join(unknown_tool_keys)}")
     return {
         tool_key: TOOLS[tool_key]
-        for tool_key in selected
+        for tool_key in tool_keys
     }
 
 
 def resolve_selected_tools(
     *,
-    profile_selected: tuple[str, ...] | None,
-    requested: tuple[str, ...],
+    subscribed_tool_keys: tuple[str, ...] | None,
+    requested_tool_keys: tuple[str, ...],
     include_all: bool,
 ) -> tuple[str, ...] | None:
     if include_all:
         return None
-    if not requested:
-        return profile_selected
-    get_selected_tools(selected=requested)
-    if profile_selected is None:
-        return requested
-    unavailable = sorted(set(requested) - set(profile_selected))
-    if unavailable:
+    if not requested_tool_keys:
+        return subscribed_tool_keys
+    get_selected_tools(tool_keys=requested_tool_keys)
+    if subscribed_tool_keys is None:
+        return requested_tool_keys
+    unsubscribed_tool_keys = sorted(set(requested_tool_keys) - set(subscribed_tool_keys))
+    if unsubscribed_tool_keys:
         raise KeyError(
             "Requested tool(s) are not subscribed by the active profile: "
-            f"{', '.join(unavailable)}",
+            f"{', '.join(unsubscribed_tool_keys)}",
         )
-    return requested
+    return requested_tool_keys
 
 
 def check_installed_tools(
     *,
-    selected: tuple[str, ...] | None,
+    tool_keys: tuple[str, ...] | None,
 ):
     """Return subscribed tools that are installed on this system."""
     _log_message("Checking installed tools...")
-    available = set()
-    selected_tools = get_selected_tools(selected=selected)
-    for command, tool in selected_tools.items():
+    installed_tool_keys = set()
+    selected_tool_configs = get_selected_tools(tool_keys=tool_keys)
+    for command, tool in selected_tool_configs.items():
         found_via_app = (
             sys.platform == "darwin"
             and tool.mac_app is not None
@@ -138,13 +138,13 @@ def check_installed_tools(
         )
         if shutil.which(command) or found_via_app:
             _log_message(f"Found {tool.name} ({command}) in your `$PATH`.")
-            available.add(command)
+            installed_tool_keys.add(command)
         else:
             _log_message(
                 f"{tool.name} was not found in your `$PATH`.\n"
                 f"Install it via: `brew install {tool.brew}`",
             )
-    return available
+    return installed_tool_keys
 
 
 def shallow_clone_repo(
@@ -171,12 +171,12 @@ def shallow_clone_repo(
 def remove_symlinks(
     *,
     dry_run: bool,
-    selected: tuple[str, ...] | None = None,
+    tool_keys: tuple[str, ...] | None = None,
 ):
     log_messages.configure(write_to_file=not dry_run)
     _log_message("Started removing tool config symlinks")
-    selected_tools = get_selected_tools(selected=selected)
-    for tool in selected_tools.values():
+    selected_tool_configs = get_selected_tools(tool_keys=tool_keys)
+    for tool in selected_tool_configs.values():
         apply_shell_actions.remove_symlink(
             target_path=tool.target_dir,
             script_name=SCRIPT_NAME,
@@ -189,17 +189,17 @@ def run(
     *,
     dry_run: bool,
     check_only: bool = False,
-    selected: tuple[str, ...] | None = None,
+    tool_keys: tuple[str, ...] | None = None,
 ):
     log_messages.configure(write_to_file=not dry_run)
     ## log start of script
     _log_message("Started setting up tool configs")
-    available_tools = check_installed_tools(selected=selected)
+    installed_tool_keys = check_installed_tools(tool_keys=tool_keys)
     if check_only:
         _log_message("Check complete. Exiting due to `--check-only`")
         return
     ## symlink each config directory to ~/.config/
-    for command in sorted(available_tools):
+    for command in sorted(installed_tool_keys):
         tool = TOOLS[command]
         apply_shell_actions.ensure_dir_exists(
             directory=tool.target_dir.parent,
@@ -213,7 +213,7 @@ def run(
             dry_run=dry_run,
         )
     ## git clone repos
-    for command in available_tools:
+    for command in installed_tool_keys:
         tool = TOOLS[command]
         if tool.clone_repo is not None:
             shallow_clone_repo(
@@ -259,15 +259,15 @@ def main():
     if args.all and args.tool:
         parser.error("--all cannot be combined with --tool")
     profile = load_profiles.load_profile(profile_name=args.profile)
-    selected = resolve_selected_tools(
-        profile_selected=profile.tools if profile is not None else None,
-        requested=tuple(args.tool),
+    tool_keys = resolve_selected_tools(
+        subscribed_tool_keys=profile.tools if profile is not None else None,
+        requested_tool_keys=tuple(args.tool),
         include_all=args.all,
     )
     run(
         dry_run=args.dry_run,
         check_only=args.check_only,
-        selected=selected,
+        tool_keys=tool_keys,
     )
 
 ##

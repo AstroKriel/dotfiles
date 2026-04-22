@@ -103,40 +103,40 @@ def setup_extra(
 
 def get_selected_extras(
     *,
-    selected: tuple[str, ...] | None,
+    extra_keys: tuple[str, ...] | None,
 ) -> dict[str, ExtraConfig]:
     """Return extra configs selected by the active system profile."""
-    if selected is None:
+    if extra_keys is None:
         return EXTRAS
-    unknown = sorted(set(selected) - set(EXTRAS))
-    if unknown:
-        raise KeyError(f"Unknown extra(s): {', '.join(unknown)}")
+    unknown_extra_keys = sorted(set(extra_keys) - set(EXTRAS))
+    if unknown_extra_keys:
+        raise KeyError(f"Unknown extra(s): {', '.join(unknown_extra_keys)}")
     return {
         extra_key: EXTRAS[extra_key]
-        for extra_key in selected
+        for extra_key in extra_keys
     }
 
 
 def resolve_selected_extras(
     *,
-    profile_selected: tuple[str, ...] | None,
-    requested: tuple[str, ...],
+    subscribed_extra_keys: tuple[str, ...] | None,
+    requested_extra_keys: tuple[str, ...],
     include_all: bool,
 ) -> tuple[str, ...] | None:
     if include_all:
         return None
-    if not requested:
-        return profile_selected
-    get_selected_extras(selected=requested)
-    if profile_selected is None:
-        return requested
-    unavailable = sorted(set(requested) - set(profile_selected))
-    if unavailable:
+    if not requested_extra_keys:
+        return subscribed_extra_keys
+    get_selected_extras(extra_keys=requested_extra_keys)
+    if subscribed_extra_keys is None:
+        return requested_extra_keys
+    unsubscribed_extra_keys = sorted(set(requested_extra_keys) - set(subscribed_extra_keys))
+    if unsubscribed_extra_keys:
         raise KeyError(
             "Requested extra(s) are not subscribed by the active profile: "
-            f"{', '.join(unavailable)}",
+            f"{', '.join(unsubscribed_extra_keys)}",
         )
-    return requested
+    return requested_extra_keys
 
 ##
 ## === PROGRAM MAIN
@@ -146,12 +146,12 @@ def resolve_selected_extras(
 def remove_symlinks(
     *,
     dry_run: bool,
-    selected: tuple[str, ...] | None = None,
+    extra_keys: tuple[str, ...] | None = None,
 ) -> None:
     log_messages.configure(write_to_file=not dry_run)
     _log_message("Started removing extra config symlinks")
-    selected_extras = get_selected_extras(selected=selected)
-    for extra in selected_extras.values():
+    selected_extra_configs = get_selected_extras(extra_keys=extra_keys)
+    for extra in selected_extra_configs.values():
         apply_shell_actions.remove_symlink(
             target_path=extra.target_path,
             script_name=SCRIPT_NAME,
@@ -163,13 +163,13 @@ def remove_symlinks(
 def run(
     *,
     dry_run: bool,
-    selected: tuple[str, ...] | None = None,
+    extra_keys: tuple[str, ...] | None = None,
     platform_tags: tuple[str, ...] | None = None,
 ) -> None:
     log_messages.configure(write_to_file=not dry_run)
     _log_message("Started setting up extra configs")
-    selected_extras = get_selected_extras(selected=selected)
-    for extra in selected_extras.values():
+    selected_extra_configs = get_selected_extras(extra_keys=extra_keys)
+    for extra in selected_extra_configs.values():
         setup_extra(
             extra=extra,
             dry_run=dry_run,
@@ -207,14 +207,14 @@ def main() -> None:
     if args.all and args.extra:
         parser.error("--all cannot be combined with --extra")
     profile = load_profiles.load_profile(profile_name=args.profile)
-    selected = resolve_selected_extras(
-        profile_selected=profile.extras if profile is not None else None,
-        requested=tuple(args.extra),
+    extra_keys = resolve_selected_extras(
+        subscribed_extra_keys=profile.extras if profile is not None else None,
+        requested_extra_keys=tuple(args.extra),
         include_all=args.all,
     )
     run(
         dry_run=args.dry_run,
-        selected=selected,
+        extra_keys=extra_keys,
         platform_tags=profile.platforms if profile is not None else None,
     )
 

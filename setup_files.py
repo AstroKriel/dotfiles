@@ -46,9 +46,12 @@ def validate_profile(
         ("extra", profile.extras, setup_extras.EXTRAS),
     ]
     for subscription_kind, subscribed_keys, available_configs in subscription_groups:
-        unknown = sorted(set(subscribed_keys) - set(available_configs))
-        if unknown:
-            _log_message(f"Unknown {subscription_kind}(s): {', '.join(unknown)}")
+        unknown_subscription_keys = sorted(set(subscribed_keys) - set(available_configs))
+        if unknown_subscription_keys:
+            _log_message(
+                f"Unknown {subscription_kind}(s): "
+                f"{', '.join(unknown_subscription_keys)}",
+            )
             is_valid = False
     for editor_key in profile.editors:
         editor = setup_editors.EDITORS.get(editor_key)
@@ -78,11 +81,11 @@ def validate_profile(
         if not extra.source_path.exists():
             _log_message(f"Missing extra source file: {extra.source_path}")
             is_valid = False
-        missing_tags = sorted(set(extra.requires) - set(profile.platforms))
-        if missing_tags:
+        missing_platform_tags = sorted(set(extra.requires) - set(profile.platforms))
+        if missing_platform_tags:
             _log_message(
                 f"Extra `{extra_key}` is missing platform tag(s): "
-                f"{', '.join(missing_tags)}",
+                f"{', '.join(missing_platform_tags)}",
             )
             is_valid = False
     if is_valid:
@@ -147,15 +150,15 @@ def main():
         )
         setup_tools.remove_symlinks(
             dry_run=dry_run,
-            selected=profile.tools if profile is not None else None,
+            tool_keys=profile.tools if profile is not None else None,
         )
         setup_editors.remove_symlinks(
             dry_run=dry_run,
-            selected=profile.editors if profile is not None else None,
+            editor_keys=profile.editors if profile is not None else None,
         )
         setup_extras.remove_symlinks(
             dry_run=dry_run,
-            selected=profile.extras if profile is not None else None,
+            extra_keys=profile.extras if profile is not None else None,
         )
         return
     if profile is None:
@@ -171,15 +174,15 @@ def main():
     )
     setup_tools.run(
         dry_run=dry_run,
-        selected=profile.tools,
+        tool_keys=profile.tools,
     )
     setup_editors.run(
         dry_run=dry_run,
-        selected=profile.editors,
+        editor_keys=profile.editors,
     )
     setup_extras.run(
         dry_run=dry_run,
-        selected=profile.extras,
+        extra_keys=profile.extras,
         platform_tags=profile.platforms,
     )
 
