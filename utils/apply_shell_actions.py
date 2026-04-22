@@ -7,7 +7,6 @@
 ## stdlib
 from pathlib import Path
 import subprocess
-from typing import Optional
 
 ## local
 from utils import log_messages
@@ -77,7 +76,7 @@ def backup_file(
     target_path: Path,
     script_name: str,
     dry_run: bool = False,
-) -> Optional[Path]:
+) -> Path | None:
     """
   Backup a file or symlink at the given path.
 
@@ -225,7 +224,7 @@ def _rename_with_timestamp(
     target_path: Path,
     script_name: str,
     dry_run: bool = False,
-) -> Optional[Path]:
+) -> Path | None:
     """
   Rename a file or directory in place by appending a timestamp.
 

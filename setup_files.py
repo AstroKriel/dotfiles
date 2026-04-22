@@ -140,7 +140,6 @@ def main():
     if check_profile:
         if profile is None:
             parser.error("profile is required for --check-profile")
-            raise SystemExit(2)
         if not validate_profile(profile=profile):
             raise SystemExit(1)
         return
@@ -163,11 +162,9 @@ def main():
         return
     if profile is None:
         parser.error("profile is required unless --remove-symlinks is specified")
-        raise SystemExit(2)
     shell = shell_override or profile.shell
     if shell is None:
         parser.error("shell is required unless set by profile")
-        raise SystemExit(2)
     setup_shell.run(
         shell=shell,
         dry_run=dry_run,

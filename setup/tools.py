@@ -125,10 +125,10 @@ def resolve_selected_tools(
 def check_installed_tools(
     *,
     tool_keys: tuple[str, ...] | None,
-):
+) -> set[str]:
     """Return subscribed tools that are installed on this system."""
     _log_message("Checking installed tools...")
-    installed_tool_keys = set()
+    installed_tool_keys: set[str] = set()
     selected_tool_configs = get_selected_tools(tool_keys=tool_keys)
     for command, tool in selected_tool_configs.items():
         found_via_app = (

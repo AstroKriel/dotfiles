@@ -1,7 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "dotfiles"
 version = "0.1.0"
-description = "Add your description here"
+description = "Personal dotfiles setup scripts and tracked configuration files."
 readme = "README.md"
+authors = [{ name = "Neco Kriel", email = "necokriel@gmail.com" }]
 requires-python = ">=3.11"
 dependencies = []
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.34.0",
+    "pytest>=9.0.2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["setup", "utils"]
+force-include = { "setup_files.py" = "setup_files.py" }
+
+[tool.pyright]
+include = ["setup_files.py", "setup", "utils"]
+
+## --- rules to enforce
+reportMissingImports = true
+reportMissingTypeStubs = false  # third-party packages rarely ship stubs
+
+## --- rules to suppress
+reportExplicitAny = "none"  # argparse returns Any values from parsed command-line input
+reportAny = "none"  # noisy cascade from argparse and TOML parsing
+reportUnknownMemberType = "none"  # noisy for simple script-style path and subprocess helpers
+reportUnknownVariableType = "none"  # noisy for parsed TOML and argparse values
+reportUnknownArgumentType = "none"  # noisy for argparse values passed into typed helpers
+reportImplicitStringConcatenation = "none"  # valid style for long error messages
+reportImplicitOverride = "none"  # no classes currently need override enforcement
+reportUnusedCallResult = "none"  # setup helpers are called for side effects
+reportPrivateUsage = "none"  # private helpers are local module implementation details
+reportUninitializedInstanceVariable = "none"  # dataclasses initialize instance fields
+enableTypeIgnoreComments = true  # honour "# type: ignore" when needed
+reportIgnoreCommentWithoutRule = "none"  # allow broad ignores in future tests if needed
+reportUnnecessaryTypeIgnoreComment = "none"  # suppress warnings about stale ignore comments
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

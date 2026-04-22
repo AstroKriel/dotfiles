@@ -13,6 +13,7 @@ from pathlib import Path
 import re
 import shutil
 import sys
+from typing import cast
 
 ## local
 from utils import load_profiles
@@ -126,27 +127,37 @@ def merge_config_modules(
     *,
     modules_dir: Path,
     mode: str,
-) -> dict | list:
-    if mode == "dict":
-        merged = {}
-    elif mode == "list":
-        merged = []
-    else:
-        _log_message(f"Error: Unsupported mode `{mode}`")
-        return None
+) -> dict[str, object] | list[object] | None:
     if not modules_dir.exists():
         _log_message(f"Skipping. No module directory found: {modules_dir}")
         return None
-    for module in sorted(modules_dir.glob("*.jsonc")):
-        with module.open("r", encoding="utf-8") as f:
-            raw_content = f.read()
-            filtered_content = filter_jsonc_comments(raw_content)
-            content = json.loads(filtered_content)
-            if mode == "dict":
-                merged.update(content)
-            elif mode == "list":
-                merged.extend(content)
-    return merged
+    if mode == "dict":
+        merged_dict: dict[str, object] = {}
+        for module in sorted(modules_dir.glob("*.jsonc")):
+            with module.open("r", encoding="utf-8") as f:
+                raw_content = f.read()
+                filtered_content = filter_jsonc_comments(raw_content)
+                content = json.loads(filtered_content)
+                if not isinstance(content, dict):
+                    _log_message(f"Skipping. Expected object config in: {module}")
+                    return None
+                merged_dict.update(cast(dict[str, object], content))
+        return merged_dict
+    elif mode == "list":
+        merged_list: list[object] = []
+        for module in sorted(modules_dir.glob("*.jsonc")):
+            with module.open("r", encoding="utf-8") as f:
+                raw_content = f.read()
+                filtered_content = filter_jsonc_comments(raw_content)
+                content = json.loads(filtered_content)
+                if not isinstance(content, list):
+                    _log_message(f"Skipping. Expected list config in: {module}")
+                    return None
+                merged_list.extend(cast(list[object], content))
+        return merged_list
+    else:
+        _log_message(f"Error: Unsupported mode `{mode}`")
+        return None
 
 
 def install_extensions(

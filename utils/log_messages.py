@@ -14,7 +14,7 @@ from typing import Callable
 ##
 
 LOG_FILE = Path.home() / "dotfiles_log.txt"
-_WRITE_TO_FILE = True
+_write_to_file = True
 
 ##
 ## === LOG FUNCTIONS
@@ -35,7 +35,7 @@ def log_message(
     timestamp = get_timestamp()
     log_entry = f"[{timestamp}] ({script_name}): {message}\n"
     print(log_entry)
-    if not _WRITE_TO_FILE:
+    if not _write_to_file:
         return
     log_file.parent.mkdir(parents=True, exist_ok=True)
     with open(log_file, "a") as f:
@@ -46,8 +46,8 @@ def configure(
     *,
     write_to_file: bool,
 ) -> None:
-    global _WRITE_TO_FILE
-    _WRITE_TO_FILE = write_to_file
+    global _write_to_file
+    _write_to_file = write_to_file
 
 
 def make_logger(

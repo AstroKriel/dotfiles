@@ -1,10 +1,12 @@
 # DotFiles
 
-This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the scripts discussed below, where each is run via:
+This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the scripts discussed below. The main entry point is run as:
 
 ```bash
-uv run <script>.py [args]
+uv run setup_files.py [args]
 ```
+
+Layer modules can be run directly with `uv run -m setup.<layer> [args]`.
 
 All scripts support `--dry-run` to preview what actions will be performed, without actually applying them. For a first-time machine setup, see the [full setup guide](#full-setup-guide) below.
 
@@ -176,4 +178,14 @@ type reload_bash
 
 # when using zsh
 type reload_zsh
+```
+
+# Python Development
+
+Python project metadata and tooling live in `pyproject.toml`. Run the main checks with:
+
+```bash
+uv run basedpyright
+uv run python -m py_compile setup_files.py setup/*.py utils/*.py
+uv build --sdist --wheel --out-dir /tmp/dotfiles-build-check
 ```
