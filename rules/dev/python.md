@@ -542,6 +542,7 @@ Fields
 | Case | lowercase, unless referring to a named thing: a function, class, constant, or variable |
 | Length | a few words to one sentence; never a paragraph |
 | Purpose | only three reasons to comment: section structure, non-obvious constraints or invariants, and algorithmic decisions where the why is not derivable from the code |
+| Formatting | use backticks for parameter names, flag names, config keys, filenames, and literal values: `` `param_name` ``, `` `--dry-run` ``, `` `this-system.toml` ``, `` `True` `` |
 | Silence | leave obvious code uncommented: standard NumPy idioms, straightforward validation calls, and self-documenting function names need no explanation |
 
 ### Section Markers
@@ -583,6 +584,6 @@ numpy.multiply(
 | Rule | |
 |---|---|
 | Exception types | use builtins: `ValueError`, `TypeError`, `KeyError`, `RuntimeError`, `FileNotFoundError` |
-| Messages | always include the parameter name; describe what was wrong and what was expected |
-| Formatting | use backticks for variable/parameter names: `` f"`{param_name}` must be one of ..." `` |
+| Messages | always include the relevant parameter, flag, config key, or filename; describe what was wrong and what was expected |
+| Formatting | use backticks for parameter names, flag names, config keys, filenames, and literal values: `` f"`{param_name}` must be one of ..." ``, `` "`--dry-run` requires ..." `` |
 | Soft errors | functions that check conditions may accept `raise_error: bool = True`, raise when `True`, log/warn when `False` |

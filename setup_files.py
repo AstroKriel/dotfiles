@@ -38,7 +38,7 @@ def validate_profile(
     is_valid = True
     known_shells = {shell_config.name for shell_config in setup_shell.SHELLS}
     if profile.shell is not None and profile.shell not in known_shells:
-        _log_message(f"Unknown shell: {profile.shell}")
+        _log_message(f"Unknown `shell` in `this-system.toml`: `{profile.shell}`")
         is_valid = False
     subscription_groups = [
         ("editor", profile.editors, setup_editors.EDITORS),
@@ -49,7 +49,7 @@ def validate_profile(
         unknown_subscription_keys = sorted(set(subscribed_keys) - set(available_configs))
         if unknown_subscription_keys:
             _log_message(
-                f"Unknown {subscription_kind}(s): "
+                f"Unknown `{subscription_kind}` subscription(s): "
                 f"{', '.join(unknown_subscription_keys)}",
             )
             is_valid = False
@@ -84,7 +84,7 @@ def validate_profile(
         missing_platform_tags = sorted(set(extra.requires) - set(profile.platforms))
         if missing_platform_tags:
             _log_message(
-                f"Extra `{extra_key}` is missing platform tag(s): "
+                f"`extras` subscription `{extra_key}` is missing platform tag(s): "
                 f"{', '.join(missing_platform_tags)}",
             )
             is_valid = False
@@ -102,12 +102,6 @@ def main():
         description="Set up the full dotfiles environment from a system profile.",
     )
     parser.add_argument(
-        "shell",
-        nargs="?",
-        choices=[shell_config.name for shell_config in setup_shell.SHELLS],
-        help="Shell to activate, overriding the selected profile shell",
-    )
-    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print actions without applying them",
@@ -118,10 +112,6 @@ def main():
         help="Remove dotfile symlinks for the selected profile, or all if no profile exists",
     )
     parser.add_argument(
-        "--profile",
-        help="Load selected configs from profiles/<name>.toml",
-    )
-    parser.add_argument(
         "--check-profile",
         action="store_true",
         help="Validate profile subscriptions and exit without applying changes",
@@ -130,19 +120,17 @@ def main():
     dry_run = cast(bool, args.dry_run)
     remove_symlinks = cast(bool, args.remove_symlinks)
     check_profile = cast(bool, args.check_profile)
-    profile_name = cast(str | None, args.profile)
-    shell_override = cast(str | None, args.shell)
     log_messages.configure(write_to_file=not (dry_run or check_profile))
     profile = load_profiles.load_profile(
-        profile_name=profile_name,
         required=not remove_symlinks,
     )
     if check_profile:
         if profile is None:
-            parser.error("profile is required for --check-profile")
+            parser.error("`this-system.toml` is required for `--check-profile`")
         if not validate_profile(profile=profile):
             raise SystemExit(1)
         return
+    ## no `this-system.toml` means remove all known links
     if remove_symlinks:
         setup_shell.remove_symlinks(
             dry_run=dry_run,
@@ -161,12 +149,15 @@ def main():
         )
         return
     if profile is None:
-        parser.error("profile is required unless --remove-symlinks is specified")
-    shell = shell_override or profile.shell
-    if shell is None:
-        parser.error("shell is required unless set by profile")
+        parser.error("`this-system.toml` is required unless `--remove-symlinks` is specified")
+    shell_name = profile.shell
+    if shell_name is None:
+        parser.error(
+            "`shell` is missing from `this-system.toml`; "
+            'add `shell = "zsh"` or `shell = "bash"`.',
+        )
     setup_shell.run(
-        shell=shell,
+        shell=shell_name,
         dry_run=dry_run,
     )
     setup_tools.run(

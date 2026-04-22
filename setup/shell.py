@@ -13,6 +13,7 @@ import shutil
 from typing import cast
 
 ## local
+from utils import load_profiles
 from utils import log_messages, apply_shell_actions
 
 ##
@@ -69,13 +70,13 @@ def change_login_shell(
     shell: str,
     dry_run: bool = False,
 ):
-    ## resolve full path to shell binary
+    ## resolve full path to `shell` binary
     shell_path = shutil.which(shell)
     if not shell_path:
-        ## shell not found: log warning and exit
-        _log_message(f"Shell '{shell}' not found in PATH.")
+        ## `shell` not found
+        _log_message(f"`shell` value `{shell}` was not found in `$PATH`.")
         return
-    ## check if shell is already set
+    ## check if `shell` is already set
     current_shell = os.environ.get("SHELL", "")
     if current_shell != shell_path:
         apply_shell_actions.run_command(
@@ -86,7 +87,7 @@ def change_login_shell(
             capture_output=False,
         )
     else:
-        ## shell is already correctly set
+        ## `shell` is already correctly set
         _log_message(f"Login shell is already set to: {shell_path}")
 
 ##
@@ -162,20 +163,22 @@ def main():
         description="Symlink shell configuration files.",
     )
     parser.add_argument(
-        "shell",
-        choices=[s.name for s in SHELLS],
-        help="Shell to activate",
-    )
-    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Print actions without applying them",
     )
     args = parser.parse_args()
-    shell_name = cast(str, args.shell)
     dry_run = cast(bool, args.dry_run)
+    profile = load_profiles.load_profile(required=True)
+    if profile is None:
+        parser.error("`this-system.toml` is required")
+    if profile.shell is None:
+        parser.error(
+            "`shell` is missing from `this-system.toml`; "
+            'add `shell = "zsh"` or `shell = "bash"`.',
+        )
     run(
-        shell=shell_name,
+        shell=profile.shell,
         dry_run=dry_run,
     )
 

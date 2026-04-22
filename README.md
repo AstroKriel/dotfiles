@@ -16,7 +16,7 @@ The active system profile is selected by `this-system.toml`, which is intentiona
 ln -s profiles/arch-x11.toml this-system.toml
 ```
 
-Pass `--profile <name>` to use `profiles/<name>.toml` directly for one command.
+Copying a tracked profile to `this-system.toml` also works. The setup scripts do not accept a one-off profile flag; update `this-system.toml` when changing the system's long-term profile.
 
 Profiles subscribe to repo-visible config names. Editors and tools use their folder names, while extras use paths relative to `extras/`:
 
@@ -28,23 +28,23 @@ extras = ["arch-x11/touchpad-workspace-gestures.conf"]
 
 `setup_files.py` is the main entry point. It orchestrates the profile-backed layer modules under `setup/`: shell, tools, editors, and extras.
 
-`uv run -m setup.shell` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or to pick up config changes.
+`uv run -m setup.shell` sets the login shell from `this-system.toml` and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to pick up shell config changes.
 
-`uv run -m setup.tools` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped; pass `--check-only` to report what subscribed tools are detected. Use `--tool <name>` for a one-off subscribed tool, or `--all` to ignore tool subscriptions. The following tools are supported:
+`uv run -m setup.tools` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped. Pass `--which <name>` to apply one subscribed tool, or `--all` to apply every subscribed tool in `this-system.toml`; omitting both is an error. Add `--check-only` to report which selected tools are detected without applying changes. The following tools are supported:
 - [Ghostty](https://ghostty.org): fast, native terminal emulator
 - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
 - [Yazi](https://yazi-rs.github.io): terminal file manager
 
-`uv run -m setup.editors` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped. Use `--editor <name>` for a one-off subscribed editor, or `--all` to ignore editor subscriptions.
+`uv run -m setup.editors` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped. Pass `--which <name>` to apply one subscribed editor, or `--all` to apply every subscribed editor in `this-system.toml`; omitting both is an error.
 
-For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `keybindings/`, then run `uv run -m setup.editors` to regenerate the tracked JSON files. Do not hand-edit generated `settings.json`, `keymap.json`, or `keybindings.json` as canonical config.
+For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `keybindings/`, then run `uv run -m setup.editors --which zed` or `uv run -m setup.editors --which vscode` to regenerate the tracked JSON files. Do not hand-edit generated `settings.json`, `keymap.json`, or `keybindings.json` as canonical config.
 
-`uv run -m setup.extras` applies optional platform-specific configs, such as macOS keybindings. Use `--extra <extras-relative-path>` for a one-off subscribed extra, or `--all` to ignore extra subscriptions.
+`uv run -m setup.extras` applies optional platform-specific configs, such as macOS keybindings. Pass `--which <extras-relative-path>` to apply one subscribed extra, or `--all` to apply every subscribed extra in `this-system.toml`; omitting both is an error.
 
 `uv run -m setup.rules` links tracked rule files into `~/.rules/`.
 
-`setup_files.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `bash` or `zsh` for initial setup on a new machine, `--check-profile` to validate the selected profile without changing the system, or `--remove-symlinks` to tear everything down.
+`setup_files.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `--check-profile` to validate `this-system.toml` without changing the system, or `--remove-symlinks` to tear everything down.
 
 # Full Setup Guide
 
@@ -154,7 +154,9 @@ brew install yazi ffmpeg
 ## Step 6: Run setup
 
 ```bash
-uv run setup_files.py zsh
+cd DotFiles
+ln -s profiles/arch-x11.toml this-system.toml
+uv run setup_files.py
 ```
 
 Open a new terminal to pick up the shell changes.

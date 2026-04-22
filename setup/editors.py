@@ -312,7 +312,7 @@ def get_selected_editors(
         return EDITORS
     unknown_editor_keys = sorted(set(editor_keys) - set(EDITORS))
     if unknown_editor_keys:
-        raise KeyError(f"Unknown editor(s): {', '.join(unknown_editor_keys)}")
+        raise KeyError(f"Unknown `--which` editor(s): {', '.join(unknown_editor_keys)}")
     return {
         editor_key: EDITORS[editor_key]
         for editor_key in editor_keys
@@ -321,21 +321,17 @@ def get_selected_editors(
 
 def resolve_selected_editors(
     *,
-    subscribed_editor_keys: tuple[str, ...] | None,
+    subscribed_editor_keys: tuple[str, ...],
     requested_editor_keys: tuple[str, ...],
     include_all: bool,
-) -> tuple[str, ...] | None:
+) -> tuple[str, ...]:
     if include_all:
-        return None
-    if not requested_editor_keys:
         return subscribed_editor_keys
     get_selected_editors(editor_keys=requested_editor_keys)
-    if subscribed_editor_keys is None:
-        return requested_editor_keys
     unsubscribed_editor_keys = sorted(set(requested_editor_keys) - set(subscribed_editor_keys))
     if unsubscribed_editor_keys:
         raise KeyError(
-            "Requested editor(s) are not subscribed by the active profile: "
+            "Requested `--which` editor(s) are not subscribed in `this-system.toml`: "
             f"{', '.join(unsubscribed_editor_keys)}",
         )
     return requested_editor_keys
@@ -395,31 +391,31 @@ def main():
         help="Print actions without applying them",
     )
     parser.add_argument(
-        "--profile",
-        help="Load selected editors from profiles/<name>.toml",
-    )
-    parser.add_argument(
-        "--editor",
+        "--which",
         action="append",
         choices=sorted(EDITORS),
         default=[],
+        metavar="EDITOR",
         help="Apply one subscribed editor. Can be passed multiple times",
     )
     parser.add_argument(
         "--all",
         action="store_true",
-        help="Apply all known editors, ignoring profile editor subscriptions",
+        help="Apply all subscribed editors from `this-system.toml`",
     )
     args = parser.parse_args()
     include_all = cast(bool, args.all)
-    requested_editor_keys = tuple(cast(list[str], args.editor))
-    profile_name = cast(str | None, args.profile)
+    requested_editor_keys = tuple(cast(list[str], args.which))
     dry_run = cast(bool, args.dry_run)
     if include_all and requested_editor_keys:
-        parser.error("--all cannot be combined with --editor")
-    profile = load_profiles.load_profile(profile_name=profile_name)
+        parser.error("`--all` cannot be combined with `--which`")
+    if not include_all and not requested_editor_keys:
+        parser.error("pass `--all` or at least one `--which`")
+    profile = load_profiles.load_profile(required=True)
+    if profile is None:
+        parser.error("`this-system.toml` is required")
     editor_keys = resolve_selected_editors(
-        subscribed_editor_keys=profile.editors if profile is not None else None,
+        subscribed_editor_keys=profile.editors,
         requested_editor_keys=requested_editor_keys,
         include_all=include_all,
     )

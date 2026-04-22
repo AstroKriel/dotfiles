@@ -15,7 +15,6 @@ from typing import cast
 ##
 
 DOTFILES_DIR = Path(__file__).resolve().parent.parent
-PROFILES_DIR = DOTFILES_DIR / "profiles"
 THIS_SYSTEM_PROFILE_PATH = DOTFILES_DIR / "this-system.toml"
 
 ##
@@ -40,31 +39,22 @@ class SystemProfile:
 
 def load_profile(
     *,
-    profile_name: str | None = None,
     required: bool = False,
 ) -> SystemProfile | None:
-    """Load a named profile or the local `this-system.toml` profile."""
-    profile_path = resolve_profile_path(profile_name=profile_name)
+    """Load the local `this-system.toml` profile."""
+    profile_path = resolve_profile_path()
     if profile_path is None:
         if required:
             raise FileNotFoundError(
-                "No system profile found. Create `this-system.toml` or pass `--profile <name>`.",
+                "No system profile found. Create `this-system.toml` from a tracked profile.",
             )
         return None
     raw_profile = cast(dict[str, object], tomllib.loads(profile_path.read_text()))
     return create_profile(raw_profile=raw_profile)
 
 
-def resolve_profile_path(
-    *,
-    profile_name: str | None,
-) -> Path | None:
-    """Resolve the profile path from a profile name or `this-system.toml`."""
-    if profile_name is not None:
-        profile_path = PROFILES_DIR / f"{profile_name}.toml"
-        if not profile_path.exists():
-            raise FileNotFoundError(f"Profile `{profile_name}` not found at: {profile_path}")
-        return profile_path
+def resolve_profile_path() -> Path | None:
+    """Resolve the local `this-system.toml` profile path."""
     if THIS_SYSTEM_PROFILE_PATH.exists() or THIS_SYSTEM_PROFILE_PATH.is_symlink():
         return THIS_SYSTEM_PROFILE_PATH
     return None

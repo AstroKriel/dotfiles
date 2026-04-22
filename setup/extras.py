@@ -111,7 +111,7 @@ def get_selected_extras(
         return EXTRAS
     unknown_extra_keys = sorted(set(extra_keys) - set(EXTRAS))
     if unknown_extra_keys:
-        raise KeyError(f"Unknown extra(s): {', '.join(unknown_extra_keys)}")
+        raise KeyError(f"Unknown `--which` extra(s): {', '.join(unknown_extra_keys)}")
     return {
         extra_key: EXTRAS[extra_key]
         for extra_key in extra_keys
@@ -120,21 +120,17 @@ def get_selected_extras(
 
 def resolve_selected_extras(
     *,
-    subscribed_extra_keys: tuple[str, ...] | None,
+    subscribed_extra_keys: tuple[str, ...],
     requested_extra_keys: tuple[str, ...],
     include_all: bool,
-) -> tuple[str, ...] | None:
+) -> tuple[str, ...]:
     if include_all:
-        return None
-    if not requested_extra_keys:
         return subscribed_extra_keys
     get_selected_extras(extra_keys=requested_extra_keys)
-    if subscribed_extra_keys is None:
-        return requested_extra_keys
     unsubscribed_extra_keys = sorted(set(requested_extra_keys) - set(subscribed_extra_keys))
     if unsubscribed_extra_keys:
         raise KeyError(
-            "Requested extra(s) are not subscribed by the active profile: "
+            "Requested `--which` extra(s) are not subscribed in `this-system.toml`: "
             f"{', '.join(unsubscribed_extra_keys)}",
         )
     return requested_extra_keys
@@ -189,38 +185,38 @@ def main() -> None:
         help="Print actions without applying them",
     )
     parser.add_argument(
-        "--profile",
-        help="Load selected extras from profiles/<name>.toml",
-    )
-    parser.add_argument(
-        "--extra",
+        "--which",
         action="append",
         choices=sorted(EXTRAS),
         default=[],
+        metavar="EXTRA",
         help="Apply one subscribed extra. Can be passed multiple times",
     )
     parser.add_argument(
         "--all",
         action="store_true",
-        help="Apply all known extras, ignoring profile extra subscriptions",
+        help="Apply all subscribed extras from `this-system.toml`",
     )
     args = parser.parse_args()
     include_all = cast(bool, args.all)
-    requested_extra_keys = tuple(cast(list[str], args.extra))
-    profile_name = cast(str | None, args.profile)
+    requested_extra_keys = tuple(cast(list[str], args.which))
     dry_run = cast(bool, args.dry_run)
     if include_all and requested_extra_keys:
-        parser.error("--all cannot be combined with --extra")
-    profile = load_profiles.load_profile(profile_name=profile_name)
+        parser.error("`--all` cannot be combined with `--which`")
+    if not include_all and not requested_extra_keys:
+        parser.error("pass `--all` or at least one `--which`")
+    profile = load_profiles.load_profile(required=True)
+    if profile is None:
+        parser.error("`this-system.toml` is required")
     extra_keys = resolve_selected_extras(
-        subscribed_extra_keys=profile.extras if profile is not None else None,
+        subscribed_extra_keys=profile.extras,
         requested_extra_keys=requested_extra_keys,
         include_all=include_all,
     )
     run(
         dry_run=dry_run,
         extra_keys=extra_keys,
-        platform_tags=profile.platforms if profile is not None else None,
+        platform_tags=profile.platforms,
     )
 
 ##

@@ -94,7 +94,7 @@ def get_selected_tools(
         return TOOLS
     unknown_tool_keys = sorted(set(tool_keys) - set(TOOLS))
     if unknown_tool_keys:
-        raise KeyError(f"Unknown tool(s): {', '.join(unknown_tool_keys)}")
+        raise KeyError(f"Unknown `--which` tool(s): {', '.join(unknown_tool_keys)}")
     return {
         tool_key: TOOLS[tool_key]
         for tool_key in tool_keys
@@ -103,21 +103,17 @@ def get_selected_tools(
 
 def resolve_selected_tools(
     *,
-    subscribed_tool_keys: tuple[str, ...] | None,
+    subscribed_tool_keys: tuple[str, ...],
     requested_tool_keys: tuple[str, ...],
     include_all: bool,
-) -> tuple[str, ...] | None:
+) -> tuple[str, ...]:
     if include_all:
-        return None
-    if not requested_tool_keys:
         return subscribed_tool_keys
     get_selected_tools(tool_keys=requested_tool_keys)
-    if subscribed_tool_keys is None:
-        return requested_tool_keys
     unsubscribed_tool_keys = sorted(set(requested_tool_keys) - set(subscribed_tool_keys))
     if unsubscribed_tool_keys:
         raise KeyError(
-            "Requested tool(s) are not subscribed by the active profile: "
+            "Requested `--which` tool(s) are not subscribed in `this-system.toml`: "
             f"{', '.join(unsubscribed_tool_keys)}",
         )
     return requested_tool_keys
@@ -241,32 +237,32 @@ def main():
         help="Only check installed tools and exit",
     )
     parser.add_argument(
-        "--profile",
-        help="Load selected tools from profiles/<name>.toml",
-    )
-    parser.add_argument(
-        "--tool",
+        "--which",
         action="append",
         choices=sorted(TOOLS),
         default=[],
+        metavar="TOOL",
         help="Apply one subscribed tool. Can be passed multiple times",
     )
     parser.add_argument(
         "--all",
         action="store_true",
-        help="Apply all known tools, ignoring profile tool subscriptions",
+        help="Apply all subscribed tools from `this-system.toml`",
     )
     args = parser.parse_args()
     include_all = cast(bool, args.all)
-    requested_tool_keys = tuple(cast(list[str], args.tool))
-    profile_name = cast(str | None, args.profile)
+    requested_tool_keys = tuple(cast(list[str], args.which))
     dry_run = cast(bool, args.dry_run)
     check_only = cast(bool, args.check_only)
     if include_all and requested_tool_keys:
-        parser.error("--all cannot be combined with --tool")
-    profile = load_profiles.load_profile(profile_name=profile_name)
+        parser.error("`--all` cannot be combined with `--which`")
+    if not include_all and not requested_tool_keys:
+        parser.error("pass `--all` or at least one `--which`")
+    profile = load_profiles.load_profile(required=True)
+    if profile is None:
+        parser.error("`this-system.toml` is required")
     tool_keys = resolve_selected_tools(
-        subscribed_tool_keys=profile.tools if profile is not None else None,
+        subscribed_tool_keys=profile.tools,
         requested_tool_keys=requested_tool_keys,
         include_all=include_all,
     )
