@@ -137,11 +137,11 @@ def merge_config_modules(
             with module.open("r", encoding="utf-8") as f:
                 raw_content = f.read()
                 filtered_content = filter_jsonc_comments(raw_content)
-                content = json.loads(filtered_content)
-                if not isinstance(content, dict):
+                dict_content = cast(object, json.loads(filtered_content))
+                if not isinstance(dict_content, dict):
                     _log_message(f"Skipping. Expected object config in: {module}")
                     return None
-                merged_dict.update(cast(dict[str, object], content))
+                merged_dict.update(cast(dict[str, object], dict_content))
         return merged_dict
     elif mode == "list":
         merged_list: list[object] = []
@@ -149,11 +149,11 @@ def merge_config_modules(
             with module.open("r", encoding="utf-8") as f:
                 raw_content = f.read()
                 filtered_content = filter_jsonc_comments(raw_content)
-                content = json.loads(filtered_content)
-                if not isinstance(content, list):
+                list_content = cast(object, json.loads(filtered_content))
+                if not isinstance(list_content, list):
                     _log_message(f"Skipping. Expected list config in: {module}")
                     return None
-                merged_list.extend(cast(list[object], content))
+                merged_list.extend(cast(list[object], list_content))
         return merged_list
     else:
         _log_message(f"Error: Unsupported mode `{mode}`")
@@ -411,16 +411,20 @@ def main():
         help="Apply all known editors, ignoring profile editor subscriptions",
     )
     args = parser.parse_args()
-    if args.all and args.editor:
+    include_all = cast(bool, args.all)
+    requested_editor_keys = tuple(cast(list[str], args.editor))
+    profile_name = cast(str | None, args.profile)
+    dry_run = cast(bool, args.dry_run)
+    if include_all and requested_editor_keys:
         parser.error("--all cannot be combined with --editor")
-    profile = load_profiles.load_profile(profile_name=args.profile)
+    profile = load_profiles.load_profile(profile_name=profile_name)
     editor_keys = resolve_selected_editors(
         subscribed_editor_keys=profile.editors if profile is not None else None,
-        requested_editor_keys=tuple(args.editor),
-        include_all=args.all,
+        requested_editor_keys=requested_editor_keys,
+        include_all=include_all,
     )
     run(
-        dry_run=args.dry_run,
+        dry_run=dry_run,
         editor_keys=editor_keys,
     )
 

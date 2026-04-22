@@ -187,5 +187,4 @@ Python project metadata and tooling live in `pyproject.toml`. Run the main check
 ```bash
 uv run basedpyright
 uv run python -m py_compile setup_files.py setup/*.py utils/*.py
-uv build --sdist --wheel --out-dir /tmp/dotfiles-build-check
 ```

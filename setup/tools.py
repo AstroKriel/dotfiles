@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import shutil
 import sys
+from typing import cast
 
 ## local
 from utils import load_profiles
@@ -256,17 +257,22 @@ def main():
         help="Apply all known tools, ignoring profile tool subscriptions",
     )
     args = parser.parse_args()
-    if args.all and args.tool:
+    include_all = cast(bool, args.all)
+    requested_tool_keys = tuple(cast(list[str], args.tool))
+    profile_name = cast(str | None, args.profile)
+    dry_run = cast(bool, args.dry_run)
+    check_only = cast(bool, args.check_only)
+    if include_all and requested_tool_keys:
         parser.error("--all cannot be combined with --tool")
-    profile = load_profiles.load_profile(profile_name=args.profile)
+    profile = load_profiles.load_profile(profile_name=profile_name)
     tool_keys = resolve_selected_tools(
         subscribed_tool_keys=profile.tools if profile is not None else None,
-        requested_tool_keys=tuple(args.tool),
-        include_all=args.all,
+        requested_tool_keys=requested_tool_keys,
+        include_all=include_all,
     )
     run(
-        dry_run=args.dry_run,
-        check_only=args.check_only,
+        dry_run=dry_run,
+        check_only=check_only,
         tool_keys=tool_keys,
     )
 

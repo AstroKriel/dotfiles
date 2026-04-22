@@ -8,6 +8,7 @@
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 ## local
 from utils import load_profiles
 from utils import log_messages, apply_shell_actions
@@ -204,16 +205,20 @@ def main() -> None:
         help="Apply all known extras, ignoring profile extra subscriptions",
     )
     args = parser.parse_args()
-    if args.all and args.extra:
+    include_all = cast(bool, args.all)
+    requested_extra_keys = tuple(cast(list[str], args.extra))
+    profile_name = cast(str | None, args.profile)
+    dry_run = cast(bool, args.dry_run)
+    if include_all and requested_extra_keys:
         parser.error("--all cannot be combined with --extra")
-    profile = load_profiles.load_profile(profile_name=args.profile)
+    profile = load_profiles.load_profile(profile_name=profile_name)
     extra_keys = resolve_selected_extras(
         subscribed_extra_keys=profile.extras if profile is not None else None,
-        requested_extra_keys=tuple(args.extra),
-        include_all=args.all,
+        requested_extra_keys=requested_extra_keys,
+        include_all=include_all,
     )
     run(
-        dry_run=args.dry_run,
+        dry_run=dry_run,
         extra_keys=extra_keys,
         platform_tags=profile.platforms if profile is not None else None,
     )

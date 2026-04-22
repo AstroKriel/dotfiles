@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import os
 from pathlib import Path
 import shutil
+from typing import cast
 
 ## local
 from utils import log_messages, apply_shell_actions
@@ -171,9 +172,11 @@ def main():
         help="Print actions without applying them",
     )
     args = parser.parse_args()
+    shell_name = cast(str, args.shell)
+    dry_run = cast(bool, args.dry_run)
     run(
-        shell=args.shell,
-        dry_run=args.dry_run,
+        shell=shell_name,
+        dry_run=dry_run,
     )
 
 ##

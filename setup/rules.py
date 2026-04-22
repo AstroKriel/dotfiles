@@ -7,6 +7,7 @@
 ## stdlib
 import argparse
 from pathlib import Path
+from typing import cast
 
 ## local
 from utils import log_messages, apply_shell_actions
@@ -71,7 +72,8 @@ def main() -> None:
         help="Print actions without applying them",
     )
     args = parser.parse_args()
-    run(dry_run=args.dry_run)
+    dry_run = cast(bool, args.dry_run)
+    run(dry_run=dry_run)
 
 ##
 ## === ENTRY POINT

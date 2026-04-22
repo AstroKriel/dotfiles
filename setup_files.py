@@ -127,9 +127,9 @@ def main():
         help="Validate profile subscriptions and exit without applying changes",
     )
     args = parser.parse_args()
-    dry_run = bool(args.dry_run)
-    remove_symlinks = bool(args.remove_symlinks)
-    check_profile = bool(args.check_profile)
+    dry_run = cast(bool, args.dry_run)
+    remove_symlinks = cast(bool, args.remove_symlinks)
+    check_profile = cast(bool, args.check_profile)
     profile_name = cast(str | None, args.profile)
     shell_override = cast(str | None, args.shell)
     log_messages.configure(write_to_file=not (dry_run or check_profile))

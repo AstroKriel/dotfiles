@@ -7,6 +7,7 @@
 ## stdlib
 from pathlib import Path
 import subprocess
+from typing import cast
 
 ## local
 from utils import log_messages
@@ -41,7 +42,9 @@ def run_command(
         log_messages.log_message(script_name=script_name, message=f"Done: {description}")
         return True
     except subprocess.CalledProcessError as e:
-        error_output = e.stderr.strip() if (capture_output and e.stderr) else "(no output captured)"
+        stderr_value = cast(object, e.stderr)
+        stderr = stderr_value if isinstance(stderr_value, str) else ""
+        error_output = stderr.strip() if (capture_output and stderr) else "(no output captured)"
         log_messages.log_message(script_name=script_name, message=f"Failed: {description}\n{error_output}")
         return False
 

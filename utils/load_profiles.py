@@ -8,7 +8,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 import tomllib
-from typing import Any
+from typing import cast
 
 ##
 ## === PROFILE CONFIG
@@ -51,7 +51,7 @@ def load_profile(
                 "No system profile found. Create `this-system.toml` or pass `--profile <name>`.",
             )
         return None
-    raw_profile = tomllib.loads(profile_path.read_text())
+    raw_profile = cast(dict[str, object], tomllib.loads(profile_path.read_text()))
     return create_profile(raw_profile=raw_profile)
 
 
@@ -72,7 +72,7 @@ def resolve_profile_path(
 
 def create_profile(
     *,
-    raw_profile: dict[str, Any],
+    raw_profile: dict[str, object],
 ) -> SystemProfile:
     """Create a typed system profile from parsed TOML data."""
     return SystemProfile(
@@ -101,7 +101,7 @@ def create_profile(
 
 def _get_optional_string(
     *,
-    raw_profile: dict[str, Any],
+    raw_profile: dict[str, object],
     key: str,
 ) -> str | None:
     value = raw_profile.get(key)
@@ -114,14 +114,15 @@ def _get_optional_string(
 
 def _get_string_tuple(
     *,
-    raw_profile: dict[str, Any],
+    raw_profile: dict[str, object],
     key: str,
 ) -> tuple[str, ...]:
     value = raw_profile.get(key, [])
     if not isinstance(value, list):
         raise TypeError(f"`{key}` must be a list of strings.")
-    if not all(isinstance(item, str) for item in value):
+    value_items = cast(list[object], value)
+    if not all(isinstance(item, str) for item in value_items):
         raise TypeError(f"`{key}` must contain only strings.")
-    return tuple(value)
+    return tuple(cast(list[str], value_items))
 
 ## } MODULE
