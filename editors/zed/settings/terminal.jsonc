@@ -1,5 +1,7 @@
 {
   "terminal": {
+    "font_family": ".ZedMono",
+    "font_size": 12,
     "detect_venv": "off"
   }
 }

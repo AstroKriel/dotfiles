@@ -7,10 +7,10 @@
 ## stdlib
 from pathlib import Path
 import subprocess
-from typing import Optional
+from typing import cast
 
 ## local
-from utils import logging
+from utils import log_messages
 
 ##
 ## === PUBLIC ACTIONS
@@ -26,12 +26,12 @@ def run_command(
     capture_output: bool = True,
 ) -> bool:
     """
-  Run a shell command with logging. Return True on success, False on failure.
+  Run a shell command with log_messages. Return True on success, False on failure.
   """
     if dry_run:
-        logging.log_message(script_name=script_name, message=f"[dry-run] Would run: {description}")
+        log_messages.log_message(script_name=script_name, message=f"[dry-run] Would run: {description}")
         return True
-    logging.log_message(script_name=script_name, message=f"Running: {description}")
+    log_messages.log_message(script_name=script_name, message=f"Running: {description}")
     try:
         subprocess.run(
             args=args,
@@ -39,11 +39,13 @@ def run_command(
             capture_output=capture_output,
             text=capture_output,
         )
-        logging.log_message(script_name=script_name, message=f"Done: {description}")
+        log_messages.log_message(script_name=script_name, message=f"Done: {description}")
         return True
     except subprocess.CalledProcessError as e:
-        error_output = e.stderr.strip() if (capture_output and e.stderr) else "(no output captured)"
-        logging.log_message(script_name=script_name, message=f"Failed: {description}\n{error_output}")
+        stderr_value = cast(object, e.stderr)
+        stderr = stderr_value if isinstance(stderr_value, str) else ""
+        error_output = stderr.strip() if (capture_output and stderr) else "(no output captured)"
+        log_messages.log_message(script_name=script_name, message=f"Failed: {description}\n{error_output}")
         return False
 
 
@@ -60,13 +62,13 @@ def ensure_dir_exists(
     if directory.exists():
         return
     if dry_run:
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"[dry-run] Would create directory: {directory}",
         )
     else:
         directory.mkdir(parents=True, exist_ok=True)
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"Created directory: {directory}",
         )
@@ -77,7 +79,7 @@ def backup_file(
     target_path: Path,
     script_name: str,
     dry_run: bool = False,
-) -> Optional[Path]:
+) -> Path | None:
     """
   Backup a file or symlink at the given path.
 
@@ -92,24 +94,27 @@ def backup_file(
         try:
             ## attempt to resolve what the symlink points to (may fail if broken)
             resolved = target_path.resolve()
-            logging.log_message(
+            log_messages.log_message(
                 script_name=script_name,
-                message=f"{target_path} (symlink) -> {resolved}",
+                message=log_messages.format_dry_run(
+                    message=f"{target_path} (symlink) -> {resolved}",
+                    dry_run=dry_run,
+                ),
             )
         except Exception as e:
             ## broken or unresolvable symlink
-            logging.log_message(
+            log_messages.log_message(
                 script_name=script_name,
                 message=f"Warning: failed to resolve symlink {target_path}: {e}",
             )
         if dry_run:
-            logging.log_message(
+            log_messages.log_message(
                 script_name=script_name,
                 message=f"[dry-run] Would remove symlink: {target_path}",
             )
         else:
             target_path.unlink()
-            logging.log_message(
+            log_messages.log_message(
                 script_name=script_name,
                 message=f"Removed symlink: {target_path}",
             )
@@ -121,9 +126,12 @@ def backup_file(
         dry_run=dry_run,
     )
     if backup_path:
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
-            message=f"{target_path} -> {backup_path}",
+            message=log_messages.format_dry_run(
+                message=f"{target_path} -> {backup_path}",
+                dry_run=dry_run,
+            ),
         )
     return backup_path
 
@@ -142,7 +150,7 @@ def create_symlink(
   """
     ## source does not exist
     if not source_path.exists():
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"Skipping. {source_path} does not exist.",
         )
@@ -158,21 +166,24 @@ def create_symlink(
         return
     ## target is already correctly linked to source
     if _already_linked_correctly(target_path=target_path, source_path=source_path):
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
-            message=f"Already correctly linked: {target_path}",
+            message=log_messages.format_dry_run(
+                message=f"Already correctly linked: {target_path}",
+                dry_run=dry_run,
+            ),
         )
         return
     ## target points to something else
     if _symlink_is_broken(target_path):
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"Skipping. {target_path} is a broken symlink.",
         )
         return
     ## check types match before replacing
     if not _types_match(source_path=source_path, target_path=target_path):
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"Skipping due to a type mismatch. {target_path} is {_get_path_type(target_path)}, "
             f"but source is {_get_path_type(source_path)}.",
@@ -204,13 +215,13 @@ def remove_symlink(
     if not target_path.is_symlink():
         return
     if dry_run:
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"[dry-run] Would remove symlink: {target_path}",
         )
     else:
         target_path.unlink()
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"Removed symlink: {target_path}",
         )
@@ -225,7 +236,7 @@ def _rename_with_timestamp(
     target_path: Path,
     script_name: str,
     dry_run: bool = False,
-) -> Optional[Path]:
+) -> Path | None:
     """
   Rename a file or directory in place by appending a timestamp.
 
@@ -235,15 +246,15 @@ def _rename_with_timestamp(
     if not target_path.exists() and not target_path.is_symlink():
         return None
     ## generate a timestamped backup name
-    timestamp = logging.get_timestamp().replace(" ", ".")
+    timestamp = log_messages.get_timestamp().replace(" ", ".")
     backup_path = target_path.with_stem(f"{target_path.stem}.{timestamp}")
     if dry_run:
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"[dry-run] Would rename {target_path} -> {backup_path}",
         )
     else:
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"Renaming {target_path} -> {backup_path}",
         )
@@ -295,13 +306,13 @@ def _make_symlink(
   Create a symlink from target_path to source_path.
   """
     if dry_run:
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"[dry-run] Would symlink: {source_path} -> {target_path}",
         )
     else:
         target_path.symlink_to(source_path)
-        logging.log_message(
+        log_messages.log_message(
             script_name=script_name,
             message=f"Symlinked: {source_path} -> {target_path}",
         )

@@ -1,30 +1,54 @@
 # DotFiles
 
-This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the four scripts discussed below, where each is run via:
+This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the scripts discussed below. The main entry point is run as:
 
 ```bash
-uv run <script>.py [args]
+uv run setup_configs.py [args]
 ```
+
+Layer modules can be run directly with `uv run -m setup.<layer> [args]`.
 
 All scripts support `--dry-run` to preview what actions will be performed, without actually applying them. For a first-time machine setup, see the [full setup guide](#full-setup-guide) below.
 
-`setup_shell.py` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or to pick up config changes.
+The active system profile is selected by `this-system.toml`, which is intentionally ignored by git. Usually this should be a symlink to a tracked profile under `profiles/`:
 
-`setup_tools.py` wires up configs for all installed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so tools that are not installed yet are skipped; pass `--check-only` to report what tools detected. The following tools are supported:
+```bash
+ln -s profiles/arch-x11.toml this-system.toml
+```
+
+Copying a tracked profile to `this-system.toml` also works. The setup scripts do not accept a one-off profile flag; update `this-system.toml` when changing the system's long-term profile.
+
+Profiles subscribe to repo-visible config names. Editors and tools use their folder names, while extras use paths relative to `extras/`:
+
+```toml
+editors = ["zed"]
+tools = ["ghostty"]
+extras = ["arch-x11/touchpad-workspace-gestures.conf"]
+```
+
+`setup_configs.py` is the main entry point. It orchestrates the profile-backed layer modules under `setup/`: shell, tools, editors, and extras.
+
+`uv run -m setup.shell` sets the login shell from `this-system.toml` and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to pick up shell config changes.
+
+`uv run -m setup.tools` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped. Pass `--which <name>` to apply one subscribed tool, or `--all` to apply every subscribed tool in `this-system.toml`; omitting both is an error. Add `--check-only` to report which selected tools are detected without applying changes. The following tools are supported:
 - [Ghostty](https://ghostty.org): fast, native terminal emulator
 - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
 - [Yazi](https://yazi-rs.github.io): terminal file manager
-- [Neovim](https://neovim.io): terminal-based text editor
-- [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/): text editor with sensible batteries-included
 
-`setup_editors.py` installs extensions and applies configs for [Visual Studio Code](https://code.visualstudio.com) and [Zed](https://zed.dev). Editors not yet on the system are skipped.
+`uv run -m setup.editors` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped. Pass `--which <name>` to apply one subscribed editor, or `--all` to apply every subscribed editor in `this-system.toml`; omitting both is an error.
 
-`setup_env.py` runs the full setup chain (shell, tools, and editors) in one command. Pass `bash` or `zsh` for initial setup on a new machine, or `--remove-symlinks` to tear everything down.
+For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `keybindings/`, then run `uv run -m setup.editors --which zed` or `uv run -m setup.editors --which vscode` to regenerate the tracked JSON files. Do not hand-edit generated `settings.json`, `keymap.json`, or `keybindings.json` as canonical config.
+
+`uv run -m setup.extras` applies optional platform-specific configs, such as macOS keybindings. Pass `--which <extras-relative-path>` to apply one subscribed extra, or `--all` to apply every subscribed extra in `this-system.toml`; omitting both is an error.
+
+`uv run -m setup.rules` links tracked rule files into `~/.rules/`.
+
+`setup_configs.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `--check-profile` to validate `this-system.toml` without changing the system, or `--remove-symlinks` to tear everything down.
 
 # Full Setup Guide
 
-Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-6 clone the repo, install tools, and run the setup scripts to configure the shell, editors, and tools.
+Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-6 clone the repo, install tools, and run the setup scripts to configure the shell, editors, tools, and extras.
 
 ## Step 1: Install Homebrew
 
@@ -115,22 +139,24 @@ Install whichever tools and editors are needed. Note: `--cask` is used for GUI a
 # editors
 brew install --cask visual-studio-code
 brew install --cask zed
+brew install neovim
+brew install --cask emacs
 
 # terminals
 brew install --cask ghostty
 brew install --cask kitty
 
 # tools
-brew install neovim
 brew install tmux
 brew install yazi ffmpeg
-brew install --cask emacs
 ```
 
 ## Step 6: Run setup
 
 ```bash
-uv run setup_env.py zsh
+cd DotFiles
+ln -s profiles/arch-x11.toml this-system.toml
+uv run setup_configs.py
 ```
 
 Open a new terminal to pick up the shell changes.
@@ -154,4 +180,13 @@ type reload_bash
 
 # when using zsh
 type reload_zsh
+```
+
+# Python Development
+
+Python project metadata and tooling live in `pyproject.toml`. Run the main checks with:
+
+```bash
+uv run basedpyright
+uv run python -m py_compile setup_configs.py setup/*.py utils/*.py
 ```

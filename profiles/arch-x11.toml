@@ -1,0 +1,25 @@
+shell = "zsh"
+
+platforms = [
+  "linux",
+  "arch",
+  "x11",
+  "xfce",
+  "lightdm",
+]
+
+editors = [
+  "zed",
+]
+
+tools = [
+  "ghostty",
+  "tmux",
+  "yazi",
+]
+
+extras = [
+  "arch-x11/lightdm-locale.xprofile",
+  "arch-x11/mouse-workspace-buttons.xbindkeysrc",
+  "arch-x11/touchpad-workspace-gestures.conf",
+]

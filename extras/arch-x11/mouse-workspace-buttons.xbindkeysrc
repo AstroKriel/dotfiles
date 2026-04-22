@@ -1,0 +1,5 @@
+"xdotool set_desktop --relative -- -1"
+  b:8
+
+"xdotool set_desktop --relative -- +1"
+  b:9

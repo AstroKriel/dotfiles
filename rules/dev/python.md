@@ -51,7 +51,7 @@ dependencies = ["<package-name>"]
 <package-name> = { path = "<relative-path>", editable = true }
 ```
 
-Use basedpyright for type checking (not mypy, not pyright). Include all relevant source and test directories. Suppressed rules must have an inline comment explaining why:
+Use basedpyright for type checking (not mypy, not pyright). Include all relevant source and test directories. Suppressed rules must have an inline comment explaining why. The suppression list below is a menu of acceptable suppressions, not a block to copy wholesale; only add suppressions that are needed for the project after first trying to fix the code:
 
 ```toml
 [tool.pyright]
@@ -63,6 +63,7 @@ reportMissingImports = true
 reportMissingTypeStubs = false  # third-party packages rarely ship stubs
 
 ## --- rules to suppress
+## Add only the suppressions that this project actually needs.
 reportExplicitAny = "none"  # numpy/scipy code uses Any extensively; unavoidable
 reportAny = "none"  # noisy cascade of the above
 reportUnknownMemberType = "none"  # cascade from untyped third-party stubs
@@ -260,6 +261,7 @@ if __name__ == "__main__":
 | `## local` | imports from within the current project |
 | Per line | one import per line |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
+| Module imports | import the module, not individual functions: `from jormi.ww_types import check_types` then `check_types.ensure_nonempty_string(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site — use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
 | Long imports | use parentheses with trailing commas |
 
 ---
@@ -341,7 +343,7 @@ class MessageType(Enum):
 | Rule | |
 |---|---|
 | Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; keyword-only arguments enforced with `*` for any function with more than one parameter |
-| Call sites | every argument on its own line with a trailing comma, even for single-argument calls |
+| Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line |
 | Size | typically 20-80 lines, single-responsibility |
 | Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
 | Validation | always separated into `ensure_*` / `check_*` / `_validate_*` helpers, called before any logic |
@@ -540,6 +542,7 @@ Fields
 | Case | lowercase, unless referring to a named thing: a function, class, constant, or variable |
 | Length | a few words to one sentence; never a paragraph |
 | Purpose | only three reasons to comment: section structure, non-obvious constraints or invariants, and algorithmic decisions where the why is not derivable from the code |
+| Formatting | use backticks for parameter names, flag names, config keys, filenames, and literal values: `` `param_name` ``, `` `--dry-run` ``, `` `this-system.toml` ``, `` `True` `` |
 | Silence | leave obvious code uncommented: standard NumPy idioms, straightforward validation calls, and self-documenting function names need no explanation |
 
 ### Section Markers
@@ -581,6 +584,6 @@ numpy.multiply(
 | Rule | |
 |---|---|
 | Exception types | use builtins: `ValueError`, `TypeError`, `KeyError`, `RuntimeError`, `FileNotFoundError` |
-| Messages | always include the parameter name; describe what was wrong and what was expected |
-| Formatting | use backticks for variable/parameter names: `` f"`{param_name}` must be one of ..." `` |
+| Messages | always include the relevant parameter, flag, config key, or filename; describe what was wrong and what was expected |
+| Formatting | use backticks for parameter names, flag names, config keys, filenames, and literal values: `` f"`{param_name}` must be one of ..." ``, `` "`--dry-run` requires ..." `` |
 | Soft errors | functions that check conditions may accept `raise_error: bool = True`, raise when `True`, log/warn when `False` |
