@@ -1,0 +1,9 @@
+[
+  {
+    "context": "AcpThread > Editor",
+    "bindings": {
+      // temporary workaround: Zed maps this to block comments here
+      "shift-alt-a": "agent::AllowOnce",
+    },
+  },
+]

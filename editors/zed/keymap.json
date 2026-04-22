@@ -1,5 +1,11 @@
 [
   {
+    "context": "AcpThread > Editor",
+    "bindings": {
+      "shift-alt-a": "agent::AllowOnce",
+    },
+  },
+  {
     "context": "Editor",
     "bindings": {
       "super-alt-f": [
