@@ -5,22 +5,22 @@
       "super-alt-f": [
         "buffer_search::Deploy",
         {
-          "replace_enabled": false
-        }
+          "replace_enabled": false,
+        },
       ],
       "super-alt-r": [
         "buffer_search::Deploy",
         {
-          "replace_enabled": true
-        }
+          "replace_enabled": true,
+        },
       ],
       "super-alt-k": "editor::ToggleSoftWrap",
       "super-alt-m": "editor::ToggleMinimap",
       "super-alt-up": "editor::AddSelectionAbove",
       "super-alt-down": "editor::AddSelectionBelow",
       "super-alt-ctrl-up": "editor::MoveLineUp",
-      "super-alt-ctrl-down": "editor::MoveLineDown"
-    }
+      "super-alt-ctrl-down": "editor::MoveLineDown",
+    },
   },
   {
     "bindings": {
@@ -32,6 +32,7 @@
       "super-alt-/": "project_panel::ToggleFocus",
       "super-alt-.": "git_panel::ToggleFocus",
       "super-alt-'": "agent::ToggleFocus",
+      "ctrl-alt-super-'": "multi_workspace::ToggleWorkspaceSidebar",
       "super-alt-;": "terminal_panel::ToggleFocus",
       "super-alt-o": "go_to_line::Toggle",
       "super-alt-ctrl-o": "file_finder::Toggle",
@@ -41,8 +42,8 @@
       "super-alt-ctrl-.": "zed::OpenSettings",
       "super-alt-ctrl-k": "zed::OpenKeymap",
       "super-alt-ctrl-p": "command_palette::Toggle",
-      "super-alt-ctrl-/": "projects::OpenRemote"
-    }
+      "super-alt-ctrl-/": "projects::OpenRemote",
+    },
   },
   {
     "context": "Pane",
@@ -54,23 +55,23 @@
       "super-alt-ctrl-[": [
         "workspace::MoveItemToPaneInDirection",
         {
-          "direction": "left"
-        }
+          "direction": "left",
+        },
       ],
       "super-alt-ctrl-]": [
         "workspace::MoveItemToPaneInDirection",
         {
-          "direction": "right"
-        }
+          "direction": "right",
+        },
       ],
       "super-alt-w": "pane::CloseActiveItem",
       "super-alt-t": "pane::ReopenClosedItem",
       "super-alt-ctrl-w": [
         "pane::CloseOtherItems",
         {
-          "close_pinned": false
-        }
-      ]
-    }
-  }
+          "close_pinned": false,
+        },
+      ],
+    },
+  },
 ]
