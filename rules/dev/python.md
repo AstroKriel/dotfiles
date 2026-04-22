@@ -51,7 +51,7 @@ dependencies = ["<package-name>"]
 <package-name> = { path = "<relative-path>", editable = true }
 ```
 
-Use basedpyright for type checking (not mypy, not pyright). Include all relevant source and test directories. Suppressed rules must have an inline comment explaining why:
+Use basedpyright for type checking (not mypy, not pyright). Include all relevant source and test directories. Suppressed rules must have an inline comment explaining why. The suppression list below is a menu of acceptable suppressions, not a block to copy wholesale; only add suppressions that are needed for the project after first trying to fix the code:
 
 ```toml
 [tool.pyright]
@@ -63,6 +63,7 @@ reportMissingImports = true
 reportMissingTypeStubs = false  # third-party packages rarely ship stubs
 
 ## --- rules to suppress
+## Add only the suppressions that this project actually needs.
 reportExplicitAny = "none"  # numpy/scipy code uses Any extensively; unavoidable
 reportAny = "none"  # noisy cascade of the above
 reportUnknownMemberType = "none"  # cascade from untyped third-party stubs
