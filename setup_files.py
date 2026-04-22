@@ -40,15 +40,15 @@ def validate_profile(
     if profile.shell is not None and profile.shell not in known_shells:
         _log_message(f"Unknown shell: {profile.shell}")
         is_valid = False
-    checks = [
+    subscription_groups = [
         ("editor", profile.editors, setup_editors.EDITORS),
         ("tool", profile.tools, setup_tools.TOOLS),
         ("extra", profile.extras, setup_extras.EXTRAS),
     ]
-    for label, selected, available in checks:
-        unknown = sorted(set(selected) - set(available))
+    for subscription_kind, subscribed_keys, available_configs in subscription_groups:
+        unknown = sorted(set(subscribed_keys) - set(available_configs))
         if unknown:
-            _log_message(f"Unknown {label}(s): {', '.join(unknown)}")
+            _log_message(f"Unknown {subscription_kind}(s): {', '.join(unknown)}")
             is_valid = False
     for editor_key in profile.editors:
         editor = setup_editors.EDITORS.get(editor_key)
