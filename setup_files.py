@@ -10,12 +10,12 @@ from pathlib import Path
 from typing import cast
 
 ## local
-import setup_editors
-import setup_extras
-import setup_shell
-import setup_tools
-from utils import profiles
-from utils import logging
+from setup import editors as setup_editors
+from setup import extras as setup_extras
+from setup import shell as setup_shell
+from setup import tools as setup_tools
+from utils import load_profiles
+from utils import log_messages
 
 ##
 ## === SCRIPT CONFIG
@@ -23,7 +23,7 @@ from utils import logging
 
 SCRIPT_NAME = Path(__file__).name
 
-_log_message = logging.make_logger(SCRIPT_NAME)
+_log_message = log_messages.make_logger(SCRIPT_NAME)
 
 ##
 ## === PROFILE VALIDATION
@@ -32,11 +32,11 @@ _log_message = logging.make_logger(SCRIPT_NAME)
 
 def validate_profile(
     *,
-    profile: profiles.SystemProfile,
+    profile: load_profiles.SystemProfile,
 ) -> bool:
     """Validate profile subscriptions without changing the system."""
     is_valid = True
-    known_shells = {shell.name for shell in setup_shell.SHELLS}
+    known_shells = {shell_config.name for shell_config in setup_shell.SHELLS}
     if profile.shell is not None and profile.shell not in known_shells:
         _log_message(f"Unknown shell: {profile.shell}")
         is_valid = False
@@ -101,7 +101,7 @@ def main():
     parser.add_argument(
         "shell",
         nargs="?",
-        choices=[s.name for s in setup_shell.SHELLS],
+        choices=[shell_config.name for shell_config in setup_shell.SHELLS],
         help="Shell to activate, overriding the selected profile shell",
     )
     parser.add_argument(
@@ -129,8 +129,8 @@ def main():
     check_profile = bool(args.check_profile)
     profile_name = cast(str | None, args.profile)
     shell_override = cast(str | None, args.shell)
-    logging.configure(write_to_file=not (dry_run or check_profile))
-    profile = profiles.load_profile(
+    log_messages.configure(write_to_file=not (dry_run or check_profile))
+    profile = load_profiles.load_profile(
         profile_name=profile_name,
         required=not remove_symlinks,
     )

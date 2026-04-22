@@ -12,17 +12,18 @@ from pathlib import Path
 import shutil
 
 ## local
-from utils import logging, shell_actions
+from utils import log_messages, apply_shell_actions
 
 ##
 ## === SHELL CONFIG
 ##
 
 SCRIPT_NAME = Path(__file__).name
-SHELL_DIR = Path(__file__).resolve().parent / "shell"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+SHELL_DIR = ROOT_DIR / "shell"
 HOME_DIR = Path.home()
 
-_log_message = logging.make_logger(SCRIPT_NAME)
+_log_message = log_messages.make_logger(SCRIPT_NAME)
 
 
 @dataclass
@@ -55,7 +56,7 @@ def remove_file_if_exists(
     dry_run: bool,
 ):
     if target_path.exists() or target_path.is_symlink():
-        shell_actions.backup_file(
+        apply_shell_actions.backup_file(
             target_path=target_path,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
@@ -76,7 +77,7 @@ def change_login_shell(
     ## check if shell is already set
     current_shell = os.environ.get("SHELL", "")
     if current_shell != shell_path:
-        shell_actions.run_command(
+        apply_shell_actions.run_command(
             args=["chsh", "-s", shell_path],
             script_name=SCRIPT_NAME,
             description=f"change login shell to: {shell_path}",
@@ -96,11 +97,11 @@ def remove_symlinks(
     *,
     dry_run: bool,
 ):
-    logging.configure(write_to_file=not dry_run)
+    log_messages.configure(write_to_file=not dry_run)
     _log_message("Started removing shell config symlinks")
     all_files = UTILS_FILES + [f for s in SHELLS for f in s.files]
     for file_name in all_files:
-        shell_actions.remove_symlink(
+        apply_shell_actions.remove_symlink(
             target_path=HOME_DIR / f".{file_name}",
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
@@ -113,7 +114,7 @@ def run(
     shell: str,
     dry_run: bool,
 ):
-    logging.configure(write_to_file=not dry_run)
+    log_messages.configure(write_to_file=not dry_run)
     chosen = next(s for s in SHELLS if s.name == shell)
     others = [s for s in SHELLS if s.name != shell]
     ## log start of script
@@ -122,7 +123,7 @@ def run(
     for file_name in UTILS_FILES:
         source_path = SHELL_DIR / "utils" / file_name
         target_path = HOME_DIR / f".{file_name}"
-        shell_actions.create_symlink(
+        apply_shell_actions.create_symlink(
             source_path=source_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,
@@ -132,7 +133,7 @@ def run(
     for file_name in chosen.files:
         source_path = SHELL_DIR / chosen.name / file_name
         target_path = HOME_DIR / f".{file_name}"
-        shell_actions.create_symlink(
+        apply_shell_actions.create_symlink(
             source_path=source_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,

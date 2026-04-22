@@ -24,21 +24,25 @@ tools = ["ghostty"]
 extras = ["arch-x11/touchpad-workspace-gestures.conf"]
 ```
 
-`setup_shell.py` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or to pick up config changes.
+`setup_files.py` is the main entry point. It orchestrates the profile-backed layer modules under `setup/`: shell, tools, editors, and extras.
 
-`setup_tools.py` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped; pass `--check-only` to report what subscribed tools are detected. Use `--tool <name>` for a one-off subscribed tool, or `--all` to ignore tool subscriptions. The following tools are supported:
+`uv run -m setup.shell` sets the login shell and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to switch shells or to pick up config changes.
+
+`uv run -m setup.tools` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped; pass `--check-only` to report what subscribed tools are detected. Use `--tool <name>` for a one-off subscribed tool, or `--all` to ignore tool subscriptions. The following tools are supported:
 - [Ghostty](https://ghostty.org): fast, native terminal emulator
 - [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
 - [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
 - [Yazi](https://yazi-rs.github.io): terminal file manager
 
-`setup_editors.py` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped. Use `--editor <name>` for a one-off subscribed editor, or `--all` to ignore editor subscriptions.
+`uv run -m setup.editors` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped. Use `--editor <name>` for a one-off subscribed editor, or `--all` to ignore editor subscriptions.
 
-For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `keybindings/`, then run `uv run setup_editors.py` to regenerate the tracked JSON files. Do not hand-edit generated `settings.json`, `keymap.json`, or `keybindings.json` as canonical config.
+For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `keybindings/`, then run `uv run -m setup.editors` to regenerate the tracked JSON files. Do not hand-edit generated `settings.json`, `keymap.json`, or `keybindings.json` as canonical config.
 
-`setup_extras.py` applies optional platform-specific configs, such as macOS keybindings. Use `--extra <extras-relative-path>` for a one-off subscribed extra, or `--all` to ignore extra subscriptions.
+`uv run -m setup.extras` applies optional platform-specific configs, such as macOS keybindings. Use `--extra <extras-relative-path>` for a one-off subscribed extra, or `--all` to ignore extra subscriptions.
 
-`setup_env.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `bash` or `zsh` for initial setup on a new machine, `--check-profile` to validate the selected profile without changing the system, or `--remove-symlinks` to tear everything down.
+`uv run -m setup.rules` links tracked rule files into `~/.rules/`.
+
+`setup_files.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `bash` or `zsh` for initial setup on a new machine, `--check-profile` to validate the selected profile without changing the system, or `--remove-symlinks` to tear everything down.
 
 # Full Setup Guide
 
@@ -148,7 +152,7 @@ brew install yazi ffmpeg
 ## Step 6: Run setup
 
 ```bash
-uv run setup_env.py zsh
+uv run setup_files.py zsh
 ```
 
 Open a new terminal to pick up the shell changes.

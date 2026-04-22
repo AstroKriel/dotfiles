@@ -9,17 +9,18 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 ## local
-from utils import profiles
-from utils import logging, shell_actions
+from utils import load_profiles
+from utils import log_messages, apply_shell_actions
 
 ##
 ## === EXTRA CONFIG
 ##
 
 SCRIPT_NAME = Path(__file__).name
-EXTRAS_DIR = Path(__file__).resolve().parent / "extras"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+EXTRAS_DIR = ROOT_DIR / "extras"
 
-_log_message = logging.make_logger(SCRIPT_NAME)
+_log_message = log_messages.make_logger(SCRIPT_NAME)
 
 
 @dataclass
@@ -87,12 +88,12 @@ def setup_extra(
         missing = sorted(set(extra.requires) - set(platform_tags or ()))
         _log_message(f"Skipping {extra.name}; missing profile platform tag(s): {', '.join(missing)}")
         return
-    shell_actions.ensure_dir_exists(
+    apply_shell_actions.ensure_dir_exists(
         directory=extra.target_path.parent,
         script_name=SCRIPT_NAME,
         dry_run=dry_run,
     )
-    shell_actions.create_symlink(
+    apply_shell_actions.create_symlink(
         source_path=extra.source_path,
         target_path=extra.target_path,
         script_name=SCRIPT_NAME,
@@ -147,11 +148,11 @@ def remove_symlinks(
     dry_run: bool,
     selected: tuple[str, ...] | None = None,
 ) -> None:
-    logging.configure(write_to_file=not dry_run)
+    log_messages.configure(write_to_file=not dry_run)
     _log_message("Started removing extra config symlinks")
     selected_extras = get_selected_extras(selected=selected)
     for extra in selected_extras.values():
-        shell_actions.remove_symlink(
+        apply_shell_actions.remove_symlink(
             target_path=extra.target_path,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
@@ -165,7 +166,7 @@ def run(
     selected: tuple[str, ...] | None = None,
     platform_tags: tuple[str, ...] | None = None,
 ) -> None:
-    logging.configure(write_to_file=not dry_run)
+    log_messages.configure(write_to_file=not dry_run)
     _log_message("Started setting up extra configs")
     selected_extras = get_selected_extras(selected=selected)
     for extra in selected_extras.values():
@@ -205,7 +206,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.all and args.extra:
         parser.error("--all cannot be combined with --extra")
-    profile = profiles.load_profile(profile_name=args.profile)
+    profile = load_profiles.load_profile(profile_name=args.profile)
     selected = resolve_selected_extras(
         profile_selected=profile.extras if profile is not None else None,
         requested=tuple(args.extra),

@@ -15,8 +15,8 @@ import shutil
 import sys
 
 ## local
-from utils import profiles
-from utils import logging, shell_actions
+from utils import load_profiles
+from utils import log_messages, apply_shell_actions
 
 ##
 ## === EDITOR CONFIG
@@ -24,10 +24,11 @@ from utils import logging, shell_actions
 
 SCRIPT_NAME = Path(__file__).name
 HOME_DIR = Path.home()
-DOTFILES_DIR = Path(__file__).resolve().parent / "editors"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+DOTFILES_DIR = ROOT_DIR / "editors"
 CONFIG_DIR = HOME_DIR / ".config"
 
-_log_message = logging.make_logger(SCRIPT_NAME)
+_log_message = log_messages.make_logger(SCRIPT_NAME)
 
 _VSCODE_TARGET_DIR = (
     Path.home() / "Library/Application Support/Code/User"
@@ -159,7 +160,7 @@ def install_extensions(
         return
     extensions = [e for e in extensions_file.read_text().splitlines() if e.strip()]
     for ext in extensions:
-        shell_actions.run_command(
+        apply_shell_actions.run_command(
             args=[command, "--install-extension", ext],
             script_name=SCRIPT_NAME,
             description=f"install extension: {ext}",
@@ -175,7 +176,7 @@ def shallow_clone_repo(
     if repo.output.exists():
         _log_message(f"{repo.name} already exists under: {repo.output}")
         return
-    shell_actions.run_command(
+    apply_shell_actions.run_command(
         args=["git", "clone", "--depth", "1", repo.url, str(repo.output)],
         script_name=SCRIPT_NAME,
         description=f"clone {repo.name} (shallow) under {repo.output}",
@@ -191,7 +192,7 @@ def run_doom_sync(
     if not doom_bin.exists():
         _log_message(f"Doom binary not found at: {doom_bin}")
         return
-    shell_actions.run_command(
+    apply_shell_actions.run_command(
         args=[str(doom_bin), "sync"],
         script_name=SCRIPT_NAME,
         description="doom sync",
@@ -221,12 +222,12 @@ def setup_editor(
         )
         return
     if editor.files is None:
-        shell_actions.ensure_dir_exists(
+        apply_shell_actions.ensure_dir_exists(
             directory=editor.target_dir.parent,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
-        shell_actions.create_symlink(
+        apply_shell_actions.create_symlink(
             source_path=editor.dotfiles_dir,
             target_path=editor.target_dir,
             script_name=SCRIPT_NAME,
@@ -277,13 +278,13 @@ def setup_editor_files(
                 json.dump(merged_config, f, indent=2)
             _log_message(f"Wrote merged config to: {output_path}")
         ## ensure target directory exists
-        shell_actions.ensure_dir_exists(
+        apply_shell_actions.ensure_dir_exists(
             directory=editor.target_dir,
             script_name=SCRIPT_NAME,
             dry_run=dry_run,
         )
         ## symlink merged config
-        shell_actions.create_symlink(
+        apply_shell_actions.create_symlink(
             source_path=output_path,
             target_path=target_path,
             script_name=SCRIPT_NAME,
@@ -338,19 +339,19 @@ def remove_symlinks(
     dry_run: bool,
     selected: tuple[str, ...] | None = None,
 ):
-    logging.configure(write_to_file=not dry_run)
+    log_messages.configure(write_to_file=not dry_run)
     _log_message("Started removing editor config symlinks")
     selected_editors = get_selected_editors(selected=selected)
     for editor in selected_editors.values():
         if editor.files is None:
-            shell_actions.remove_symlink(
+            apply_shell_actions.remove_symlink(
                 target_path=editor.target_dir,
                 script_name=SCRIPT_NAME,
                 dry_run=dry_run,
             )
         else:
             for file_name in editor.files:
-                shell_actions.remove_symlink(
+                apply_shell_actions.remove_symlink(
                     target_path=editor.target_dir / f"{file_name}.json",
                     script_name=SCRIPT_NAME,
                     dry_run=dry_run,
@@ -363,7 +364,7 @@ def run(
     dry_run: bool,
     selected: tuple[str, ...] | None = None,
 ):
-    logging.configure(write_to_file=not dry_run)
+    log_messages.configure(write_to_file=not dry_run)
     selected_editors = get_selected_editors(selected=selected)
     for editor in selected_editors.values():
         setup_editor(
@@ -401,7 +402,7 @@ def main():
     args = parser.parse_args()
     if args.all and args.editor:
         parser.error("--all cannot be combined with --editor")
-    profile = profiles.load_profile(profile_name=args.profile)
+    profile = load_profiles.load_profile(profile_name=args.profile)
     selected = resolve_selected_editors(
         profile_selected=profile.editors if profile is not None else None,
         requested=tuple(args.editor),
