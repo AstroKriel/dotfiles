@@ -15,13 +15,13 @@ Personal python libraries live under `Asgard/sindri/submodules/`. Projects that 
 | `jormi` | shared utility library for computing MHD turbulence statistics: vector field decompositions, power spectra, PDFs |
 | `bifrost` | stores scientific data efficiently and provides an interface for accessing it |
 | `vegtamr` | line integral convolution library for vector field visualisation |
-| `ww-arepo-sims` | interface between AREPO simulation data and jormi |
-| `ww-flash-sims` | interface between FLASH simulation data and jormi |
-| `ww-quokka-sims` | interface between Quokka simulation data and jormi |
+| `ww-arepo-sims` | interface between AREPO simulation data and `jormi` |
+| `ww-flash-sims` | interface between FLASH simulation data and `jormi` |
+| `ww-quokka-sims` | interface between Quokka simulation data and `jormi` |
 
-jormi is the primary shared utility library. It covers the full workflow of scientific computing in the Asgard ecosystem: MHD turbulence statistics, field operations and decompositions, array utilities, plotting, I/O, logging, and HPC job scheduling. Before writing any new utility logic, check jormi first. New projects should depend on jormi and reuse what it offers rather than reimplementing it.
+`jormi` is the primary shared utility library. It covers the full workflow of scientific computing in the Asgard ecosystem: MHD turbulence statistics, field operations and decompositions, array utilities, plotting, I/O, logging, and HPC job scheduling. Before writing any new utility logic, check `jormi` first. New projects should depend on `jormi` and reuse what it offers rather than reimplementing it.
 
-Beyond jormi, make use of the other submodules where relevant. If the work involves loading or processing simulation data, reach for the appropriate `ww-*-sims` package rather than writing bespoke I/O. For vector field visualisation, use vegtamr. Note that bifrost is still under active development and not yet functional; do not depend on it.
+Beyond `jormi`, make use of the other submodules where relevant. If the work involves loading or processing simulation data, reach for the appropriate `ww-*-sims` package rather than writing bespoke I/O. For vector field visualisation, use `vegtamr`. Note that `bifrost` is still under active development and not yet functional; do not depend on it.
 
 ### freyja
 
@@ -46,7 +46,7 @@ Once a project has matured and the dependency has stabilised, switch to a pinned
 
 ```toml
 [tool.uv.sources]
-<package-name> = { git = "https://github.com/AstroKriel/<package-name>", rev = "<commit-hash>" }
+<package-name> = { git = "https://github.com/<username>/<package-name>", rev = "<commit-hash>" }
 ```
 
 Do **not** add `[tool.hatch.metadata] allow-direct-references = true` when using `[tool.uv.sources]`. That flag is only needed when a direct URL reference is written inline in the `dependencies` list (e.g. `"jormi @ file://..."`). With `[tool.uv.sources]`, the `dependencies` list contains only a plain package name and hatchling never sees the path.
@@ -57,7 +57,7 @@ Do **not** add `[tool.hatch.metadata] allow-direct-references = true` when using
 
 Simulation interface layers should preserve the representation of the data as read from disk. If the source data are `float32`, loaders should return `float32` fields by default rather than silently casting/promoting to `float64`.
 
-Numerical promotion belongs in the computation layer (e.g., in jormi/). When an operation requires higher precision for correctness or stability, the compute-side implementation should explicitly convert or promote the relevant arrays there, especially for precision-sensitive routines. Do not push this responsibility into project code (in mimir/) unless there is no better place to enforce it.
+Numerical promotion belongs in the computation layer (e.g., in `jormi/`). When an operation requires higher precision for correctness or stability, the compute-side implementation should explicitly convert or promote the relevant arrays there, especially for precision-sensitive routines. Do not push this responsibility into project code (in `mimir/`) unless there is no better place to enforce it.
 
 ---
 
@@ -77,7 +77,7 @@ Asgard projects extend the standard import order with two personal library group
 
 ## Terminal Feedback
 
-Use `jormi.ww_io.manage_log` for jormi-authored, user-facing terminal feedback in Asgard projects. This includes actions, progress messages, warnings, summaries, skipped work, created/saved files, validation-script pass/fail status, and other operational messages intended for a person reading the terminal.
+Use `jormi.ww_io.manage_log` for `jormi`-authored, user-facing terminal feedback in Asgard projects. This includes actions, progress messages, warnings, summaries, skipped work, created/saved files, validation-script pass/fail status, and other operational messages intended for a person reading the terminal.
 
 Do not use `manage_log` for pure compute helpers, low-level transformations, or routine internal state. Prefer returning values or raising exceptions there. Do not replace raised exceptions with logging unless the function is explicitly responsible for handling the error and continuing.
 
