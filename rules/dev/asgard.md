@@ -53,6 +53,14 @@ Do **not** add `[tool.hatch.metadata] allow-direct-references = true` when using
 
 ---
 
+## Data Representation
+
+Simulation interface layers should preserve the representation of the data as read from disk. If the source data are `float32`, loaders should return `float32` fields by default rather than silently casting/promoting to `float64`.
+
+Numerical promotion belongs in the computation layer (e.g., in jormi/). When an operation requires higher precision for correctness or stability, the compute-side implementation should explicitly convert or promote the relevant arrays there, especially for precision-sensitive routines. Do not push this responsibility into project code (in mimir/) unless there is no better place to enforce it.
+
+---
+
 ## Imports
 
 Asgard projects extend the standard import order with two personal library groups, placed based on how the dependency is referenced:
