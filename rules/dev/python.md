@@ -260,6 +260,9 @@ if __name__ == "__main__":
 | `## personal` | your own separately-packaged libraries, installed as dependencies |
 | `## local` | imports from within the current project |
 | Per line | one import per line |
+| Within groups | plain `import ...` lines first, then `from ... import ...` lines |
+| Sort order | alphabetise imports within each `import ...` and `from ... import ...` block |
+| Spacing | separate `import ...` and `from ... import ...` blocks with one blank line when both appear in the same group |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
 | Module imports | import the module, not individual functions: `from jormi.ww_types import check_types` then `check_types.ensure_nonempty_string(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site — use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
 | Long imports | use parentheses with trailing commas |

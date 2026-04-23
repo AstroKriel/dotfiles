@@ -64,3 +64,13 @@ Asgard projects extend the standard import order with two personal library group
 | `## personal (remote)` | personal libraries referenced as a pinned git commit |
 | `## local` | imports from within the current project |
 | `## personal (local)` | personal libraries referenced as an editable install |
+
+---
+
+## Terminal Feedback
+
+Use `jormi.ww_io.manage_log` for jormi-authored, user-facing terminal feedback in Asgard projects. This includes actions, progress messages, warnings, summaries, skipped work, created/saved files, validation-script pass/fail status, and other operational messages intended for a person reading the terminal.
+
+Do not use `manage_log` for pure compute helpers, low-level transformations, or routine internal state. Prefer returning values or raising exceptions there. Do not replace raised exceptions with logging unless the function is explicitly responsible for handling the error and continuing.
+
+Direct terminal output is acceptable only when it is the implementation of the logger itself, generated shell-script content, or raw child-process output intentionally streamed by a subprocess helper. In normal Python code, avoid `print()` for user-facing feedback; add a `verbose` flag when the message is optional.
