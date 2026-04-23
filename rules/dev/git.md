@@ -53,6 +53,7 @@ Scope answers *where* the change is. Granularity depends on how localised the ch
 | Separator | use `;` to separate multiple related changes within one commit |
 | Ending | end with a period |
 | Length | total length under 100 characters |
+| Characters | ASCII only; no special characters |
 
 ---
 
