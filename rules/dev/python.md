@@ -323,6 +323,7 @@ class MessageType(Enum):
 | Directories | `directory` when only one in scope; `_dir` suffix when multiple: `source_dir`, `target_dir` |
 | Comprehension variables | prepend `_` if the name would conflict with an existing name in scope: `_rules_file` |
 | Booleans | `is_*` or `has_*` prefix: `is_periodic`, `has_zeros`, `is_open` |
+| Function results | naming should preserve the concept across layers: functions use verb + concept, variables name the returned concept, and result classes use that same concept as the type name; prefer the pattern `<concept> = <verb>_<concept>(...)` |
 
 ### Constants
 
