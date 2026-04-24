@@ -9,7 +9,7 @@ These rules apply when writing or editing any markdown documentation: setup guid
 | Rule | |
 |---|---|
 | ASCII only | no Unicode punctuation: no em dashes, no curly quotes, no ellipsis characters |
-| Dashes | use `-` for a dash; never `—` |
+| No em dashes as punctuation | use a comma, semicolon, or full stop instead; never use `—` to set off a clause |
 | Placeholders | use `<angle-brackets>`: `<package-name>`, `<username>`, `<commit-hash>` |
 
 ---
@@ -18,8 +18,8 @@ These rules apply when writing or editing any markdown documentation: setup guid
 
 | Rule | |
 |---|---|
-| Code, paths, commands, keys | always in backticks: `qalculate-gtk`, `~/.config/conky/conky.conf`, `Super+Ctrl+=` |
-| Values and flags | backticks: `true`, `--offline`, `size=9` |
+| Code, paths, commands, keys | always in backticks: `<command>`, `~/.config/<app>/<file>`, `<Modifier>+<Key>` |
+| Values and flags | backticks: `<bool>`, `--<flag>`, `<setting>=<value>` |
 | Emphasis | use **bold** for warnings and key terms; avoid italic |
 | Never inline commands | commands always go in a code block, never bare in prose |
 
@@ -50,7 +50,7 @@ Use tables for:
 
 ## Code Blocks
 
-Every command goes in a code block. Never write a command inline in prose. Include the full command as it would be run — no ellipsis, no shorthand.
+Every command goes in a code block. Never write a command inline in prose. Include the full command as it would be run, with no ellipsis or shorthand.
 
 ---
 
@@ -82,7 +82,14 @@ For setup guides, add a design decisions or lessons learned section where releva
 
 ## Examples
 
-Examples should be generalised — no personal usernames, hostnames, or machine-specific paths unless the point of the example is machine-specific configuration. Use placeholders:
+Examples should illustrate the concept, not a specific instance. Use `<angle-bracket>` placeholders instead of real names, paths, or values. This applies to inline examples and code blocks alike.
+
+| Rule | |
+|---|---|
+| No personal names | no real usernames, hostnames, or email addresses |
+| No machine-specific paths | use `~/.config/<app>/<file>`, not `~/.config/conky/conky.conf` |
+| No real package names as examples | use `<package-name>`, not a specific package |
+| Exception | when the example IS the specific thing being documented (e.g. the exact command to install a particular app) |
 
 ```bash
 git clone https://github.com/<username>/<repo>.git
