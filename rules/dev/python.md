@@ -42,7 +42,7 @@ dev = [
 ]
 ```
 
-For personal libraries installed as editable local dependencies, declare them in `[tool.uv.sources]`. Do **not** add `[tool.hatch.metadata] allow-direct-references = true` — that is only needed for direct URL references written inline in the `dependencies` list; `[tool.uv.sources]` is resolved by uv and hatchling never sees the path:
+For personal libraries installed as editable local dependencies, declare them in `[tool.uv.sources]`. Do **not** add `[tool.hatch.metadata] allow-direct-references = true`; that is only needed for direct URL references written inline in the `dependencies` list. `[tool.uv.sources]` is resolved by uv and hatchling never sees the path:
 
 ```toml
 dependencies = ["<package-name>"]
@@ -264,7 +264,7 @@ if __name__ == "__main__":
 | Sort order | alphabetise imports within each `import ...` and `from ... import ...` block |
 | Spacing | separate `import ...` and `from ... import ...` blocks with one blank line when both appear in the same group |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
-| Module imports | import the module, not individual functions: `from jormi.ww_types import check_types` then `check_types.ensure_nonempty_string(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site — use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
+| Module imports | import the module, not individual functions: `from jormi.ww_types import check_types` then `check_types.ensure_nonempty_string(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site; use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
 | Long imports | use parentheses with trailing commas |
 
 ---
@@ -466,8 +466,8 @@ Code should be self-documenting. A comment is an admission that the code alone i
 | Scope | Rule |
 |---|---|
 | Public functions and methods | always |
-| Private functions and methods | never — rely on type hints and inline comments |
-| Classes and dataclasses | always — one sentence describing what the class represents |
+| Private functions and methods | never; rely on type hints and inline comments |
+| Classes and dataclasses | always; one sentence describing what the class represents |
 
 **Format:**
 
@@ -488,11 +488,11 @@ Always present. Use imperative or declarative voice: *"Compute X"*, *"Return X"*
 
 **Second paragraph:**
 
-Add only when the opening sentence leaves something genuinely unclear — edge case behaviour, what triggers a raise, a non-obvious side effect, or an important constraint. 2–4 sentences max. Never use it to restate what the type annotations already say.
+Add only when the opening sentence leaves something genuinely unclear: edge case behaviour, what triggers a raise, a non-obvious side effect, or an important constraint. 2–4 sentences max. Never use it to restate what the type annotations already say.
 
 **Parameters section:**
 
-Add when there are four or more parameters *and* their constraints or relationships are not clear from the type hints alone. Use the `Fields ---` style below. Only document what the type annotation does not already say — valid ranges, what `None` means, dependencies between parameters:
+Add when there are four or more parameters *and* their constraints or relationships are not clear from the type hints alone. Use the `Fields ---` style below. Only document what the type annotation does not already say: valid ranges, what `None` means, dependencies between parameters:
 
 ```python
 """
@@ -533,7 +533,7 @@ Fields
 |---|---|
 | Names and values | backticks: `` `param_name` ``, `` `True` ``, `` `None` `` |
 | Inline math | code style: `` `y = A * x^b` `` |
-| Types | never repeat in the docstring — the signature already has them |
+| Types | never repeat in the docstring; the signature already has them |
 | Format | never use numpy/sphinx-style `Parameters:\n-----------` blocks |
 
 ### Comments
@@ -603,9 +603,9 @@ numpy.multiply(
 | Punctuation | always end with a period |
 | Names and identifiers | backticks: parameter names, flag names, config keys, field names, literal values |
 | Runtime data | bare: paths, shapes, numbers |
-| `:` | narrows scope — what follows names what precedes it; layer only when each colon adds a distinct level |
+| `:` | narrows scope; what follows names what precedes it. layer only when each colon adds a distinct level |
 | `;` | joins a contrasting clause: `got`, `searched in`, `found N` |
-| Chaining | wrap caught exceptions with `raise ... from error`; the chain carries the why — don't repeat it in the message |
+| Chaining | wrap caught exceptions with `raise ... from error`; the chain carries the why, don't repeat it in the message |
 | Soft errors | accept `raise_error: bool = True`; raise when `True`, log/warn when `False` |
 
 | Message type | Pattern |
