@@ -117,25 +117,6 @@ git commit -m "update(process_data.py): use package-a validate_inputs for type c
 
 Use the `git_helpers` CLI (`~/Projects/GitHelpers`) for git operations where a command exists. Fall back to raw `git` only when no equivalent command exists. Full reference: `~/Projects/GitHelpers/README.md`.
 
-**Common commands:**
-
-| Task | Command |
-|---|---|
-| Push (auto-sets upstream) | `git_helpers push` |
-| Sync branch with upstream | `git_helpers sync-branch [remote/branch]` |
-| Create branch from main | `git_helpers create-branch-from-default <name>` |
-| Create branch from specific remote | `git_helpers create-branch-from-remote <name> <remote/branch>` |
-| Delete local branch | `git_helpers delete-local-branch <name>` |
-| Prune gone remotes | `git_helpers prune-gone-locals` |
-| Prune merged locals | `git_helpers prune-merged-locals [remote/branch]` |
-| Full branch cleanup | `git_helpers cleanup-local-branches [remote/branch]` |
-| Stash work | `git_helpers stash-work [name]` |
-| Unstash work | `git_helpers unstash-work [name]` |
-| Amend last commit | `git_helpers amend-last-commit [msg]` |
-| Branch status overview | `git_helpers show-branches-status` |
-
-**Global flags:** `--dry-run` to preview commands without executing; `--allow-dirty` to skip clean worktree check.
-
 ---
 
 ## Commit Message Examples

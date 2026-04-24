@@ -323,7 +323,6 @@ class MessageType(Enum):
 | Directories | `directory` when only one in scope; `_dir` suffix when multiple: `source_dir`, `target_dir` |
 | Comprehension variables | prepend `_` if the name would conflict with an existing name in scope: `_rules_file` |
 | Booleans | `is_*` or `has_*` prefix: `is_periodic`, `has_zeros`, `is_open` |
-| Function results | naming should preserve the concept across layers: functions use verb + concept, variables name the returned concept, and result classes use that same concept as the type name; prefer the pattern `<concept> = <verb>_<concept>(...)` |
 
 ### Constants
 
@@ -461,17 +460,9 @@ Code should be self-documenting. A comment is an admission that the code alone i
 
 ### Docstrings
 
-**When to write:**
+Write docstrings for all public functions, methods, classes, and dataclasses. Never for private functions or methods.
 
-| Scope | Rule |
-|---|---|
-| Public functions and methods | always |
-| Private functions and methods | never; rely on type hints and inline comments |
-| Classes and dataclasses | always; one sentence describing what the class represents |
-
-**Format:**
-
-One-liners have the opening and closing `"""` on the same line. Multi-line docstrings open with `"""` and the text immediately on the first line; the closing `"""` sits on its own line with no trailing blank line before it:
+One-liners have the opening and closing `"""` on the same line. Multi-line docstrings open with `"""` and the text immediately on the first line; the closing `"""` sits on its own line:
 
 ```python
 """Compute the root-mean-square of a NumPy array."""
@@ -482,17 +473,11 @@ passing through a reference point (x_ref, y_ref).
 """
 ```
 
-**Opening sentence:**
+Opening sentence: imperative or declarative voice ("Compute X", "Return X"). Sentence case, ends with a period.
 
-Always present. Use imperative or declarative voice: *"Compute X"*, *"Return X"*, *"Ensure X raises if..."*. Must fit on one line. Sentence case, ends with a period. If the function name already communicates the intent fully, keep the docstring as short as possible.
+Add a second paragraph only when the opening sentence leaves something genuinely unclear: edge case behaviour, what triggers a raise, a non-obvious side effect. 2-4 sentences max. Never restate what the type annotations already say.
 
-**Second paragraph:**
-
-Add only when the opening sentence leaves something genuinely unclear: edge case behaviour, what triggers a raise, a non-obvious side effect, or an important constraint. 2–4 sentences max. Never use it to restate what the type annotations already say.
-
-**Parameters section:**
-
-Add when there are four or more parameters *and* their constraints or relationships are not clear from the type hints alone. Use the `Fields ---` style below. Only document what the type annotation does not already say: valid ranges, what `None` means, dependencies between parameters:
+Add a `Parameters ---` section when there are four or more parameters and their constraints are not clear from the type hints alone. Only document what the annotation does not already say:
 
 ```python
 """
@@ -502,32 +487,24 @@ Parameters
 ---
 - `param_name`:
     What it expects; constraints; what None means if applicable.
-
-- `other_param`:
-    Only used when `param_name` is not None.
 """
 ```
 
-**Dataclass fields:**
-
-Add a `Fields ---` section when field names alone do not convey their constraints or expected shape:
+Add a `Fields ---` section to a dataclass when field names alone do not convey their constraints or expected shape:
 
 ```python
 """
-Estimated 1D probability density function from binned data.
+Short description of what the dataclass represents.
 
 Fields
 ---
-- `bin_centers`:
-    1D array of bin center positions; must be finite.
+- `field_name`:
+    What it holds; valid ranges or invariants; what None means if applicable.
 
-- `densities`:
-    1D array of probability densities; must be finite, same length as
-    `bin_centers`, and normalised so the integral equals 1.
+- `other_field`:
+    Must be the same length as `field_name`; always finite.
 """
 ```
-
-**Style:**
 
 | Rule | |
 |---|---|
