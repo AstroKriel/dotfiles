@@ -82,3 +82,39 @@ Use `jormi.ww_io.manage_log` for `jormi`-authored, user-facing terminal feedback
 Do not use `manage_log` for pure compute helpers, low-level transformations, or routine internal state. Prefer returning values or raising exceptions there. Do not replace raised exceptions with logging unless the function is explicitly responsible for handling the error and continuing.
 
 Direct terminal output is acceptable only when it is the implementation of the logger itself, generated shell-script content, or raw child-process output intentionally streamed by a subprocess helper. In normal Python code, avoid `print()` for user-facing feedback; add a `verbose` flag when the message is optional.
+
+### Choosing a log function
+
+| Function | When to use |
+|---|---|
+| `log_task` | before a long-running operation starts |
+| `log_note` | neutral observation worth surfacing (e.g. timing, counts) |
+| `log_hint` | non-fatal issue the caller should know about; data clipped, parameter ignored, fallback applied |
+| `log_alert` | something unexpected that may indicate a problem but does not stop execution |
+| `log_debug` | verbose detail for development only; should not appear in production runs |
+| `log_outcome` | pass/fail result for an individual test case within a vtest |
+| `log_action` | completed operation with a structured outcome, title, and optional notes |
+| `log_context` | display current parameters or config at the start of a run |
+| `log_warning` | soft error condition; pairs with `raise_error=False` pattern |
+| `log_error` | non-raising failure; operation failed but execution continues |
+| `log_items` | enumerate a list of things under a title |
+| `log_summary` | end-of-run summary with key metrics in a notes dict |
+| `log_section` | marks a major phase boundary in script output |
+
+### Message format
+
+All messages: lowercase throughout; backtick convention same as exceptions (names and identifiers in backticks, runtime data bare).
+
+| Function | Form | Period |
+|---|---|---|
+| `log_task` | present participle: `"reading file: {path}"` | no |
+| `log_note` | sentence or noun phrase | yes |
+| `log_hint` | sentence; no `"Note:"` prefix | yes |
+| `log_alert` | sentence | yes |
+| `log_error` | sentence; no `"Error:"` prefix | yes |
+| `log_warning` | sentence; no `"Warning:"` prefix | yes |
+| `log_outcome` | noun phrase identifying what was tested | no |
+| `log_action` title | noun phrase | no |
+| `log_action` message | sentence | yes |
+| `log_context` / `log_summary` title | noun phrase | no |
+| `log_section` title | noun phrase | no |
