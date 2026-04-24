@@ -149,6 +149,8 @@ def main():
             dry_run=dry_run,
             extra_keys=profile.extras if profile is not None else None,
         )
+        if profile is None or profile.link_rules:
+            setup_rules.remove_symlinks(dry_run=dry_run)
         return
     if profile is None:
         parser.error("`this-system.toml` is required unless `--remove-symlinks` is specified")
