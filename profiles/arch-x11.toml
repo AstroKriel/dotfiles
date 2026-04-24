@@ -1,5 +1,7 @@
 shell = "zsh"
 
+link_rules = true
+
 platforms = [
   "linux",
   "arch",

@@ -12,6 +12,7 @@ from typing import cast
 ## local
 from setup import editors as setup_editors
 from setup import extras as setup_extras
+from setup import rules as setup_rules
 from setup import shell as setup_shell
 from setup import tools as setup_tools
 from utils import load_profiles
@@ -174,6 +175,8 @@ def main():
         extra_keys=profile.extras,
         platform_tags=profile.platforms,
     )
+    if profile.link_rules:
+        setup_rules.run(dry_run=dry_run)
 
 
 ##
