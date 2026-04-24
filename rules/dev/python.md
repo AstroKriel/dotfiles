@@ -601,8 +601,9 @@ numpy.multiply(
 |---|---|
 | Capitalisation | lowercase throughout; capitalise only where the word itself requires it (proper nouns, class names, acronyms) |
 | Punctuation | always end with a period |
-| Names and identifiers | backticks: parameter names, flag names, config keys, field names, literal values |
+| Names and identifiers | backticks: parameter names, flag names, config keys, field names, file extensions, literal values (`` `.sh` ``, `` `True` ``, `` `None` ``) |
 | Runtime data | bare: paths, shapes, numbers |
+| Single quotes | never for quoting names or values in prose; only where structurally required (e.g. inside an f-string already delimited by double quotes) |
 | `:` | narrows scope; what follows names what precedes it. layer only when each colon adds a distinct level |
 | `;` | joins a contrasting clause: `got`, `searched in`, `found N` |
 | Chaining | wrap caught exceptions with `raise ... from error`; the chain carries the why, don't repeat it in the message |
