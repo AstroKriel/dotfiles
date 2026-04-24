@@ -96,21 +96,21 @@ testpaths = ["utests"]
 | Casing | `snake_case` for all filenames |
 | Pattern | verb-noun: `compute_array_stats.py`, `load_dataset.py`, `check_arrays.py`, `manage_log.py` |
 | Private modules | leading underscore: `_config_types.py`, `_data_operators.py` |
-| Packages | `ww_<concept>` prefix; `ww_` means "working with" and marks the public entry point for a concept: `ww_arrays`, `ww_fields`, `ww_plots` |
+| Packages | named for the concept they expose: `arrays`, `fields`, `plots` |
 
 ### Module Growth
 
 A single module promoted to a package keeps its name. Sub-modules highlight the sub-concept using the same verb-noun convention:
 
 ```
-ww_arrays/
+<concept>/
     __init__.py
-    compute_stats.py
-    load_datasets.py
-    check_shapes.py
+    <verb>_<noun>.py
+    <verb>_<noun>.py
+    ...
 ```
 
-Each module is named for the operation it performs (`parse_config.py`, `validate_schema.py`, `load_dataset.py`), and when a concept expands, it becomes a package whose sub-modules each own one narrow responsibility. Prefer more smaller modules over one large module.
+When a concept expands, it becomes a package whose sub-modules each own one narrow responsibility. Typically 50–300 lines; a module approaching 400 lines is a signal to split.
 
 ---
 
@@ -585,9 +585,41 @@ numpy.multiply(
 
 ## Error Handling
 
+### Exception Types
+
+| Type | When to use |
+|---|---|
+| `ValueError` | wrong value; constraint violation |
+| `TypeError` | wrong type |
+| `KeyError` | missing key in a mapping |
+| `FileNotFoundError` | a required file or directory does not exist |
+| `RuntimeError` | execution failure; always chain with `from` |
+
+### Messages
+
 | Rule | |
 |---|---|
-| Exception types | use builtins: `ValueError`, `TypeError`, `KeyError`, `RuntimeError`, `FileNotFoundError` |
-| Messages | always include the relevant parameter, flag, config key, or filename; describe what was wrong and what was expected |
-| Formatting | use backticks for parameter names, flag names, config keys, filenames, and literal values: `` f"`{param_name}` must be one of ..." ``, `` "`--dry-run` requires ..." `` |
-| Soft errors | functions that check conditions may accept `raise_error: bool = True`, raise when `True`, log/warn when `False` |
+| Capitalisation | lowercase throughout; capitalise only where the word itself requires it (proper nouns, class names, acronyms) |
+| Punctuation | always end with a period |
+| Names and identifiers | backticks: parameter names, flag names, config keys, field names, literal values |
+| Runtime data | bare: paths, shapes, numbers |
+| `:` | narrows scope — what follows names what precedes it; layer only when each colon adds a distinct level |
+| `;` | joins a contrasting clause: `got`, `searched in`, `found N` |
+| Chaining | wrap caught exceptions with `raise ... from error`; the chain carries the why — don't repeat it in the message |
+| Soft errors | accept `raise_error: bool = True`; raise when `True`, log/warn when `False` |
+
+| Message type | Pattern |
+|---|---|
+| Constraint | `` `param` must be X; got `value`. `` |
+| Not found | `` X not found: `name`; searched in {path}. `` |
+| Invalid choice | `` `param` must be one of {options}; got `value`. `` |
+| Runtime failure | `` `{thing}` failed. `` + chain with `from` |
+
+```python
+raise ValueError("`num_samples` must be a positive integer.")
+raise ValueError(f"`spline_order` must be 1, 2, or 3; got `{spline_order}`.")
+raise ValueError(f"`{param_name}` must be one of {valid_options}; got `{value}`.")
+raise ValueError(f"field not found: `{field_key}`; searched in {dataset_dir}.")
+raise FileNotFoundError(f"config error: `output_dir`: path does not exist; got {path}.")
+raise RuntimeError(f"`{command}` failed.") from error
+```
