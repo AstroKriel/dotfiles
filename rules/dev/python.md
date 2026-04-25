@@ -116,9 +116,38 @@ A single module promoted to a package keeps its name. Sub-modules highlight the 
 
 When a concept expands, it becomes a package whose sub-modules each own one narrow responsibility. Typically 50–300 lines; a module approaching 400 lines is a signal to split.
 
+## Mathematical Naming
+
+When code, comments, and docstrings use mathematical notation, keep naming aligned with Einstein-style conventions.
+
+| Rule | |
+|---|---|
+| Scalars | lower-case: `<scalar>` |
+| Vectors | lower-case with an index: `<vector>_<index>` |
+| Tensors | upper-case with indices: `<Tensor>_<index><index>` |
+| Code names | preserve the same distinction in variable names where practical |
+
+When a variable name describes an operation applied to a quantity, separate the action from the quantity with an underscore.
+
+| Rule | |
+|---|---|
+| Prefer | `<action>_<quantity>` |
+| Avoid | `<action><quantity>` |
+
+This makes differential and tensor expressions easier to scan in code.
+
+Apply this consistently to:
+
+- variable names
+- comments
+- docstrings
+- user-facing labels, unless an established public label should be preserved
+
 ---
 
 ## File Layout
+
+The `## { ... }` wrappers exist to delimit content. Empty files (e.g. `__init__.py` files that only serve as package markers) need no wrapper.
 
 Modules follow this structure:
 
@@ -340,7 +369,7 @@ class <EnumName>(Enum):
 |---|---|
 | Public functions | fully annotated, parameters and return types |
 | Union types | `NDArray[Any] \| list[float]`, `str \| Path`, `float \| None` |
-| Private functions | type hints yes, docstrings no |
+| Private functions | type hints yes, docstrings optional |
 | Complex types | use `TypeAlias`, defined in a dedicated `## === TYPE ALIASES` section |
 
 ---
@@ -349,7 +378,7 @@ class <EnumName>(Enum):
 
 | Rule | |
 |---|---|
-| Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; keyword-only arguments enforced with `*` for any function with more than one parameter |
+| Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; single-parameter functions do not require `*,`; for two or more parameters, use `*,`: private functions always place it at the first position (all keyword-only); public functions may place `*,` after a single leading subject parameter whose identity is already implied by the function name, in which case that subject may be passed positionally |
 | Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line |
 | Size | typically 20-80 lines, single-responsibility |
 | Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
@@ -358,19 +387,21 @@ class <EnumName>(Enum):
 | Structure | public functions read as a recipe: validate -> sub-task 1 -> sub-task 2 -> return |
 
 ```python
+## all keyword-only: when the subject is not implied by the function name
 def <verb>_<noun>(
     *,
     <param>: <type>,
     <param>: <type>,
     <param>: <type> = <default>,
-    <param>: bool = False,
 ) -> <type>:
 
-<result> = <verb>_<noun>(
-    <param>=<value>,
-    <param>=<value>,
-    <param>=<value>,
-)
+## subject-first: when the function name already identifies the subject type,  making its position unambiguous
+def <verb>_<noun>(
+    <subject>: <type>,
+    *,
+    <param>: <type>,
+    <param>: <type> = <default>,
+) -> <type>:
 ```
 
 ---
@@ -469,7 +500,7 @@ Code should be self-documenting. A comment is an admission that the code alone i
 
 ### Docstrings
 
-Write docstrings for all public functions, methods, classes, and dataclasses. Never for private functions or methods.
+Write docstrings for all public functions, methods, classes, and dataclasses. Docstrings are optional for private functions and methods.
 
 One-liners have the opening and closing `"""` on the same line. Multi-line docstrings open with `"""` and the text immediately on the first line; the closing `"""` sits on its own line:
 
