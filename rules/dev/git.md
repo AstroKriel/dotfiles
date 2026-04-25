@@ -57,31 +57,18 @@ Scope answers **where** the change is. Granularity depends on how localised the 
 
 ---
 
-## Branch Naming
+## Commit Message Examples
+
+These illustrate the message format and wording style only, not the full shell workflow:
 
 ```
-verb/short-description
+fix(<script>.py): <description of what was broken and how it is fixed>.
+refactor(<module>.py): <description of structural change>.
+fix(<function>): accept <type> for <param>; accept None for <param>.
+apply(linting): fix ruff and pyright warnings across src/.
+rename(<dir>/): <description of naming change>.
+add: initial repo structure.
 ```
-
-For shared repos (multiple contributors), prepend a username:
-
-```
-username/verb/short-description
-```
-
-| Rule | |
-|---|---|
-| Case | lowercase throughout |
-| Separators | `/` for namespaces, `-` for words within a namespace |
-| Length | max 50 characters |
-| Characters | alphanumeric, `-`, and `/` only |
-| Purpose | one branch per logical change |
-
-Use the same verbs as commits: `add`, `fix`, `refactor`, `update`, `del`, etc.
-
-**Avoid:** dates, vague names (`wip`, `temp`, `fix-stuff`), and anything longer than needed.
-
-**Lifecycle:** delete branches after merging; rebase onto `main` before opening a PR.
 
 ---
 
@@ -119,15 +106,28 @@ Use the `git_helpers` CLI (`~/Projects/GitHelpers`) for git operations where a c
 
 ---
 
-## Commit Message Examples
-
-These illustrate the message format and wording style only, not the full shell workflow:
+## Branch Naming
 
 ```
-fix(<script>.py): <description of what was broken and how it is fixed>.
-refactor(<module>.py): <description of structural change>.
-fix(<function>): accept <type> for <param>; accept None for <param>.
-apply(linting): fix ruff and pyright warnings across src/.
-rename(<dir>/): <description of naming change>.
-add: initial repo structure.
+verb/short-description
 ```
+
+For shared repos (multiple contributors), prepend a username:
+
+```
+username/verb/short-description
+```
+
+| Rule | |
+|---|---|
+| Case | lowercase throughout |
+| Separators | `/` for namespaces, `-` for words within a namespace |
+| Length | max 50 characters |
+| Characters | alphanumeric, `-`, and `/` only |
+| Purpose | one branch per logical change |
+
+Use the same verbs as commits: `add`, `fix`, `refactor`, `update`, `del`, etc.
+
+**Avoid:** dates, vague names (`wip`, `temp`, `fix-stuff`), and anything longer than needed.
+
+**Lifecycle:** delete branches after merging; rebase onto `main` before opening a PR.
