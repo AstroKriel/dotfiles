@@ -116,6 +116,78 @@ A single module promoted to a package keeps its name. Sub-modules highlight the 
 
 When a concept expands, it becomes a package whose sub-modules each own one narrow responsibility. Typically 50–300 lines; a module approaching 400 lines is a signal to split.
 
+## Imports
+
+| Rule | |
+|---|---|
+| Order | `## stdlib` -> `## third-party` -> `## personal` -> `## local` |
+| `## personal` | separately-packaged libraries installed as dependencies |
+| `## local` | imports from within the current project |
+| Per line | one import per line |
+| Within groups | plain `import ...` lines first, then `from ... import ...` lines |
+| Sort order | alphabetise imports within each `import ...` and `from ... import ...` block |
+| Spacing | separate `import ...` and `from ... import ...` blocks with one blank line when both appear in the same group |
+| Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
+| Module imports | import the module, not individual functions: `from <package>.<module> import <module>` then `<module>.<function>(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site; use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
+| Long imports | use parentheses with trailing commas when there are three or more models being imported  |
+| Re-exports | use `from <module> import <name> as <name>` (self-alias) when a module re-exports a symbol for callers; `from <module> import <name>` alone is not considered a re-export by pyright and will produce an error at the call site |
+
+---
+
+## Naming Conventions
+
+### Functions
+
+Always use strong, specific verb prefixes. Avoid weak or generic leading words that do not communicate what the function does or returns:
+
+| Prefix | Purpose |
+|---|---|
+| `compute_*` | mathematical/numerical operations |
+| `check_*` | returns `bool`, may raise or warn; one of two function-level actions under the validate concept |
+| `ensure_*` | raises on failure, no meaningful return; the other function-level action under the validate concept |
+| `load_*` | I/O that returns data |
+| `create_*` / `make_*` | object construction |
+| `get_*` | query or lookup |
+| `resolve_*` | disambiguation between options |
+| `extract_*` | pull data from a larger structure |
+
+Private helpers use a leading underscore: `_<verb>_<noun>()`.
+
+### Classes
+
+Private classes use a leading underscore. They serve as implementation details supporting public classes and are not re-exported.
+
+Enums that are used as strings inherit from both `str` and `Enum`. Enums that are pure value holders inherit from `Enum` only:
+
+```python
+class <Name>(str, Enum): ...   # used as strings
+class <Name>(Enum): ...        # pure value holder
+```
+
+Enum members may hold dataclass instances as values to carry rich metadata per member:
+
+```python
+class <EnumName>(Enum):
+    <MEMBER> = <DataclassType>(
+        <arg>,
+        <arg>,
+        <arg>,
+    )
+```
+
+### Variables
+
+| Rule | |
+|---|---|
+| Casing | `snake_case` exclusively, never camelCase |
+| Abbreviations | acceptable when well-known within the domain |
+| Descriptive names | use qualified names that read as subscript notation: `<qualifier>_<noun>` |
+| Single-letter names | never, names must always indicate what is being worked with |
+| Abbreviated names | never, `language` not `lang`, `index` not `idx` |
+| Directories | `directory` when only one in scope; `_dir` suffix when multiple: `source_dir`, `target_dir` |
+| Comprehension variables | prepend `_` if the name would conflict with an existing name in scope |
+| Booleans | `is_*` or `has_*` prefix |
+
 ## Mathematical Naming
 
 When code, comments, and docstrings use mathematical notation, keep naming aligned with Einstein-style conventions.
@@ -142,6 +214,73 @@ Apply this consistently to:
 - comments
 - docstrings
 - user-facing labels, unless an established public label should be preserved
+
+### Constants
+
+`UPPER_CASE` at module level.
+
+---
+
+## Type Annotations
+
+| Rule | |
+|---|---|
+| Public functions | fully annotated, parameters and return types |
+| Union types | `NDArray[Any] \| list[float]`, `str \| Path`, `float \| None` |
+| Private functions | type hints yes, docstrings optional |
+| Complex types | use `TypeAlias`, defined in a dedicated `## === TYPE ALIASES` section |
+
+---
+
+## Function Decomposition
+
+| Rule | |
+|---|---|
+| Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; single-parameter functions do not require `*,`; for two or more parameters, use `*,`: private functions always place it at the first position (all keyword-only); public functions may place `*,` after a single leading subject parameter whose identity is already implied by the function name, in which case that subject may be passed positionally |
+| Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line |
+| Size | typically 20-80 lines, single-responsibility |
+| Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
+| Validation | always separated into `ensure_*` / `check_*` helpers, called before any logic |
+| Helpers | private (`_` prefix), each doing exactly one sub-task |
+| Structure | public functions read as a recipe: validate -> sub-task 1 -> sub-task 2 -> return |
+
+```python
+## all keyword-only: when the subject is not implied by the function name
+def <verb>_<noun>(
+    *,
+    <param>: <type>,
+    <param>: <type>,
+    <param>: <type> = <default>,
+) -> <type>:
+
+## subject-first: when the function name already identifies the subject type,  making its position unambiguous
+def <verb>_<noun>(
+    <subject>: <type>,
+    *,
+    <param>: <type>,
+    <param>: <type> = <default>,
+) -> <type>:
+```
+
+---
+
+## Data Structures
+
+| Rule | |
+|---|---|
+| Containers | prefer `@dataclass(frozen=True)`, immutability by default |
+| Derived attributes | use `@cached_property` |
+| Alternative constructors | `@classmethod` methods named `from_*` |
+| Resource lifecycle | use context managers (`__enter__` / `__exit__`) |
+
+Method ordering within dataclasses:
+
+1. `__post_init__` (validation on construction)
+2. Private helper methods (`_` prefix)
+3. `@property` methods
+4. `@cached_property` methods
+5. Regular instance methods
+6. `@classmethod` methods
 
 ---
 
@@ -282,147 +421,6 @@ if __name__ == "__main__":
 
 ## } V-TEST
 ```
-
----
-
-## Imports
-
-| Rule | |
-|---|---|
-| Order | `## stdlib` -> `## third-party` -> `## personal` -> `## local` |
-| `## personal` | separately-packaged libraries installed as dependencies |
-| `## local` | imports from within the current project |
-| Per line | one import per line |
-| Within groups | plain `import ...` lines first, then `from ... import ...` lines |
-| Sort order | alphabetise imports within each `import ...` and `from ... import ...` block |
-| Spacing | separate `import ...` and `from ... import ...` blocks with one blank line when both appear in the same group |
-| Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
-| Module imports | import the module, not individual functions: `from <package>.<module> import <module>` then `<module>.<function>(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site; use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
-| Long imports | use parentheses with trailing commas when there are three or more models being imported  |
-| Re-exports | use `from <module> import <name> as <name>` (self-alias) when a module re-exports a symbol for callers; `from <module> import <name>` alone is not considered a re-export by pyright and will produce an error at the call site |
-
----
-
-## Naming Conventions
-
-### Functions
-
-Always use strong, specific verb prefixes. Avoid weak or generic leading words that do not communicate what the function does or returns:
-
-| Prefix | Purpose |
-|---|---|
-| `compute_*` | mathematical/numerical operations |
-| `check_*` | returns `bool`, may raise or warn; one of two function-level actions under the validate concept |
-| `ensure_*` | raises on failure, no meaningful return; the other function-level action under the validate concept |
-| `load_*` | I/O that returns data |
-| `create_*` / `make_*` | object construction |
-| `get_*` | query or lookup |
-| `resolve_*` | disambiguation between options |
-| `extract_*` | pull data from a larger structure |
-
-Private helpers use a leading underscore: `_<verb>_<noun>()`.
-
-### Classes
-
-Private classes use a leading underscore. They serve as implementation details supporting public classes and are not re-exported.
-
-Enums that are used as strings inherit from both `str` and `Enum`. Enums that are pure value holders inherit from `Enum` only:
-
-```python
-class <Name>(str, Enum): ...   # used as strings
-class <Name>(Enum): ...        # pure value holder
-```
-
-Enum members may hold dataclass instances as values to carry rich metadata per member:
-
-```python
-class <EnumName>(Enum):
-    <MEMBER> = <DataclassType>(
-        <arg>,
-        <arg>,
-        <arg>,
-    )
-```
-
-### Variables
-
-| Rule | |
-|---|---|
-| Casing | `snake_case` exclusively, never camelCase |
-| Abbreviations | acceptable when well-known within the domain |
-| Descriptive names | use qualified names that read as subscript notation: `<qualifier>_<noun>` |
-| Single-letter names | never, names must always indicate what is being worked with |
-| Abbreviated names | never, `language` not `lang`, `index` not `idx` |
-| Directories | `directory` when only one in scope; `_dir` suffix when multiple: `source_dir`, `target_dir` |
-| Comprehension variables | prepend `_` if the name would conflict with an existing name in scope |
-| Booleans | `is_*` or `has_*` prefix |
-
-### Constants
-
-`UPPER_CASE` at module level.
-
----
-
-## Type Annotations
-
-| Rule | |
-|---|---|
-| Public functions | fully annotated, parameters and return types |
-| Union types | `NDArray[Any] \| list[float]`, `str \| Path`, `float \| None` |
-| Private functions | type hints yes, docstrings optional |
-| Complex types | use `TypeAlias`, defined in a dedicated `## === TYPE ALIASES` section |
-
----
-
-## Function Decomposition
-
-| Rule | |
-|---|---|
-| Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; single-parameter functions do not require `*,`; for two or more parameters, use `*,`: private functions always place it at the first position (all keyword-only); public functions may place `*,` after a single leading subject parameter whose identity is already implied by the function name, in which case that subject may be passed positionally |
-| Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line |
-| Size | typically 20-80 lines, single-responsibility |
-| Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
-| Validation | always separated into `ensure_*` / `check_*` helpers, called before any logic |
-| Helpers | private (`_` prefix), each doing exactly one sub-task |
-| Structure | public functions read as a recipe: validate -> sub-task 1 -> sub-task 2 -> return |
-
-```python
-## all keyword-only: when the subject is not implied by the function name
-def <verb>_<noun>(
-    *,
-    <param>: <type>,
-    <param>: <type>,
-    <param>: <type> = <default>,
-) -> <type>:
-
-## subject-first: when the function name already identifies the subject type,  making its position unambiguous
-def <verb>_<noun>(
-    <subject>: <type>,
-    *,
-    <param>: <type>,
-    <param>: <type> = <default>,
-) -> <type>:
-```
-
----
-
-## Data Structures
-
-| Rule | |
-|---|---|
-| Containers | prefer `@dataclass(frozen=True)`, immutability by default |
-| Derived attributes | use `@cached_property` |
-| Alternative constructors | `@classmethod` methods named `from_*` |
-| Resource lifecycle | use context managers (`__enter__` / `__exit__`) |
-
-Method ordering within dataclasses:
-
-1. `__post_init__` (validation on construction)
-2. Private helper methods (`_` prefix)
-3. `@property` methods
-4. `@cached_property` methods
-5. Regular instance methods
-6. `@classmethod` methods
 
 ---
 
