@@ -8,7 +8,7 @@ These rules apply when working within the `Asgard/` project. They complement the
 
 ### sindri
 
-Personal python libraries live under `Asgard/sindri/submodules/`. Projects that are part of the `Asgard/` ecosystem should be placed within this tree.
+Python libraries live under `Asgard/sindri/submodules/`. Projects that are part of the `Asgard/` ecosystem should be placed within this tree.
 
 | Package | Purpose |
 |---|---|
@@ -21,11 +21,20 @@ Personal python libraries live under `Asgard/sindri/submodules/`. Projects that 
 
 `jormi/` is the primary shared utility library. It covers the full workflow of scientific computing in the `Asgard/` ecosystem: MHD turbulence statistics, field operations and decompositions, array utilities, plotting, I/O, logging, and HPC job scheduling. Before writing any new utility logic, check `jormi/` first. New projects should depend on `jormi/` and reuse what it offers rather than reimplementing it.
 
+#### Internal layering
+
+`jormi/` enforces a strict two-layer separation between array math and field objects:
+
+- `ww_arrays/` owns all array-level mathematics. Functions here operate purely on `NDArray` inputs and return `NDArray` outputs. No field objects, no field metadata.
+- `ww_fields/` is a thin wrapper layer. It extracts arrays from field objects, delegates to `ww_arrays/`, and rewraps the result. It contains no array math of its own.
+
+When adding a new computation, implement it in `ww_arrays/` first. The `ww_fields/` wrapper then calls it. If the computation is only ever needed inside `ww_fields/`, it still belongs in `ww_arrays/` unless it is trivially one line.
+
 Beyond `jormi/`, make use of the other submodules where relevant. If the work involves loading or processing simulation data, reach for the appropriate `ww-*-sims/` package rather than writing bespoke I/O. For vector field visualisation, use `vegtamr/`. Note that `bifrost/` is still under active development and not yet functional; do not depend on it.
 
 ### freyja
 
-`freyja/` is the development sandbox. It brings together many personal packages in one place, used for prototyping and testing ideas before they are ready to be formalised. Code here is exploratory and not expected to be production-quality.
+`freyja/` is the development sandbox. It brings together many packages in one place, used for prototyping and testing ideas before they are ready to be formalised. Code here is exploratory and not expected to be production-quality.
 
 ### mimir
 
@@ -35,7 +44,7 @@ Once a science idea is solid, it graduates to a dedicated science project repo u
 
 ### Referencing Personal Libraries
 
-During active development, reference personal libraries as editable installs in `pyproject.toml`:
+During active development, reference libraries as editable installs in `pyproject.toml`:
 
 ```toml
 [tool.uv.sources]
@@ -63,7 +72,7 @@ Numerical promotion belongs in the computation layer (e.g., in `jormi/`). When a
 
 ## Imports
 
-Asgard projects extend the standard import order with two personal library groups, placed based on how the dependency is referenced:
+Asgard projects extend the standard import order with two additional library groups, placed based on how the dependency is referenced:
 
 | Group | Purpose |
 |---|---|
