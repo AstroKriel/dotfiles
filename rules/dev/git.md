@@ -23,7 +23,7 @@ Use only these actions:
 | `del` | deleting code or files |
 | `update` | changes to existing functionality |
 | `improve` | quality/clarity improvements |
-| `apply` | applying external changes (linting, formatting) |
+| `apply` | applying external changes (linting, formatting, style) |
 | `config` | config file changes |
 | `docs` | documentation only |
 | `test` | test additions or fixes |
@@ -32,7 +32,7 @@ Use only these actions:
 
 ## Scope
 
-Scope answers *where* the change is. Granularity depends on how localised the change is:
+Scope answers **where** the change is. Granularity depends on how localised the change is:
 
 | Situation | Scope |
 |---|---|
@@ -63,7 +63,7 @@ Scope answers *where* the change is. Granularity depends on how localised the ch
 verb/short-description
 ```
 
-For shared repos (multiple contributors), prepend your username:
+For shared repos (multiple contributors), prepend a username:
 
 ```
 username/verb/short-description
@@ -77,7 +77,7 @@ username/verb/short-description
 | Characters | alphanumeric, `-`, and `/` only |
 | Purpose | one branch per logical change |
 
-Use the same verbs as commits: `add`, `fix`, `refactor`, `update`, `remove`, etc.
+Use the same verbs as commits: `add`, `fix`, `refactor`, `update`, `del`, etc.
 
 **Avoid:** dates, vague names (`wip`, `temp`, `fix-stuff`), and anything longer than needed.
 
@@ -92,23 +92,23 @@ When suggesting commits, always present each one as a copy-pasteable shell block
 Single repository:
 
 ```bash
-cd ~/Projects/my-repo
-git add src/data_loader.py
-git commit -m "fix(data_loader.py): handle missing file path by raising FileNotFoundError."
+cd ~/Projects/<repo>
+git add <path/to/file.py>
+git commit -m "<type>(<file.py>): <description>."
 ```
 
 Multiple repositories:
 
 ```bash
-cd ~/Projects/package-a
-git add src/package_a/validate_inputs.py
-git commit -m "fix(validate_inputs.py): raise TypeError when input type is invalid."
+cd ~/Projects/<repo-a>
+git add <path/to/file.py>
+git commit -m "<type>(<file.py>): <description>."
 ```
 
 ```bash
-cd ~/Projects/package-b
-git add src/package_b/process_data.py
-git commit -m "update(process_data.py): use package-a validate_inputs for type checking."
+cd ~/Projects/<repo-b>
+git add <path/to/other_file.py>
+git commit -m "<type>(<other_file.py>): <description>."
 ```
 
 ---
@@ -124,10 +124,10 @@ Use the `git_helpers` CLI (`~/Projects/GitHelpers`) for git operations where a c
 These illustrate the message format and wording style only, not the full shell workflow:
 
 ```
-fix(data_loader.py): handle missing file path by raising FileNotFoundError.
-refactor(data_loader.py): expand function signatures to one arg per line.
-fix(compute_stats): accept int for bin_count; accept None for label.
+fix(<script>.py): <description of what was broken and how it is fixed>.
+refactor(<module>.py): <description of structural change>.
+fix(<function>): accept <type> for <param>; accept None for <param>.
 apply(linting): fix ruff and pyright warnings across src/.
-rename(plots/): align module names with verb-noun convention.
+rename(<dir>/): <description of naming change>.
 add: initial repo structure.
 ```
