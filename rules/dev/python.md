@@ -1,6 +1,6 @@
 # Python Coding Conventions
 
-These rules define how Python code is written across all personal projects. They apply to any AI assistant helping draft, review, or refactor Python code.
+These rules define how Python code is written across all projects.
 
 ---
 
@@ -77,6 +77,8 @@ reportUninitializedInstanceVariable = "none"  # false positive: pyright misses v
 enableTypeIgnoreComments = true  # honour "# type: ignore" (basedpyright defaults to false)
 reportIgnoreCommentWithoutRule = "none"  # test files use bare "# type: ignore" intentionally
 reportUnnecessaryTypeIgnoreComment = "none"  # suppress warnings about stale ignore comments
+reportUnnecessaryIsInstance = "none"  # isinstance guards for runtime safety beyond what annotations enforce
+reportUnreachable = "none"  # paired with the above: guards after exhaustive isinstance chains appear unreachable to pyright
 ```
 
 Configure pytest with the src layout in mind:
@@ -94,9 +96,11 @@ testpaths = ["utests"]
 | Rule | |
 |---|---|
 | Casing | `snake_case` for all filenames |
-| Pattern | verb-noun: `compute_array_stats.py`, `load_dataset.py`, `check_arrays.py`, `manage_log.py` |
-| Private modules | leading underscore: `_config_types.py`, `_data_operators.py` |
+| Pattern | verb-noun: `<verb>_<noun>.py` |
+| Private modules | leading underscore: `_<verb>_<noun>.py` |
 | Packages | named for the concept they expose: `arrays`, `fields`, `plots` |
+
+Function naming follows the same boundary logic: a function should only use a leading underscore when it is intended to stay internal to its own module. If a function is called from another module, do not prefix it with an underscore, even if it lives in a private module.
 
 ### Module Growth
 
@@ -257,15 +261,16 @@ if __name__ == "__main__":
 | Rule | |
 |---|---|
 | Order | `## stdlib` -> `## third-party` -> `## personal` -> `## local` |
-| `## personal` | your own separately-packaged libraries, installed as dependencies |
+| `## personal` | separately-packaged libraries installed as dependencies |
 | `## local` | imports from within the current project |
 | Per line | one import per line |
 | Within groups | plain `import ...` lines first, then `from ... import ...` lines |
 | Sort order | alphabetise imports within each `import ...` and `from ... import ...` block |
 | Spacing | separate `import ...` and `from ... import ...` blocks with one blank line when both appear in the same group |
 | Aliases | never `import numpy as np` or `import matplotlib.pyplot as plt`, use full names or descriptive aliases: `import numpy`, `import matplotlib.pyplot as mpl_plot`, `from matplotlib.axes import Axes as mpl_Axes` |
-| Module imports | import the module, not individual functions: `from jormi.ww_types import check_types` then `check_types.ensure_nonempty_string(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site; use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
-| Long imports | use parentheses with trailing commas |
+| Module imports | import the module, not individual functions: `from <package>.<module> import <module>` then `<module>.<function>(...)`. Exceptions: (1) third-party libraries where a descriptive prefix alias preserves namespace at the call site; use `mpl_` for matplotlib, `scipy_` for scipy, `rich_` for rich (e.g. `from matplotlib.axes import Axes as mpl_Axes`, `from rich.console import Console as rich_Console`); (2) universally idiomatic stdlib imports: `from pathlib import Path`, `from typing import Any`, `from dataclasses import dataclass`, `from enum import Enum` |
+| Long imports | use parentheses with trailing commas when there are three or more models being imported  |
+| Re-exports | use `from <module> import <name> as <name>` (self-alias) when a module re-exports a symbol for callers; `from <module> import <name>` alone is not considered a re-export by pyright and will produce an error at the call site |
 
 ---
 
@@ -273,41 +278,40 @@ if __name__ == "__main__":
 
 ### Functions
 
-Use strong verb prefixes, always. Never `calc_`, `process_`, or generic names:
+Always use strong, specific verb prefixes. Avoid weak or generic leading words that do not communicate what the function does or returns:
 
 | Prefix | Purpose |
 |---|---|
 | `compute_*` | mathematical/numerical operations |
-| `check_*` | returns `bool`, may raise or warn |
-| `ensure_*` | raises on failure (assertion-style) |
+| `check_*` | returns `bool`, may raise or warn; one of two function-level actions under the validate concept |
+| `ensure_*` | raises on failure, no meaningful return; the other function-level action under the validate concept |
 | `load_*` | I/O that returns data |
 | `create_*` / `make_*` | object construction |
 | `get_*` | query or lookup |
 | `resolve_*` | disambiguation between options |
 | `extract_*` | pull data from a larger structure |
-| `validate_*` | raise on invalid state (private use) |
 
-Private helpers use a leading underscore: `_get_bin_edges()`, `_validate_inputs()`, `_extract_column()`.
+Private helpers use a leading underscore: `_<verb>_<noun>()`.
 
 ### Classes
 
-Private classes use a leading underscore: `_Colours`, `_MessageStyle`. These serve as implementation details supporting public classes and are not re-exported.
+Private classes use a leading underscore. They serve as implementation details supporting public classes and are not re-exported.
 
 Enums that are used as strings inherit from both `str` and `Enum`. Enums that are pure value holders inherit from `Enum` only:
 
 ```python
-class SortOrder(str, Enum): ...   # used as strings
-class MessageType(Enum): ...      # pure value holder
+class <Name>(str, Enum): ...   # used as strings
+class <Name>(Enum): ...        # pure value holder
 ```
 
 Enum members may hold dataclass instances as values to carry rich metadata per member:
 
 ```python
-class MessageType(Enum):
-    TASK = _MessageStyle(
-        "Task",
-        Symbols.RIGHT_ARROW.value,
-        _Colours.WHITE.value,
+class <EnumName>(Enum):
+    <MEMBER> = <DataclassType>(
+        <arg>,
+        <arg>,
+        <arg>,
     )
 ```
 
@@ -316,13 +320,13 @@ class MessageType(Enum):
 | Rule | |
 |---|---|
 | Casing | `snake_case` exclusively, never camelCase |
-| Abbreviations | acceptable when well-known within the domain: `ndim`, `cmap`, `num_rows`, `col_index` |
-| Descriptive names | use subscript-style: `num_cells_x`, `bin_centers`, `axis_to_slice`, `field_key` |
+| Abbreviations | acceptable when well-known within the domain |
+| Descriptive names | use qualified names that read as subscript notation: `<qualifier>_<noun>` |
 | Single-letter names | never, names must always indicate what is being worked with |
 | Abbreviated names | never, `language` not `lang`, `index` not `idx` |
 | Directories | `directory` when only one in scope; `_dir` suffix when multiple: `source_dir`, `target_dir` |
-| Comprehension variables | prepend `_` if the name would conflict with an existing name in scope: `_rules_file` |
-| Booleans | `is_*` or `has_*` prefix: `is_periodic`, `has_zeros`, `is_open` |
+| Comprehension variables | prepend `_` if the name would conflict with an existing name in scope |
+| Booleans | `is_*` or `has_*` prefix |
 
 ### Constants
 
@@ -349,23 +353,23 @@ class MessageType(Enum):
 | Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line |
 | Size | typically 20-80 lines, single-responsibility |
 | Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
-| Validation | always separated into `ensure_*` / `check_*` / `_validate_*` helpers, called before any logic |
+| Validation | always separated into `ensure_*` / `check_*` helpers, called before any logic |
 | Helpers | private (`_` prefix), each doing exactly one sub-task |
 | Structure | public functions read as a recipe: validate -> sub-task 1 -> sub-task 2 -> return |
 
 ```python
-def compute_p_norm(
+def <verb>_<noun>(
     *,
-    array_a: NDArray[Any],
-    array_b: NDArray[Any],
-    p_norm: float = 2,
-    normalise_by_length: bool = False,
-) -> float:
+    <param>: <type>,
+    <param>: <type>,
+    <param>: <type> = <default>,
+    <param>: bool = False,
+) -> <type>:
 
-result = compute_p_norm(
-    array_a=field_a,
-    array_b=field_b,
-    p_norm=2,
+<result> = <verb>_<noun>(
+    <param>=<value>,
+    <param>=<value>,
+    <param>=<value>,
 )
 ```
 
@@ -400,47 +404,52 @@ Unit tests live under `utests/`, mirroring the source structure. Run via pytest.
 Test files are named `test_<module_name>.py`. Tests are organised into focused `unittest.TestCase` classes named after what they test:
 
 ```python
-class TestDataLoader_Construction(unittest.TestCase):
+class Test<Concept>_<Aspect>(unittest.TestCase):
 
-    def test_valid_construction_via_from_dict(
-        self,
-    ): ...
-
-    def test_frozen_immutability(
-        self,
-    ): ...
-
-class TestDataLoader_Properties(unittest.TestCase):
-
-    def test_label_is_stored(
-        self,
-    ): ...
-
-    def test_optional_field_accepts_none(
+    def test_<behaviour>(
         self,
     ): ...
 ```
 
-Private helper functions for building test fixtures use a leading underscore: `_make_config()`, `_make_dataset()`.
+Private helper functions for building test fixtures use a leading underscore: `_make_<fixture>()`.
+
+All assertion calls follow the same multi-line call site rule as regular function calls: one argument per line, trailing comma, even when the call would fit on one line. The value under test goes on its own first line so each assertion is easy to scan:
+
+```python
+self.assertEqual(
+    <result>,
+    <expected>,
+)
+
+self.assertTrue(
+    <condition>,
+)
+
+numpy.testing.assert_array_almost_equal(
+    <result>,
+    <expected>,
+)
+```
 
 Use `assertAlmostEqual()` for floating-point comparisons and `assertRaises()` for error cases:
 
 ```python
-def test_invalid_input_raises(
+def test_<behaviour>_raises(
     self,
 ):
     with self.assertRaises(
-        TypeError,
+        <ErrorType>,
     ):
-        validate_inputs.ensure_type(
-            value=42,
-            expected_type=str,
+        <module>.<function>(
+            <param>=<invalid_value>,
         )
 ```
 
 ### Validation Tests (vtests)
 
 Validation tests live under `vtests/`, mirroring the source structure. Use them when a unit test is not practical: for example, testing numerical convergence, decomposition accuracy, or integrated behaviour across modules.
+
+Vtests are not pytest-based. Run them via `uv run vtests/run_all.py`. Do not use pytest to run vtests; pytest cannot collect them because vtest classes take `__init__` arguments.
 
 Each vtest is a standalone script with a `main()` function, discovered and run via `vtests/run_all.py`. Where possible, save visual output (plots, diagrams) alongside the test to allow human inspection of results:
 
@@ -456,7 +465,7 @@ def main() -> None:
 
 ## Docstrings & Comments
 
-Code should be self-documenting. A comment is an admission that the code alone is not clear enough. Comments are written for yourself: to recall why a decision was made, not to describe what the code does.
+Code should be self-documenting. A comment is an admission that the code alone is not clear enough. Comments exist to capture the why: to recall why a decision was made, not to describe what the code does.
 
 ### Docstrings
 
@@ -465,11 +474,12 @@ Write docstrings for all public functions, methods, classes, and dataclasses. Ne
 One-liners have the opening and closing `"""` on the same line. Multi-line docstrings open with `"""` and the text immediately on the first line; the closing `"""` sits on its own line:
 
 ```python
-"""Compute the root-mean-square of a NumPy array."""
+"""<One-sentence description ending with a period>."""
 
 """
-Compute the y-intercept b for the line y = slope * x + b
-passing through a reference point (x_ref, y_ref).
+<Opening sentence.>
+
+<Optional second paragraph for non-obvious behaviour.>
 """
 ```
 
@@ -494,22 +504,22 @@ Add a `Fields ---` section to a dataclass when field names alone do not convey t
 
 ```python
 """
-Short description of what the dataclass represents.
+<One-sentence description of what the dataclass represents.>
 
 Fields
 ---
-- `field_name`:
+- `<field>`:
     What it holds; valid ranges or invariants; what None means if applicable.
 
-- `other_field`:
-    Must be the same length as `field_name`; always finite.
+- `<other_field>`:
+    Constraint relating it to another field, if any.
 """
 ```
 
 | Rule | |
 |---|---|
 | Names and values | backticks: `` `param_name` ``, `` `True` ``, `` `None` `` |
-| Inline math | code style: `` `y = A * x^b` `` |
+| Inline math | code style: `` `y = a * x^b` `` |
 | Types | never repeat in the docstring; the signature already has them |
 | Format | never use numpy/sphinx-style `Parameters:\n-----------` blocks |
 
@@ -519,7 +529,7 @@ Fields
 |---|---|
 | Standalone marker | `##` (double hash); harder to accidentally uncomment than `#` |
 | Inline marker | `#` (single hash) when the comment sits to the right of code on the same line |
-| Spacing | two spaces between code and the `#` marker; do not align inline comments across lines |
+| Spacing | two spaces between code and the `#` marker; do not align inline comments across lines; applies to `pyproject.toml` as well |
 | Case | lowercase, unless referring to a named thing: a function, class, constant, or variable |
 | Length | a few words to one sentence; never a paragraph |
 | Purpose | only three reasons to comment: section structure, non-obvious constraints or invariants, and algorithmic decisions where the why is not derivable from the code |
@@ -594,10 +604,10 @@ numpy.multiply(
 | Runtime failure | `` `{thing}` failed. `` + chain with `from` |
 
 ```python
-raise ValueError("`num_samples` must be a positive integer.")
-raise ValueError(f"`spline_order` must be 1, 2, or 3; got `{spline_order}`.")
-raise ValueError(f"`{param_name}` must be one of {valid_options}; got `{value}`.")
-raise ValueError(f"field not found: `{field_key}`; searched in {dataset_dir}.")
-raise FileNotFoundError(f"config error: `output_dir`: path does not exist; got {path}.")
-raise RuntimeError(f"`{command}` failed.") from error
+raise ValueError("`<param>` must be <constraint>.")
+raise ValueError(f"`<param>` must be <constraint>; got `{<param>}`.")
+raise ValueError(f"`{<param_name>}` must be one of {<valid_options>}; got `{<value>}`.")
+raise ValueError(f"<item> not found: `{<key>}`; searched in {<location>}.")
+raise FileNotFoundError(f"config error: `<field>`: <reason>; got {<path>}.")
+raise RuntimeError(f"`{<command>}` failed.") from <error>
 ```
