@@ -42,26 +42,6 @@ Once a science idea is solid, it graduates to a dedicated science project repo u
 
 ---
 
-### Referencing Personal Libraries
-
-During active development, reference libraries as editable installs in `pyproject.toml`:
-
-```toml
-[tool.uv.sources]
-<package-name> = { path = "../submodules/<package-name>", editable = true }
-```
-
-Once a project has matured and the dependency has stabilised, switch to a pinned git commit:
-
-```toml
-[tool.uv.sources]
-<package-name> = { git = "https://github.com/<username>/<package-name>", rev = "<commit-hash>" }
-```
-
-Do **not** add `[tool.hatch.metadata] allow-direct-references = true` when using `[tool.uv.sources]`. That flag is only needed when a direct URL reference is written inline in the `dependencies` list (e.g. `"jormi @ file://..."`). With `[tool.uv.sources]`, the `dependencies` list contains only a plain package name and hatchling never sees the path.
-
----
-
 ## Data Representation
 
 Simulation interface layers should preserve the representation of the data as read from disk. If the source data are `float32`, loaders should return `float32` fields by default rather than silently casting/promoting to `float64`.
@@ -81,6 +61,26 @@ Asgard projects extend the standard import order with two additional library gro
 | `## personal (remote)` | personal libraries referenced as a pinned git commit |
 | `## local` | imports from within the current project |
 | `## personal (local)` | personal libraries referenced as an editable install |
+
+---
+
+### Referencing Personal Libraries
+
+During active development, reference libraries as editable installs in `pyproject.toml`:
+
+```toml
+[tool.uv.sources]
+<package-name> = { path = "../submodules/<package-name>", editable = true }
+```
+
+Once a project has matured and the dependency has stabilised, switch to a pinned git commit:
+
+```toml
+[tool.uv.sources]
+<package-name> = { git = "https://github.com/<username>/<package-name>", rev = "<commit-hash>" }
+```
+
+Do **not** add `[tool.hatch.metadata] allow-direct-references = true` when using `[tool.uv.sources]`. That flag is only needed when a direct URL reference is written inline in the `dependencies` list (e.g. `"jormi @ file://..."`). With `[tool.uv.sources]`, the `dependencies` list contains only a plain package name and hatchling never sees the path.
 
 ---
 
