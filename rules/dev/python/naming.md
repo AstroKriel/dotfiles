@@ -1,5 +1,7 @@
 # Python: Naming and Imports
 
+How to name things: files, modules, functions, classes, variables, mathematical quantities, and constants.
+
 ---
 
 ## Files and Modules

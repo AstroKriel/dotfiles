@@ -1,5 +1,7 @@
 # Python: File Layout
 
+How a file is structured internally: wrappers, section markers, imports, and type aliases.
+
 The `## { ... }` wrappers delimit file content. Empty files (e.g. `__init__.py` files that only serve as package markers) need no wrapper.
 
 ---

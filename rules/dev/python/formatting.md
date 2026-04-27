@@ -1,6 +1,6 @@
 # Python: Formatting
 
-Formatting rules describe how code should be written. 
+How code is visually laid out on the page: signature expansion, call site expansion, and type annotations.
 
 ---
 

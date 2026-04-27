@@ -1,5 +1,7 @@
 # Python: Error Handling
 
+Which exceptions to raise and how to phrase error messages.
+
 ---
 
 ## Exception Types

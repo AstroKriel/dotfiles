@@ -1,5 +1,7 @@
 # Python: Testing
 
+How unit tests and validation tests are structured and run.
+
 ---
 
 ## Unit Tests (utests)

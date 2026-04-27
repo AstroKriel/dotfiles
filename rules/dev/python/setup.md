@@ -1,5 +1,7 @@
 # Python: Project Setup
 
+How to configure a Python project: package manager, `pyproject.toml`, type checker, and pytest.
+
 ---
 
 ## Package Manager
