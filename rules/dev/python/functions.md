@@ -2,20 +2,7 @@
 
 ---
 
-## Type Annotations
-
-| Rule | |
-|---|---|
-| Public functions | fully annotated, parameters and return types |
-| Union types | `NDArray[Any] \| list[float]`, `str \| Path`, `float \| None` |
-| Private functions | type hints yes, docstrings optional |
-| Complex types | use `TypeAlias`, defined in a dedicated `## === TYPE ALIASES` section |
-
----
-
-## Function Signatures
-
-Every parameter goes on its own line with a trailing comma, even for single-parameter functions.
+## Signatures
 
 For two or more parameters, use `*,` to enforce keyword-only arguments:
 
@@ -44,35 +31,11 @@ def <verb>_<noun>(
 
 ## Call Sites
 
-**Single-argument calls** stay on one line:
-
-```python
-result = compute_magnitude(vector)
-```
-
-**Multi-argument calls** go one argument per line, keyword-named, with a trailing comma. Positional-only arguments (e.g. `str.split(",", 1)`) are exempt and may stay inline:
-
-```python
-result = compute_something(
-    param_a=value_a,
-    param_b=value_b,
-)
-```
-
-**Nested calls** where the argument is itself a call expression: expand both the outer and inner call to multi-line:
-
-```python
-result = outer_fn(
-    inner_fn(
-        param_a=value_a,
-        param_b=value_b,
-    ),
-)
-```
+Pass each argument explicitly by keyword name. Positional-only arguments (e.g. `str.split(",", 1)`) are exempt and may stay inline.
 
 ---
 
-## Function Structure
+## Structure
 
 | Rule | |
 |---|---|
@@ -80,7 +43,7 @@ result = outer_fn(
 | Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
 | Validation | always separated into `ensure_*` / `check_*` helpers, called before any logic |
 | Helpers | private (`_` prefix), each doing exactly one sub-task |
-| Structure | public functions read as a recipe: validate -> sub-task 1 -> sub-task 2 -> return |
+| Recipe | public functions read as a recipe: validate -> sub-task 1 -> sub-task 2 -> return |
 
 ---
 
