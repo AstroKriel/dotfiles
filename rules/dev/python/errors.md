@@ -32,10 +32,10 @@ Which exceptions to raise and how to phrase error messages.
 
 | Message type | Pattern |
 |---|---|
-| Constraint | `` `param` must be X; got `value`. `` |
-| Not found | `` X not found: `name`; searched in {path}. `` |
-| Invalid choice | `` `param` must be one of {options}; got `value`. `` |
-| Runtime failure | `` `{thing}` failed. `` + chain with `from` |
+| Constraint | `` `<param>` must be <X>; got `<value>`. `` |
+| Not found | `` <X> not found: `<name>`; searched in {<path>}. `` |
+| Invalid choice | `` `<param>` must be one of {<options>}; got `<value>`. `` |
+| Runtime failure | `` `{<thing>}` failed. `` + chain with `from` |
 
 ```python
 raise ValueError("`<param>` must be <constraint>.")
