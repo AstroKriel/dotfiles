@@ -45,6 +45,7 @@ class <EnumName>(Enum):
 | Derived attributes | use `@cached_property` |
 | Alternative constructors | `@classmethod` methods named `from_*` |
 | Resource lifecycle | use context managers (`__enter__` / `__exit__`) |
+| `@property` vs `get_*` | use `@property` for attributes derived from existing state: no parameters, no side effects, cheap to compute; use `get_*` for operations that take parameters, involve I/O, or significant cost |
 
 Method ordering within dataclasses:
 

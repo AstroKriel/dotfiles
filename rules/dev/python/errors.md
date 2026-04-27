@@ -4,6 +4,12 @@ Which exceptions to raise and how to phrase error messages.
 
 ---
 
+## Assertions
+
+Use `assert` only for internal invariants that indicate a programming error if violated. Never use `assert` to validate inputs or enforce runtime constraints; use `ensure_*` for those.
+
+---
+
 ## Exception Types
 
 | Type | When to use |
