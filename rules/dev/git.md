@@ -44,6 +44,12 @@ Scope answers **where** the change is. Granularity depends on how localised the 
 
 ---
 
+## Granularity
+
+One logical change per commit. Split when changes are independently revertable and target different scopes. Keep together when changes are interdependent or incomplete in isolation.
+
+---
+
 ## Details
 
 | Rule | |
@@ -125,9 +131,6 @@ username/verb/short-description
 | Length | max 50 characters |
 | Characters | alphanumeric, `-`, and `/` only |
 | Purpose | one branch per logical change |
-
-Use the same verbs as commits: `add`, `fix`, `refactor`, `update`, `del`, etc.
-
-**Avoid:** dates, vague names (`wip`, `temp`, `fix-stuff`), and anything longer than needed.
-
-**Lifecycle:** delete branches after merging; rebase onto `main` before opening a PR.
+| Verbs | same as commits: `add`, `fix`, `refactor`, `update`, `del`, etc. |
+| Avoid | dates, vague names (`wip`, `temp`, `fix-stuff`), and anything longer than needed |
+| Lifecycle | delete branches after merging; rebase onto `main` before opening a PR |
