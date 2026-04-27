@@ -1,6 +1,6 @@
 # Python: Naming and Imports
 
-How to name things: files, modules, functions, classes, variables, mathematical quantities, and constants.
+How to name things: files, modules, functions, variables, mathematical variables, and constants.
 
 ---
 
@@ -50,30 +50,6 @@ Private helpers use a leading underscore: `_<verb>_<noun>()`.
 
 ---
 
-## Classes
-
-Private classes use a leading underscore. They serve as implementation details supporting public classes and are not re-exported.
-
-Enums that are used as strings inherit from both `str` and `Enum`. Enums that are pure value holders inherit from `Enum` only:
-
-```python
-class <Name>(str, Enum): ...   # used as strings
-class <Name>(Enum): ...        # pure value holder
-```
-
-Enum members may hold dataclass instances as values to carry rich metadata per member:
-
-```python
-class <EnumName>(Enum):
-    <MEMBER> = <DataclassType>(
-        <arg>,
-        <arg>,
-        <arg>,
-    )
-```
-
----
-
 ## Variables
 
 | Rule | |
@@ -89,7 +65,7 @@ class <EnumName>(Enum):
 
 ---
 
-## Mathematical Naming
+### Mathematical Variables
 
 When code, comments, and docstrings use mathematical notation, keep naming aligned with Einstein-style conventions.
 
@@ -107,10 +83,13 @@ When a variable name describes an operation applied to a quantity, separate the 
 | Prefer | `<action>_<quantity>` |
 | Avoid | `<action><quantity>` |
 
-This makes differential and tensor expressions easier to scan in code. Apply consistently to variable names, comments, docstrings, and user-facing labels (unless an established public label should be preserved).
+Apply consistently to variable names, comments, docstrings, and user-facing labels; preserve established public labels when they exist.
 
----
+### Constants
 
-## Constants
+`UPPER_CASE` at module level:
 
-`UPPER_CASE` at module level.
+```python
+MAX_ITERATIONS: int = 1000
+DEFAULT_TOLERANCE: float = 1e-6
+```

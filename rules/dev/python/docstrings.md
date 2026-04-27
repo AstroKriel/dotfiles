@@ -80,9 +80,10 @@ Fields
 Mathematical notation is preferred over English prose where appropriate:
 
 ```python
+## out_values = values^2
 numpy.multiply(
     values,
     values,
-    out=out,
-)  # out = values^2
+    out=out_values,
+)
 ```
