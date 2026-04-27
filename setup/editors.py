@@ -123,6 +123,7 @@ def filter_jsonc_comments(
 ) -> str:
     content = re.sub(r'/\*[\s\S]*?\*/', '', content)  # remove block comments
     content = re.sub(r'//[^\n\r]*', '', content)  # remove line comments
+    content = re.sub(r',(\s*[}\]])', r'\1', content)  # remove trailing commas
     return content
 
 
