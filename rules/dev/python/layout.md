@@ -88,6 +88,18 @@ Subsection markers use a single line:
 
 ---
 
+## Package Init Files
+
+`__init__.py` files that re-export symbols from sub-modules use no wrapper. Use the self-alias pattern so pyright and ruff recognise the imports as explicit re-exports:
+
+```python
+from .<module_a> import <name_a> as <name_a>
+from .<module_a> import <name_b> as <name_b>
+from .<module_b> import <name_c> as <name_c>
+```
+
+---
+
 ## Type Aliases
 
 Defined in a dedicated `## === TYPE ALIASES` section, before any functions:
