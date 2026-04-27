@@ -109,7 +109,7 @@ Defined in a dedicated `## === TYPE ALIASES` section, before any functions:
 ## === TYPE ALIASES
 ##
 
-MyType: TypeAlias = NDArray[Any]
+<Name>: TypeAlias = <Type>
 ```
 
 ---
@@ -178,7 +178,7 @@ import unittest
 ## === TEST SUITE
 ##
 
-class TestFoo_Bar(unittest.TestCase):
+class Test<Concept>_<Aspect>(unittest.TestCase):
     ...
 
 ##
