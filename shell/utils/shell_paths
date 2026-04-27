@@ -1,34 +1,34 @@
 ## add directory to an env-var if its not already present (bash/zsh agnostic)
 prepend_to_path() {
-  local varname="$1"
-  local newpath="$2"
-  local current_value
-  if [[ -n "$ZSH_VERSION" ]]; then
-    current_value="${(P)varname}"
-  else
-    current_value="${!varname}"
-  fi
-  current_value=":${current_value}:" # sandwhich path with colons
-  current_value="${current_value//:$newpath:/:}" # remove path if already stored
-  current_value="${current_value#:}" # remove leading colon
-  current_value="${current_value%:}" # remove trailing colon
-  export "$varname=$newpath${current_value:+:$current_value}"
+    local varname="$1"
+    local newpath="$2"
+    local current_value
+    if [[ -n "$ZSH_VERSION" ]]; then
+            current_value="${(P)varname}"
+    else
+            current_value="${!varname}"
+    fi
+    current_value=":${current_value}:" # sandwhich path with colons
+    current_value="${current_value//:$newpath:/:}" # remove path if already stored
+    current_value="${current_value#:}" # remove leading colon
+    current_value="${current_value%:}" # remove trailing colon
+    export "$varname=$newpath${current_value:+:$current_value}"
 }
 
 ## extend executable search paths
 prepend_to_path PATH "$HOME/.local/bin"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  ## extend compiler include paths
-  prepend_to_path CPATH /opt/homebrew/include
+    ## extend compiler include paths
+    prepend_to_path CPATH /opt/homebrew/include
 
-  ## extend library search paths
-  prepend_to_path LIBRARY_PATH /opt/homebrew/lib
+    ## extend library search paths
+    prepend_to_path LIBRARY_PATH /opt/homebrew/lib
 
-  ## extend executable search paths
-  prepend_to_path PATH /opt/homebrew/bin
-  prepend_to_path PATH /Library/TeX/texbin
-  prepend_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin
+    ## extend executable search paths
+    prepend_to_path PATH /opt/homebrew/bin
+    prepend_to_path PATH /Library/TeX/texbin
+    prepend_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin
 fi
 
 ## .

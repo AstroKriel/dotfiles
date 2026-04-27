@@ -3,7 +3,7 @@ alias reload_zsh="source $HOME/.zshrc && echo 'Reloaded: ~/.zshrc'"
 
 ## source file only if it exists
 source_if_present() {
-  [[ -f "$1" ]] && source "$1"
+    [[ -f "$1" ]] && source "$1"
 }
 
 ## source modular components if present
@@ -18,9 +18,9 @@ source_if_present "$HOME/.shell_paths"
 
 ## ssh-agent via keychain (linux only)
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  if command -v keychain &>/dev/null; then
-    eval $(keychain --eval --quiet id_ed25519_github)
-  fi
+    if command -v keychain &>/dev/null; then
+        eval $(keychain --eval --quiet id_ed25519_github)
+    fi
 fi
 
 ## initialize completion

@@ -64,7 +64,7 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # use colors in completi
 ## ---------------------
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  export HOMEBREW_NO_ENV_HINTS=1
+    export HOMEBREW_NO_ENV_HINTS=1
 fi
 
 ## .

@@ -3,7 +3,7 @@ alias reload_bash="source $HOME/.bashrc && echo 'Reloaded: ~/.bashrc'"
 
 ## helper function
 source_if_present() {
-  [[ -f "$1" ]] && source "$1"
+    [[ -f "$1" ]] && source "$1"
 }
 
 ## source modular components if present
