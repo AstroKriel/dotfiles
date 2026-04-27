@@ -237,7 +237,7 @@ Apply this consistently to:
 | Rule | |
 |---|---|
 | Signatures | every parameter on its own line with a trailing comma, even for single-parameter functions; single-parameter functions do not require `*,`; for two or more parameters, use `*,`: private functions always place it at the first position (all keyword-only); public functions may place `*,` after a single leading subject parameter whose identity is already implied by the function name, in which case that subject may be passed positionally |
-| Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line |
+| Call sites | for any call with more than one argument where args can be passed as keyword args: pass each explicitly by name, one per line, with a trailing comma; positional-only args (e.g. `str.split(",", 1)`) are exempt and may stay inline; single-argument calls may stay on one line, unless the argument is itself a call expression — in that case expand both the outer and inner call to multi-line |
 | Size | typically 20-80 lines, single-responsibility |
 | Blank lines | no blank lines inside a function body, except one blank line above and below a nested function definition |
 | Validation | always separated into `ensure_*` / `check_*` helpers, called before any logic |
