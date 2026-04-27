@@ -100,6 +100,6 @@ Apply consistently to variable names, comments, docstrings, and user-facing labe
 `UPPER_CASE` at module level:
 
 ```python
-MAX_ITERATIONS: int = 1000
-DEFAULT_TOLERANCE: float = 1e-6
+MAX_COUNT: int = 1000
+DEFAULT_TOL: float = 1e-6
 ```
