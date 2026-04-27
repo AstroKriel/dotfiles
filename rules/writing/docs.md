@@ -41,6 +41,7 @@ These rules apply when writing or editing any markdown documentation: setup guid
 
 Use tables for:
 
+- Rules and conventions
 - File locations and their purpose
 - Sensor names, hardware details, component summaries
 - Common tweaks (what to change and where)
@@ -70,7 +71,9 @@ Example:
 
 ## Capturing the Why
 
-Document the reason behind non-obvious decisions, workarounds, and design choices. A reader should be able to understand not just what to do, but why it is done that way.
+Document the reason behind non-obvious decisions, workarounds, and design choices. A reader should understand not just what to do, but why.
+
+Rules belong in tables. Prose is for two cases: explaining the **why** behind a non-obvious rule, and capturing the **philosophy** behind a concept where the rule alone would feel arbitrary. Both are written as statements of fact, not instructions; if prose is restating a table rule, cut it.
 
 For setup guides, add a design decisions or lessons learned section where relevant. Cover:
 
