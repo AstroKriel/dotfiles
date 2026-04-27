@@ -1,6 +1,6 @@
 # Python: Naming and Imports
 
-How to name things: files, modules, functions, variables, mathematical variables, and constants.
+How to name things: files, modules, functions, classes, variables, mathematical variables, and constants.
 
 ---
 
@@ -50,6 +50,15 @@ Private helpers use a leading underscore: `_<verb>_<noun>()`.
 
 ---
 
+## Classes
+
+| Rule | |
+|---|---|
+| Casing | `PascalCase` for all class, enum, and dataclass names |
+| Private classes | leading underscore: `_<Name>` |
+
+---
+
 ## Variables
 
 | Rule | |
@@ -62,6 +71,7 @@ Private helpers use a leading underscore: `_<verb>_<noun>()`.
 | Directories | `directory` when only one in scope; `_dir` suffix when multiple: `source_dir`, `target_dir` |
 | Comprehension variables | prepend `_` if the name would conflict with an existing name in scope |
 | Booleans | `is_*` or `has_*` prefix |
+| Receiver variables | name after the noun in the called function: `<noun> = <verb>_<noun>(...)`, not `result` |
 
 ---
 
