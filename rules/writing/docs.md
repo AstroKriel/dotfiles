@@ -21,7 +21,7 @@ These rules apply when writing or editing any markdown documentation: setup guid
 | Code, paths, commands, keys | always in backticks: `<command>`, `~/.config/<app>/<file>`, `<Modifier>+<Key>` |
 | Values and flags | backticks: `<bool>`, `--<flag>`, `<setting>=<value>` |
 | Emphasis | use **bold** for warnings and key terms; avoid italic |
-| Never inline commands | commands always go in a code block, never bare in prose |
+| Runnable instructions | commands the reader is expected to run belong in a code block, not inline prose |
 
 ---
 
@@ -51,7 +51,7 @@ Use tables for:
 
 ## Code Blocks
 
-Every command goes in a code block. Never write a command inline in prose. Include the full command as it would be run, with no ellipsis or shorthand.
+Runnable commands and copy-paste instructions are written in code blocks, not inline prose. Inline code remains appropriate for naming a command, script, path, module, key, or flag when the reader is not being asked to run it. Runnable commands are shown in full, as they would actually be entered, with no ellipsis or shorthand.
 
 ---
 

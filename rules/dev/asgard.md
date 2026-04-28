@@ -6,6 +6,18 @@ These rules apply when working within the `Asgard/` project. They complement the
 
 ## Repository Structure
 
+### README files
+
+README files in `Asgard/` default to project-local workflow notes and lightweight reference material, not polished general-audience documentation, unless the file clearly serves as an external-facing guide.
+
+`~/.rules/writing/docs.md` is the baseline for README files, but README files remain lightweight workflow notes unless they clearly serve as external-facing guides. In particular:
+
+- a mildly personal tone is acceptable when the README documents the author's workflow or repo conventions
+- Unicode tree diagrams are acceptable when they are the clearest way to show repository layout
+- concise prose is preferred over rigid formal structure when the file is mainly for day-to-day use
+
+The core discipline from the writing rules still applies: runnable commands and copy-paste instructions are written in code blocks, not inline prose. Inline code remains appropriate for naming a command, script, path, module, or flag when the reader is not being asked to run it. Notes and caveats use blockquotes where helpful. The reason behind non-obvious setup or layout choices is documented
+
 ### sindri
 
 Python libraries live under `Asgard/sindri/submodules/`. Projects that are part of the `Asgard/` ecosystem are placed within this tree.
