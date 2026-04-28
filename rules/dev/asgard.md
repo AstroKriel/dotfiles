@@ -94,41 +94,22 @@ Pure compute helpers, low-level transformations, and routine internal state do n
 
 Direct terminal output is limited to: the logger implementation itself, generated shell-script content, and raw child-process output streamed by a subprocess helper. `print()` is not used for user-facing feedback; functions accept a `verbose` flag when a message is optional.
 
-### Choosing a log function
+### Log functions
 
-| Function | When to use |
-|---|---|
-| `log_task` | before a long-running operation starts |
-| `log_note` | neutral observation worth surfacing (e.g. timing, counts) |
-| `log_hint` | non-fatal issue the caller should know about; data clipped, parameter ignored, fallback applied |
-| `log_alert` | something unexpected that may indicate a problem but does not stop execution |
-| `log_debug` | temporary verbose detail added while debugging; remove once the issue is resolved |
-| `log_outcome` | pass/fail result for an individual test case within a vtest |
-| `log_action` | completed operation with a structured outcome, title, and optional notes |
-| `log_context` | display current parameters or config at the start of a run |
-| `log_warning` | soft error condition; pairs with `raise_error=False` pattern |
-| `log_error` | non-raising failure; operation failed but execution continues |
-| `log_items` | enumerate a list of things under a title |
-| `log_summary` | end-of-run summary with key metrics in a notes dict |
-| `log_section` | marks a major phase boundary in script output |
+All messages: lowercase throughout; names and identifiers in backticks, runtime data bare. No redundant prefixes (`"Note:"`, `"Warning:"`, `"Error:"`) in messages.
 
-### Message format
-
-All messages: lowercase throughout; backtick convention same as exceptions (names and identifiers in backticks, runtime data bare). For example, `"processed <n> files"` not `` "processed `<n>` files" ``.
-
-| Function | Form | Period |
+| Function | When to use | Form |
 |---|---|---|
-| `log_task` | present participle: `"reading file: {path}"` | no |
-| `log_note` | sentence or noun phrase | yes |
-| `log_hint` | sentence; no `"Note:"` prefix | yes |
-| `log_alert` | sentence | yes |
-| `log_error` | sentence; no `"Error:"` prefix | yes |
-| `log_warning` | sentence; no `"Warning:"` prefix | yes |
-| `log_outcome` | noun phrase identifying what was tested | no |
-| `log_action` title | noun phrase | no |
-| `log_action` message | sentence | yes |
-| `log_context` / `log_summary` title | noun phrase | no |
-| `log_section` title | noun phrase | no |
-| `log_items` title | noun phrase | no |
-| `log_items` items | noun phrases or short sentences | no |
-| `log_summary` notes | key-value pairs; values bare (not backticked) | no |
+| `log_section` | major phase boundary in script output | noun phrase title; no period |
+| `log_context` | current parameters or config at the start of a run | noun phrase title; no period |
+| `log_task` | before a long-running operation starts | present participle: `"reading file: {path}"`; no period |
+| `log_note` | neutral observation worth surfacing (e.g. timing, counts) | sentence or noun phrase; period |
+| `log_items` | enumerate a list of things under a title | noun phrase title; noun phrases or short sentences as items; no period |
+| `log_hint` | non-fatal issue; data clipped, parameter ignored, fallback applied | sentence; period |
+| `log_alert` | something unexpected that may indicate a problem but does not stop execution | sentence; period |
+| `log_warning` | soft error condition; pairs with `raise_error=False` | sentence; period |
+| `log_error` | non-raising failure; operation failed but execution continues | sentence; period |
+| `log_action` | completed operation with outcome, title, and optional notes | noun phrase title; sentence message |
+| `log_outcome` | pass/fail result for an individual vtest case | noun phrase; no period |
+| `log_summary` | end-of-run summary with key metrics | noun phrase title; key-value notes, values bare; no period |
+| `log_debug` | temporary verbose detail; remove once the issue is resolved | sentence; period |
