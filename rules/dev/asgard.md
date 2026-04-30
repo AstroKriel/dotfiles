@@ -54,6 +54,17 @@ Beyond `jormi/`, the other submodules are used where relevant. Simulation data l
 
 Once a science idea is solid, it graduates to a dedicated science project repo under `mimir/`. Each `mimir` repo is tied to a specific paper and contains the complete workflow for that paper: data processing, analysis, and figures. These repos are self-contained and reproducible.
 
+When a project is published, rename the repo to include the publication year. Update the repository name on GitHub and any local refs pointing to it. Once renamed, make no further changes to it.
+
+The local folder name and the GitHub repository name follow different conventions:
+
+| | Format | Example |
+|---|---|---|
+| Local folder | `<author1>[-<author2>]-<year>-<title-identifiers>` | `kriel-beattie-2025-curvature` |
+| GitHub | `<Author1>[<Author2>]<year>_<title-identifiers>` | `KrielBeattie2025_curvature` |
+
+Author inclusion follows the same rule for both: for two or three authors, include all names; for more, use only the first author's name.
+
 ---
 
 ## Data Representation
