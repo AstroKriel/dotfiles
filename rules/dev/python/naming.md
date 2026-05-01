@@ -38,15 +38,16 @@ Always use strong, specific verb prefixes. Avoid weak or generic leading words t
 | Prefix | Purpose |
 |---|---|
 | `compute_*` | mathematical/numerical operations |
-| `check_*` | returns `bool`, may raise or warn; one of two function-level actions under the validate concept |
-| `ensure_*` | raises on failure, no meaningful return; the other function-level action under the validate concept |
+| `check_*` | returns `bool`, may raise or warn |
+| `ensure_*` | raises on failure, no return value; covers both atomic single-constraint checks and compound multi-condition validation; name must reflect both the subject and the criteria being ensured: `ensure_<criteria>_<subject>` or `ensure_<subject>_<criteria>` |
+| `as_*` | validates an input and returns it resolved to a canonical type; raises on failure |
 | `load_*` | I/O that returns data |
 | `create_*` / `make_*` | object construction |
 | `get_*` | query or lookup |
 | `resolve_*` | disambiguation between options |
 | `extract_*` | pull data from a larger structure |
 
-Private helpers use a leading underscore: `_<verb>_<noun>()`.
+In modules, private helpers use a leading underscore: `_<verb>_<noun>()`. In scripts, no underscore prefix is used regardless of whether a helper is internal to the script.
 
 ---
 
