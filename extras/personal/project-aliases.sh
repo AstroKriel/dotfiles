@@ -1,4 +1,7 @@
-## personal project directories
+##
+## === PROJECT DIRECTORIES
+##
+
 export DNOTES="$HOME/Projects/ProjectNotes"
 alias dnotes='cd "$DNOTES"'
 

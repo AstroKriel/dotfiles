@@ -1,43 +1,47 @@
-## allow command substitutions
-setopt PROMPT_SUBST
+##
+## === PROMPT OPTIONS
+##
 
-## enable color names
+setopt PROMPT_SUBST
 autoload -Uz colors && colors
 
-## return the current git repo name and branch/tag (if inside a repo)
+##
+## === GIT PROMPT
+##
+
 parse_git_info() {
-    ## return early if not inside a git repo
     git rev-parse --is-inside-work-tree &>/dev/null || return
-    ## local repo folder name (basename of toplevel path)
     local toplevel repo_local
     toplevel=$(git rev-parse --show-toplevel 2>/dev/null) || return
     repo_local=${toplevel:t}
-    ## extract remote repo name (basename of remote.origin.url)
     local remote_url remote_name
     remote_url=$(git config --get remote.origin.url 2>/dev/null)
     if [[ -n $remote_url ]]; then
-        remote_name=${remote_url:t} # take last path component
-        remote_name=${remote_name%.git} # strip .git suffix
+        remote_name=${remote_url:t}
+        remote_name=${remote_name%.git}
     fi
-    ## prefer the remote repo name; fall back to local folder name if no remote
     local repo_display=${remote_name:-$repo_local}
-    ## current branch or tag (fallback to 'detached' if neither)
     local branch
     branch=$(
         git symbolic-ref --quiet --short HEAD 2>/dev/null || \
         git describe --tags --exact-match 2>/dev/null || echo "detached"
     )
-    ## final formatted output
     echo " ($repo_display | $branch)"
 }
 
-PROMPT=$'\n%F{cyan}%~%f'                         # line 1: full path
-PROMPT+=$'\n[%*] %F{green}%n%f: %F{yellow}%1~%f' # line 2: timestamp + user info
-PROMPT+=$'%F{red}$(parse_git_info)%f'            # line 2: git repo + branch
-PROMPT+=$'\n-> '                                 # line 3: prompt symbol
+##
+## === PROMPT
+##
 
-## insert a blank line between the command and its output
+PROMPT=$'\n%F{cyan}%~%f'  # full path
+PROMPT+=$'\n[%*] %F{green}%n%f: %F{yellow}%1~%f'  # time, user, current directory
+PROMPT+=$'%F{red}$(parse_git_info)%f'  # git repo and branch
+PROMPT+=$'\n-> '  # prompt marker
+
+##
+## === OUTPUT SPACING
+##
+
 preexec() { print -r -- ""; }
-# unset -f preexec # uncomment to undo effect
 
 ## .

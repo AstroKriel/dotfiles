@@ -1,23 +1,28 @@
 $include /etc/inputrc
 
-## enable case-insensitive tab completion (e.g., 'git sta' matches 'GitStatus')
-## but still prioritize exact case matches when available
+##
+## === COMPLETION
+##
+
 set completion-map-case on
 set completion-ignore-case on
-
-## move by word (option/alt + arrows)
-"\e[1;3D": backward-word
-"\e[1;3C": forward-word
-
-## allow up/down arrow to search history based on current line
-"\e[A": history-search-backward
-"\e[B": history-search-forward
-
-## nicer tab-completion
 set show-all-if-ambiguous on
 set menu-complete-display-prefix on
 
-## stop word-jumping at . _ and /
+##
+## === KEYBINDINGS
+##
+
+"\e[1;3D": backward-word
+"\e[1;3C": forward-word
+
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+##
+## === WORD BOUNDARIES
+##
+
 set word-break-chars " \t\n\"'><=;|&(:./_"
 
 ## .

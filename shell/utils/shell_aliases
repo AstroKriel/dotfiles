@@ -1,14 +1,23 @@
-## ls
+##
+## === LS
+##
+
 alias lsl='ls -lhF --color=auto'
 alias lst='ls -lt --color=auto'
 alias lsa='ls -alhF --color=auto'
 
-## short-hand commands
+##
+## === COMMAND SHORTCUTS
+##
+
 alias da='deactivate'
-alias rsz='rsync -avz' # rsync with archive, verbose, compression
+alias rsz='rsync -avz'
 alias ktmux='tmux kill-server'
 
-## useful directories
+##
+## === DIRECTORIES
+##
+
 export DHOME="$HOME"
 alias dhome='cd "$DHOME"'
 

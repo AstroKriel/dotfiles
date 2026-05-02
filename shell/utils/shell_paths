@@ -1,4 +1,7 @@
-## add directory to an env-var if its not already present (bash/zsh agnostic)
+##
+## === PATH HELPERS
+##
+
 prepend_to_path() {
     local varname="$1"
     local newpath="$2"
@@ -8,24 +11,22 @@ prepend_to_path() {
     else
             current_value="${!varname}"
     fi
-    current_value=":${current_value}:" # sandwhich path with colons
-    current_value="${current_value//:$newpath:/:}" # remove path if already stored
-    current_value="${current_value#:}" # remove leading colon
-    current_value="${current_value%:}" # remove trailing colon
+    current_value=":${current_value}:"
+    current_value="${current_value//:$newpath:/:}"
+    current_value="${current_value#:}"
+    current_value="${current_value%:}"
     export "$varname=$newpath${current_value:+:$current_value}"
 }
 
-## extend executable search paths
+##
+## === USER PATHS
+##
+
 prepend_to_path PATH "$HOME/.local/bin"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-    ## extend compiler include paths
     prepend_to_path CPATH /opt/homebrew/include
-
-    ## extend library search paths
     prepend_to_path LIBRARY_PATH /opt/homebrew/lib
-
-    ## extend executable search paths
     prepend_to_path PATH /opt/homebrew/bin
     prepend_to_path PATH /Library/TeX/texbin
     prepend_to_path PATH /Applications/VSCode.app/Contents/Resources/app/bin
