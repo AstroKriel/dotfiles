@@ -9,6 +9,7 @@ Optional user-level X11/XFCE configs for the Arch Framework 13 setup.
 | `arch-x11/mouse-workspace-buttons.xbindkeysrc` | `~/.xbindkeysrc` | Maps Logitech side buttons to previous/next workspace | `xbindkeys`, `xdotool` |
 | `arch-x11/touchpad-workspace-gestures.conf` | `~/.config/libinput-gestures.conf` | Maps three-finger swipes to previous/next workspace | `libinput-gestures`, `xdotool` |
 | `arch-x11/lightdm-locale.xprofile` | `~/.xprofile` | Sets `LC_TIME=en_GB.UTF-8` for XFCE/LightDM | generated `en_GB.UTF-8` locale |
+| `arch-x11/xfce-theme-toggle` | `~/.local/bin/xfce-theme-toggle` | Toggles XFCE/GTK between light and dark mode | `xfconf-query`, `gsettings` |
 | `arch-x11/xfce-window-behavior.sh` | manual one-time run | Makes activated apps switch to their existing workspace instead of moving to the current one | `xfconf-query`, `xfwm4` |
 
 ## One-Time Setup
@@ -43,6 +44,16 @@ Configure XFCE window activation behavior:
 This sets `/general/activate_action` to `switch`, so clicking a URL opens it
 in the browser's existing workspace and moves your view there instead of
 pulling the browser window into the current workspace.
+
+Install the theme toggle extra, then run it directly or bind it in XFCE Keyboard settings:
+
+```bash
+uv run -m setup.extras --which arch-x11/xfce-theme-toggle
+xfce-theme-toggle
+xfce-theme-toggle light
+xfce-theme-toggle dark
+xfce-theme-toggle status
+```
 
 Generate the locale used by `xprofile`:
 

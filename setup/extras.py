@@ -61,6 +61,13 @@ EXTRAS: dict[str, ExtraConfig] = {
         target_path=Path.home() / ".xprofile",
         requires=("linux", "x11", "lightdm"),
     ),
+    "arch-x11/xfce-theme-toggle":
+    ExtraConfig(
+        name="XFCE theme toggle",
+        source_path=EXTRAS_DIR / "arch-x11" / "xfce-theme-toggle",
+        target_path=Path.home() / ".local" / "bin" / "xfce-theme-toggle",
+        requires=("linux", "x11", "xfce"),
+    ),
 }
 
 ##
