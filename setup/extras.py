@@ -68,6 +68,12 @@ EXTRAS: dict[str, ExtraConfig] = {
         target_path=Path.home() / ".local" / "bin" / "xfce-theme-toggle",
         requires=("linux", "x11", "xfce"),
     ),
+    "personal/project-aliases.sh":
+    ExtraConfig(
+        name="personal project aliases",
+        source_path=EXTRAS_DIR / "personal" / "project-aliases.sh",
+        target_path=Path.home() / ".project_aliases",
+    ),
 }
 
 ##

@@ -1,13 +1,23 @@
 ## ======== FZF + FILE OPENING ========
 ## ====================================
 
-fzfs() {
-    local dir="${1:-.}"
-    find "$dir" -type f 2>/dev/null | \
-        fzf --preview="bat --style=numbers --color=always {} || cat {}"
-}
+if command -v fzf >/dev/null 2>&1; then
+    fzfs() {
+        local dir="${1:-.}"
+        local preview="cat {}"
+        if command -v bat >/dev/null 2>&1; then
+            preview="bat --style=numbers --color=always {}"
+        fi
+        find "$dir" -type f 2>/dev/null | fzf --preview="$preview"
+    }
 
-fzfn() { local file=$(fzfs "$1"); [[ -n $file ]] && nvim "$file"; }
-fzfc() { local file=$(fzfs "$1"); [[ -n $file ]] && code "$file"; }
+    if command -v nvim >/dev/null 2>&1; then
+        fzfn() { local file=$(fzfs "$1"); [[ -n $file ]] && nvim "$file"; }
+    fi
+
+    if command -v code >/dev/null 2>&1; then
+        fzfc() { local file=$(fzfs "$1"); [[ -n $file ]] && code "$file"; }
+    fi
+fi
 
 ## .

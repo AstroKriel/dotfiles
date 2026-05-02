@@ -21,20 +21,4 @@ alias ddwn='cd "$DDWN"'
 export DPROJ="$DHOME/Projects"
 alias dproj='cd "$DPROJ"'
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    export DQUOKKA="$DPROJ/quokka"
-    alias dquokka='cd "$DQUOKKA"'
-
-    export DASGARD="$DPROJ/asgard"
-    alias dasgard='cd "$DASGARD"'
-fi
-
-if [[ "$OSTYPE" == "linux"* ]]; then
-    export DASGARD="$DPROJ/Asgard"
-    alias dasgard='cd "$DASGARD"'
-
-    export DSYS="$DHOME/Documents/SetupFramework"
-    alias dsys='cd "$DSYS"'
-fi
-
 ## .

@@ -25,4 +25,5 @@ extras = [
   "arch-x11/mouse-workspace-buttons.xbindkeysrc",
   "arch-x11/touchpad-workspace-gestures.conf",
   "arch-x11/xfce-theme-toggle",
+  "personal/project-aliases.sh",
 ]
