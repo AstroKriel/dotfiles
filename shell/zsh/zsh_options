@@ -53,12 +53,4 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
-##
-## === PLATFORM SETTINGS
-##
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    export HOMEBREW_NO_ENV_HINTS=1
-fi
-
 ## .

@@ -22,14 +22,7 @@ parse_git_info() {
         remote_name=$(basename "$remote_url")
         remote_name=${remote_name%.git}
     fi
-    ## normalized names avoid noise from local casing and separators
-    local repo_norm remote_norm
-    repo_norm=$(echo "$repo_local" | tr '[:upper:]' '[:lower:]' | tr -d '_-')
-    remote_norm=$(echo "$remote_name" | tr '[:upper:]' '[:lower:]' | tr -d '_-')
-    local repo_display=$repo_local
-    if [[ -n $remote_name && $remote_norm != "$repo_norm" ]]; then
-        repo_display="$repo_local->$remote_name"
-    fi
+    local repo_display=${remote_name:-$repo_local}
     local branch
     branch=$( \
         git symbolic-ref --quiet --short HEAD 2>/dev/null || \
@@ -45,7 +38,7 @@ parse_git_info() {
 
 PS1=""
 PS1+="\n\[${lightblue}\] \w \[${white}\]"  # full path
-PS1+="\n\[${green}\]\u\[${white}\]: "  # username
+PS1+="\n[\t] \[${green}\]\u\[${white}\]: "  # time and username
 PS1+="\[${yellow}\] \W \[${white}\]"  # current directory
 PS1+="\[${white_on_red}\]\$(parse_git_info)\[${white}\]"  # git repo and branch
 PS1+="\n\[${white}\] -> "  # prompt marker

@@ -25,6 +25,7 @@ prepend_to_path() {
 prepend_to_path PATH "$HOME/.local/bin"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
+    export HOMEBREW_NO_ENV_HINTS=1
     prepend_to_path CPATH /opt/homebrew/include
     prepend_to_path LIBRARY_PATH /opt/homebrew/lib
     prepend_to_path PATH /opt/homebrew/bin
