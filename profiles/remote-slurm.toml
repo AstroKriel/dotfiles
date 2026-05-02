@@ -1,0 +1,21 @@
+shell = "bash"
+
+link_rules = false
+set_login_shell = false
+
+platforms = [
+  "linux",
+  "remote",
+  "hpc",
+  "slurm",
+]
+
+editors = []
+
+tools = [
+  "tmux",
+]
+
+extras = [
+  "hpc/slurm.sh",
+]

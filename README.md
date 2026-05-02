@@ -111,6 +111,7 @@ extras = ["arch-x11/touchpad-workspace-gestures.conf"]
 | `tools` | Tool configs to apply |
 | `extras` | Optional files or scripts under `extras/` |
 | `link_rules` | Whether tracked rules are linked into `~/.rules/` |
+| `set_login_shell` | Whether setup should call `chsh` for the selected shell |
 
 ---
 

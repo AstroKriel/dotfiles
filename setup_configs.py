@@ -163,6 +163,7 @@ def main():
     setup_shell.run(
         shell=shell_name,
         dry_run=dry_run,
+        set_login_shell=profile.set_login_shell,
     )
     setup_tools.run(
         dry_run=dry_run,

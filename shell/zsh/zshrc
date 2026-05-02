@@ -23,6 +23,8 @@ source_if_present "$HOME/.shell_functions"
 source_if_present "$HOME/.shell_options"
 source_if_present "$HOME/.shell_paths"
 source_if_present "$HOME/.project_aliases"
+source_if_present "$HOME/.shell_local"
+source_if_present "$HOME/.shell_hpc"
 
 ##
 ## === SSH AGENT

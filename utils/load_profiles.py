@@ -32,6 +32,7 @@ class SystemProfile:
     tools: tuple[str, ...]
     extras: tuple[str, ...]
     link_rules: bool
+    set_login_shell: bool
 
 ##
 ## === PROFILE HELPERS
@@ -91,6 +92,11 @@ def create_profile(
             raw_profile=raw_profile,
             key="link_rules",
             default=False,
+        ),
+        set_login_shell=_get_bool(
+            raw_profile=raw_profile,
+            key="set_login_shell",
+            default=True,
         ),
     )
 
