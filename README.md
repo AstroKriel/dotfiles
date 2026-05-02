@@ -1,192 +1,239 @@
 # DotFiles
 
-This repo is used to set up my dev environment on a fresh macOS or Linux machine, and is managed through the scripts discussed below. The main entry point is run as:
+DotFiles configures a development environment from a local system profile. The repo tracks reusable shell, editor, tool, rules, and platform extras. The active machine chooses which pieces apply through `this-system.toml`.
+
+Main entry points:
 
 ```bash
-uv run setup_configs.py [args]
+uv run setup_configs.py
+uv run -m setup.<layer> <args>
 ```
 
-Layer modules can be run directly with `uv run -m setup.<layer> [args]`.
+All setup commands support `--dry-run` where the layer exposes it.
 
-All scripts support `--dry-run` to preview what actions will be performed, without actually applying them. For a first-time machine setup, see the [full setup guide](#full-setup-guide) below.
+---
 
-The active system profile is selected by `this-system.toml`, which is intentionally ignored by git. Usually this should be a symlink to a tracked profile under `profiles/`:
+## Bootstrap
 
-```bash
-ln -s profiles/arch-x11.toml this-system.toml
-```
+Install the base tools needed to clone the repo and run setup commands.
 
-Copying a tracked profile to `this-system.toml` also works. The setup scripts do not accept a one-off profile flag; update `this-system.toml` when changing the system's long-term profile.
+| Platform | Command |
+|---|---|
+| macOS | `xcode-select --install` |
+| Arch Linux | `sudo pacman -S git base-devel` |
+| Debian or Ubuntu | `sudo apt update && sudo apt install -y git build-essential` |
 
-Profiles subscribe to repo-visible config names. Editors and tools use their folder names, while extras use paths relative to `extras/`:
+Package managers are intentionally not hard-coded into the setup scripts. Use the native package manager for the system unless a specific tool requires another source.
 
-```toml
-editors = ["zed"]
-tools = ["ghostty"]
-extras = ["arch-x11/touchpad-workspace-gestures.conf"]
-```
-
-`setup_configs.py` is the main entry point. It orchestrates the profile-backed layer modules under `setup/`: shell, tools, editors, and extras.
-
-`uv run -m setup.shell` sets the login shell from `this-system.toml` and applies its config files, supporting [bash](https://www.gnu.org/software/bash/manual/bash.html) and [zsh](https://zsh.sourceforge.io/Doc/). Use it to pick up shell config changes.
-
-`uv run -m setup.tools` wires up configs for subscribed tools, clones required plugin repos, and runs post-setup steps like `tmux`. It configures tools but does not install them, so subscribed tools that are not installed yet are skipped. Pass `--which <name>` to apply one subscribed tool, or `--all` to apply every subscribed tool in `this-system.toml`; omitting both is an error. Add `--check-only` to report which selected tools are detected without applying changes. The following tools are supported:
-- [Ghostty](https://ghostty.org): fast, native terminal emulator
-- [Kitty](https://sw.kovidgoyal.net/kitty/): GPU-accelerated terminal with tiling support
-- [tmux](https://github.com/tmux/tmux): terminal multiplexer; run multiple terminal sessions in one window — requires [`tmux-mem-cpu-load`](https://github.com/thewtex/tmux-mem-cpu-load) to be installed separately for CPU/memory stats in the status bar (`paru -S tmux-mem-cpu-load` on Arch)
-- [Yazi](https://yazi-rs.github.io): terminal file manager
-
-`uv run -m setup.editors` installs extensions and applies configs for subscribed editors, including [Visual Studio Code](https://code.visualstudio.com), [Zed](https://zed.dev), [Neovim](https://neovim.io), and [Doom](https://github.com/doomemacs/doomemacs) flavoured [Emacs](https://www.gnu.org/software/emacs/). Subscribed editors not yet on the system are skipped. Pass `--which <name>` to apply one subscribed editor, or `--all` to apply every subscribed editor in `this-system.toml`; omitting both is an error.
-
-For Zed and VS Code, edit the module files under `settings/`, `keymap/`, or `keybindings/`, then run `uv run -m setup.editors --which zed` or `uv run -m setup.editors --which vscode` to regenerate the tracked JSON files. Do not hand-edit generated `settings.json`, `keymap.json`, or `keybindings.json` as canonical config.
-
-`uv run -m setup.extras` applies optional platform-specific configs, such as macOS keybindings. Pass `--which <extras-relative-path>` to apply one subscribed extra, or `--all` to apply every subscribed extra in `this-system.toml`; omitting both is an error.
-
-`uv run -m setup.rules` links tracked rule files into `~/.rules/`.
-
-`setup_configs.py` runs the full setup chain (shell, tools, editors, and extras) in one command. Pass `--check-profile` to validate `this-system.toml` without changing the system, or `--remove-symlinks` to tear everything down.
-
-# Full Setup Guide
-
-Steps 1-3 are needed before cloning this repo: installing Homebrew (the package manager used throughout), uv (to run the setup scripts), and setting up GitHub SSH access. Steps 4-6 clone the repo, install tools, and run the setup scripts to configure the shell, editors, tools, and extras.
-
-## Step 1: Install Homebrew
-
-**macOS:** first install Xcode command line tools (provides `git`, `make`, etc.):
-
-```bash
-xcode-select --install
-```
-
-**Linux:** install the required system dependencies (`git` for version control, `build-essential` for compilers and build tools that Homebrew relies on):
-
-```bash
-sudo apt update && sudo apt install -y git build-essential
-```
-
-**Both platforms:** install [Homebrew](https://brew.sh):
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-**Linux:** Homebrew installs to `/home/linuxbrew/.linuxbrew`, which is not on the default `$PATH`. The installer prints instructions at the end for how to add it; follow those before continuing.
-
-## Step 2: Install uv
-
-[uv](https://github.com/astral-sh/uv) is used to manage the Python dependencies for this repo; install it via:
+Install `uv`, then open a new terminal so `uv` is available on `PATH`.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
+uv --version
 ```
 
-Restart your terminal so `uv` is in your `$PATH`.
+---
 
-## Step 3: Set up GitHub SSH access
+## Git Access
 
-Generate an SSH key. Use a descriptive comment to identify it later. When prompted for a passphrase, you can set one for extra security, but note it down, since you will need to type it every time you use the key. If that sounds like friction you don't want, just press Enter to use an empty passphrase:
+Generate an SSH key for Git hosting:
 
 ```bash
-ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519_github -C "for github ssh access from <device-name> created on <YYYY-MM-DD>"
+ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519_github -C "GitHub access from <device-name> created on <YYYY-MM-DD>"
 ```
 
-This creates two files. Keep the private key secret and never share it; the public key is what you paste into services like GitHub to prove your identity:
-- `~/.ssh/id_ed25519_github` (private key)
-- `~/.ssh/id_ed25519_github.pub` (public key)
+Create or edit `~/.ssh/config`:
 
-Create `~/.ssh/config` if needed, and append the following to tell SSH which key to use for GitHub:
-
-```
+```sshconfig
 Host github.com
   User git
   IdentityFile ~/.ssh/id_ed25519_github
   IdentitiesOnly yes
 ```
 
-Copy the public key to the clipboard:
+Add the public key to the Git hosting account, then verify access:
 
 ```bash
-# macOS
-pbcopy < ~/.ssh/id_ed25519_github.pub
-
-# Linux
 cat ~/.ssh/id_ed25519_github.pub
-```
-
-Add it to the GitHub account: **Settings > SSH and GPG keys > New SSH key**.
-
-Verify the connection:
-
-```bash
 ssh -T git@github.com
 ```
 
-You should see: `Hi <username>! You've successfully authenticated...`
+> **Note:** GitHub prints an authentication success message and then exits without opening a shell. That is expected.
 
-## Step 4: Clone this repo
+---
 
-The repo can be cloned anywhere; the setup scripts resolve paths relative to the repo. The home directory is a good default:
+## Clone the Repo
+
+Clone the repo wherever source repositories normally live:
 
 ```bash
 git clone git@github.com:AstroKriel/DotFiles.git
-```
-
-## Step 5: Install tools and editors
-
-Install whichever tools and editors are needed. Note: `--cask` is used for GUI applications; command-line tools are installed without it:
-
-```bash
-# editors
-brew install --cask visual-studio-code
-brew install --cask zed
-brew install neovim
-brew install --cask emacs
-
-# terminals
-brew install --cask ghostty
-brew install --cask kitty
-
-# tools
-brew install tmux
-brew install yazi ffmpeg
-```
-
-## Step 6: Run setup
-
-```bash
 cd DotFiles
-ln -s profiles/arch-x11.toml this-system.toml
+```
+
+---
+
+## Select a Profile
+
+`this-system.toml` selects the active system profile and is ignored by git. Usually it is a symlink to a tracked profile under `profiles/`.
+
+```bash
+ln -s profiles/<profile-name>.toml this-system.toml
+```
+
+Copying a tracked profile to `this-system.toml` also works:
+
+```bash
+cp profiles/<profile-name>.toml this-system.toml
+```
+
+Validate the selected profile before applying changes:
+
+```bash
+uv run setup_configs.py --check-profile
+```
+
+Profiles subscribe to config groups:
+
+```toml
+shell = "zsh"
+platforms = ["linux", "x11"]
+editors = ["zed"]
+tools = ["ghostty"]
+extras = ["arch-x11/touchpad-workspace-gestures.conf"]
+```
+
+| Profile key | Purpose |
+|---|---|
+| `shell` | Login shell managed by `setup.shell` |
+| `platforms` | Capability tags used to gate platform-specific extras |
+| `editors` | Editor configs to apply |
+| `tools` | Tool configs to apply |
+| `extras` | Optional files or scripts under `extras/` |
+| `link_rules` | Whether tracked rules are linked into `~/.rules/` |
+
+---
+
+## Install Applications
+
+The setup scripts configure applications, but they do not install every application package. Install the shell, editors, tools, and extras required by the selected profile before running the full setup.
+
+Example package commands:
+
+```bash
+# macOS with Homebrew
+brew install tmux ffmpeg
+brew install --cask ghostty zed
+
+# Arch Linux
+sudo pacman -S tmux yazi ffmpeg zed
+```
+
+> **Note:** Some packages have different names or sources across systems. Install equivalent applications for the selected profile rather than treating the examples as mandatory.
+
+---
+
+## Run Setup
+
+Apply the full selected profile:
+
+```bash
 uv run setup_configs.py
 ```
 
-Open a new terminal to pick up the shell changes.
+Open a new terminal after shell changes are applied.
 
-# Verify your setup
-
-After completing all steps, confirm the key dependencies are in place:
+Remove managed symlinks for the selected profile:
 
 ```bash
-brew --version         # Homebrew
-git --version          # Git
-uv --version           # uv
-ssh -T git@github.com  # GitHub SSH access (expect: "Hi <username>!")
+uv run setup_configs.py --remove-symlinks
 ```
 
-Confirm the shell config was applied correctly (`type` is a shell built-in that shows how a command is resolved):
+---
+
+## Layer Commands
+
+Use the main script to apply every subscribed layer in the active profile:
 
 ```bash
-# when using bash
-type reload_bash
+uv run setup_configs.py
+```
 
-# when using zsh
+Use layer modules directly when changing only one part of the setup. Direct layer runs use Python module execution, so include `-m`.
+
+| Layer | Command | Purpose |
+|---|---|---|
+| Shell | `uv run -m setup.shell` | Applies the selected shell config |
+| Tools | `uv run -m setup.tools --which <tool>` | Applies one subscribed `<tool>` |
+| Editors | `uv run -m setup.editors --which <editor>` | Applies one subscribed `<editor>` |
+| Extras | `uv run -m setup.extras --which <extras-relative-path>` | Applies one subscribed extra |
+| Rules | `uv run -m setup.rules` | Links rules into `~/.rules/` |
+
+Run all subscribed entries for a single layer:
+
+```bash
+uv run -m setup.tools --all
+uv run -m setup.editors --all
+uv run -m setup.extras --all
+```
+
+Check which subscribed tools are installed before applying tool configs:
+
+```bash
+uv run -m setup.tools --check-only --all
+```
+
+---
+
+## Editing Generated Config
+
+Some editor configs are generated from smaller tracked modules.
+
+| Editor | Config | Canonical files | Generated file |
+|---|---|---|---|
+| Zed | Settings | `editors/zed/settings/*.jsonc` | `editors/zed/settings.json` |
+| Zed | Keymap | `editors/zed/keymap/*.jsonc` | `editors/zed/keymap.json` |
+| VS Code | Settings | `editors/vscode/settings/*.jsonc` | `editors/vscode/settings.json` |
+| VS Code | Keybindings | `editors/vscode/keybindings/*.jsonc` | `editors/vscode/keybindings.json` |
+
+Regenerate after editing module files:
+
+```bash
+uv run -m setup.editors --which zed
+uv run -m setup.editors --which vscode
+```
+
+> **Note:** Treat generated JSON files as output. Edit the module files instead.
+
+---
+
+## Verify Setup
+
+Confirm the base commands are available:
+
+```bash
+git --version
+uv --version
+ssh -T git@github.com
+```
+
+Confirm shell helpers are linked:
+
+```bash
+type reload_bash
 type reload_zsh
 ```
 
-# Python Development
+> **Note:** Only one of `reload_bash` or `reload_zsh` will exist, depending on the selected shell.
 
-Python project metadata and tooling live in `pyproject.toml`. Run the main checks with:
+---
 
-```bash
-uv run basedpyright
-uv run python -m py_compile setup_configs.py setup/*.py utils/*.py
-```
+## Design Decisions
+
+| Decision | Reason |
+|---|---|
+| Use `this-system.toml` instead of command-line profile flags | The active profile is a long-term machine choice, not a one-off run option |
+| Keep package installation outside setup scripts | Package names and installers differ across systems |
+| Use profile subscriptions | The repo can contain more configs than any one system needs |
+| Use platform tags for extras | Platform-specific files are skipped when the active profile does not satisfy their requirements |
+| Generate large editor JSON files from modules | Smaller files are easier to review and edit |
