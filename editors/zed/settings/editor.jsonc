@@ -1,4 +1,5 @@
 {
+  "cli_default_open_behavior": "existing_window",
   "autosave": "on_focus_change",
   "preview_tabs": {
     "enabled": false
@@ -17,5 +18,10 @@
   },
   "buffer_font_features": {
     "calt": false
+  },
+  "languages": {
+    "Python": {
+      "format_on_save": "off"
+    }
   }
 }

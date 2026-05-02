@@ -1,40 +1,33 @@
-## ls
+##
+## === LS
+##
+
 alias lsl='ls -lhF --color=auto'
 alias lst='ls -lt --color=auto'
 alias lsa='ls -alhF --color=auto'
 
-## short-hand commands
+##
+## === COMMAND SHORTCUTS
+##
+
 alias da='deactivate'
-alias rsz='rsync -avz' # rsync with archive, verbose, compression
+alias rsz='rsync -avz'
 alias ktmux='tmux kill-server'
 
-## useful directories
+##
+## === DIRECTORIES
+##
+
 export DHOME="$HOME"
 alias dhome='cd "$DHOME"'
 
 export DDOT="$DHOME/Projects/DotFiles"
 alias ddot='cd "$DDOT"'
 
-export DSYS="$DHOME/Documents/ArchSetup"
-alias dsys='cd "$DSYS"'
-
 export DDWN="$DHOME/Downloads"
 alias ddwn='cd "$DDWN"'
 
 export DPROJ="$DHOME/Projects"
 alias dproj='cd "$DPROJ"'
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  export DQUOKKA="$DPROJ/quokka"
-  alias dquokka='cd "$DQUOKKA"'
-
-  export DASGARD="$DPROJ/asgard"
-  alias dasgard='cd "$DASGARD"'
-fi
-
-if [[ "$OSTYPE" == "linux"* ]]; then
-  export DASGARD="$DPROJ/Asgard"
-  alias dasgard='cd "$DASGARD"'
-fi
 
 ## .

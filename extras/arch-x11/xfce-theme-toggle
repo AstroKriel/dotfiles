@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LIGHT_GTK_THEME="Adwaita"
+DARK_GTK_THEME="Adwaita-dark"
+XFWM_THEME="Default"
+
+usage() {
+  printf 'Usage: %s [light|dark|toggle|status]\n' "$(basename "$0")" >&2
+}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'Missing required command: %s\n' "$1" >&2
+    exit 1
+  fi
+}
+
+get_current_theme() {
+  xfconf-query -c xsettings -p /Net/ThemeName 2>/dev/null || true
+}
+
+set_mode() {
+  local mode="$1"
+  local gtk_theme panel_dark color_scheme
+
+  case "$mode" in
+    light)
+      gtk_theme="$LIGHT_GTK_THEME"
+      panel_dark=false
+      color_scheme=prefer-light
+      ;;
+    dark)
+      gtk_theme="$DARK_GTK_THEME"
+      panel_dark=true
+      color_scheme=prefer-dark
+      ;;
+    *)
+      usage
+      exit 2
+      ;;
+  esac
+
+  xfconf-query -c xsettings -p /Net/ThemeName -s "$gtk_theme"
+  xfconf-query -c xfwm4 -p /general/theme -s "$XFWM_THEME"
+  xfconf-query -c xfce4-panel -p /panels/dark-mode -s "$panel_dark"
+
+  if command -v gsettings >/dev/null 2>&1; then
+    gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" || true
+    gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" || true
+  fi
+
+  printf 'XFCE theme set to %s (%s)\n' "$mode" "$gtk_theme"
+}
+
+require_command xfconf-query
+
+requested_mode="${1:-toggle}"
+
+case "$requested_mode" in
+  light|dark)
+    set_mode "$requested_mode"
+    ;;
+  toggle)
+    current_theme="$(get_current_theme)"
+    if [[ "$current_theme" == "$DARK_GTK_THEME" ]]; then
+      set_mode light
+    else
+      set_mode dark
+    fi
+    ;;
+  status)
+    current_theme="$(get_current_theme)"
+    if [[ "$current_theme" == "$DARK_GTK_THEME" ]]; then
+      printf 'dark\n'
+    elif [[ "$current_theme" == "$LIGHT_GTK_THEME" ]]; then
+      printf 'light\n'
+    else
+      printf 'custom (%s)\n' "${current_theme:-unknown}"
+    fi
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    usage
+    exit 2
+    ;;
+esac

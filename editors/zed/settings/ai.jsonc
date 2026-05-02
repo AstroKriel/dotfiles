@@ -1,5 +1,6 @@
 {
   "agent": {
+    "dock": "right",
     "default_model": {
       "provider": "zed.dev",
       "model": "gpt-5.4-pro",

@@ -1,49 +1,43 @@
-## ---------------------
-## History Configuration
-## ---------------------
+##
+## === HISTORY
+##
 
 HISTFILE=~/.zsh_history
 HISTSIZE=100000
 SAVEHIST=200000
 
-setopt HIST_IGNORE_DUPS     # ignore duplicate commands in history
-setopt HIST_IGNORE_ALL_DUPS # remove old duplicates, keep only most recent
-setopt HIST_REDUCE_BLANKS   # remove superfluous spaces from commands
-setopt APPEND_HISTORY       # append to history file, don’t overwrite
-setopt INC_APPEND_HISTORY   # do not share shell histories live, instead incrementally append
-setopt EXTENDED_HISTORY     # record timestamps with commands
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt APPEND_HISTORY
+setopt INC_APPEND_HISTORY  # append incrementally without live history sharing
+setopt EXTENDED_HISTORY
 
-## ---------------------
-## Shell Behavior Tweaks
-## ---------------------
+##
+## === SHELL BEHAVIOUR
+##
 
 setopt INTERACTIVE_COMMENTS
 setopt NO_BEEP
 
-## ---------------------
-## Keybindings
-## ---------------------
+##
+## === KEYBINDINGS
+##
 
-## add = . _ - and / as word boundaries
+## treat punctuation-heavy project names as separate words
 WORDCHARS=${WORDCHARS//[=._\-\/]/}
-## test with: alpha_beta-gamma.delta/epsilon:42+zeta=pi<omega>|theta&phi,chi;psi?omega!END
 
-## jump to start/end of line with ctrl + arrow-keys
 bindkey "^[[1;5D" beginning-of-line
 bindkey "^[[1;5C" end-of-line
 
-## jump over words with option + arrow-keys
-## for compatibility with integrated vscode terminal
+## terminals emit different option-arrow sequences
 bindkey "\e[1;3D" backward-word
 bindkey "\e[1;3C" forward-word
-## for compatibility with other terminals
 bindkey "^[^[[D" backward-word
 bindkey "^[^[[C" forward-word
 
-## forward-delete with delete key
 bindkey "^[[3~" delete-char
 
-## up/down arrows search history by prefix
 autoload -Uz up-line-or-beginning-search
 autoload -Uz down-line-or-beginning-search
 zle -N up-line-or-beginning-search
@@ -51,20 +45,12 @@ zle -N down-line-or-beginning-search
 bindkey "^[[A" up-line-or-beginning-search
 bindkey "^[[B" down-line-or-beginning-search
 
-## ---------------------
-## Tab Completion Settings
-## ---------------------
+##
+## === COMPLETION
+##
 
-zstyle ':completion:*' menu select                      # interactive menu-like completion
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'     # case-insensitive completion
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # use colors in completions
-
-## ---------------------
-## Homebrew
-## ---------------------
-
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  export HOMEBREW_NO_ENV_HINTS=1
-fi
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
 ## .

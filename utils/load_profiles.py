@@ -31,6 +31,8 @@ class SystemProfile:
     editors: tuple[str, ...]
     tools: tuple[str, ...]
     extras: tuple[str, ...]
+    link_rules: bool
+    set_login_shell: bool
 
 ##
 ## === PROFILE HELPERS
@@ -86,6 +88,16 @@ def create_profile(
             raw_profile=raw_profile,
             key="extras",
         ),
+        link_rules=_get_bool(
+            raw_profile=raw_profile,
+            key="link_rules",
+            default=False,
+        ),
+        set_login_shell=_get_bool(
+            raw_profile=raw_profile,
+            key="set_login_shell",
+            default=True,
+        ),
     )
 
 
@@ -99,6 +111,18 @@ def _get_optional_string(
         return None
     if not isinstance(value, str):
         raise TypeError(f"`{key}` must be a string when set.")
+    return value
+
+
+def _get_bool(
+    *,
+    raw_profile: dict[str, object],
+    key: str,
+    default: bool,
+) -> bool:
+    value = raw_profile.get(key, default)
+    if not isinstance(value, bool):
+        raise TypeError(f"`{key}` must be a boolean when set.")
     return value
 
 

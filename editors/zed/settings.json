@@ -1,16 +1,4 @@
 {
-  "project_panel": {
-    "dock": "left"
-  },
-  "outline_panel": {
-    "dock": "left"
-  },
-  "collaboration_panel": {
-    "dock": "left"
-  },
-  "git_panel": {
-    "dock": "left"
-  },
   "agent": {
     "dock": "right",
     "default_model": {
@@ -32,6 +20,7 @@
   },
   "agent_ui_font_size": 14,
   "agent_buffer_font_size": 12,
+  "cli_default_open_behavior": "existing_window",
   "autosave": "on_focus_change",
   "preview_tabs": {
     "enabled": false
@@ -50,6 +39,17 @@
   },
   "buffer_font_features": {
     "calt": false
+  },
+  "languages": {
+    "Python": {
+      "format_on_save": "off"
+    }
+  },
+  "project_panel": {
+    "dock": "left"
+  },
+  "git_panel": {
+    "dock": "left"
   },
   "terminal": {
     "font_family": ".ZedMono",

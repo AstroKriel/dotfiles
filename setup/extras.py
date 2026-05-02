@@ -61,6 +61,33 @@ EXTRAS: dict[str, ExtraConfig] = {
         target_path=Path.home() / ".xprofile",
         requires=("linux", "x11", "lightdm"),
     ),
+    "arch-x11/xfce-theme-toggle":
+    ExtraConfig(
+        name="XFCE theme toggle",
+        source_path=EXTRAS_DIR / "arch-x11" / "xfce-theme-toggle",
+        target_path=Path.home() / ".local" / "bin" / "xfce-theme-toggle",
+        requires=("linux", "x11", "xfce"),
+    ),
+    "hpc/pbs.sh":
+    ExtraConfig(
+        name="PBS scheduler aliases",
+        source_path=EXTRAS_DIR / "hpc" / "pbs.sh",
+        target_path=Path.home() / ".shell_hpc",
+        requires=("linux", "remote", "hpc", "pbs"),
+    ),
+    "hpc/slurm.sh":
+    ExtraConfig(
+        name="Slurm scheduler aliases",
+        source_path=EXTRAS_DIR / "hpc" / "slurm.sh",
+        target_path=Path.home() / ".shell_hpc",
+        requires=("linux", "remote", "hpc", "slurm"),
+    ),
+    "personal/project-aliases.sh":
+    ExtraConfig(
+        name="personal project aliases",
+        source_path=EXTRAS_DIR / "personal" / "project-aliases.sh",
+        target_path=Path.home() / ".project_aliases",
+    ),
 }
 
 ##

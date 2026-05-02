@@ -1,5 +1,7 @@
 shell = "zsh"
 
+link_rules = false
+
 platforms = [
   "macos",
 ]

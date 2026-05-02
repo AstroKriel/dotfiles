@@ -1,5 +1,7 @@
 shell = "zsh"
 
+link_rules = true
+
 platforms = [
   "linux",
   "arch",
@@ -22,4 +24,6 @@ extras = [
   "arch-x11/lightdm-locale.xprofile",
   "arch-x11/mouse-workspace-buttons.xbindkeysrc",
   "arch-x11/touchpad-workspace-gestures.conf",
+  "arch-x11/xfce-theme-toggle",
+  "personal/project-aliases.sh",
 ]

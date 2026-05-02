@@ -12,6 +12,7 @@ from typing import cast
 ## local
 from setup import editors as setup_editors
 from setup import extras as setup_extras
+from setup import rules as setup_rules
 from setup import shell as setup_shell
 from setup import tools as setup_tools
 from utils import load_profiles
@@ -148,6 +149,8 @@ def main():
             dry_run=dry_run,
             extra_keys=profile.extras if profile is not None else None,
         )
+        if profile is None or profile.link_rules:
+            setup_rules.remove_symlinks(dry_run=dry_run)
         return
     if profile is None:
         parser.error("`this-system.toml` is required unless `--remove-symlinks` is specified")
@@ -160,6 +163,7 @@ def main():
     setup_shell.run(
         shell=shell_name,
         dry_run=dry_run,
+        set_login_shell=profile.set_login_shell,
     )
     setup_tools.run(
         dry_run=dry_run,
@@ -174,6 +178,8 @@ def main():
         extra_keys=profile.extras,
         platform_tags=profile.platforms,
     )
+    if profile.link_rules:
+        setup_rules.run(dry_run=dry_run)
 
 
 ##

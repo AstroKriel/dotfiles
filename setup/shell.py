@@ -136,6 +136,7 @@ def run(
     *,
     shell: str,
     dry_run: bool,
+    set_login_shell: bool = True,
 ):
     log_messages.configure(write_to_file=not dry_run)
     chosen = next(s for s in SHELLS if s.name == shell)
@@ -173,11 +174,12 @@ def run(
                 target_path=HOME_DIR / f".{file_name}",
                 dry_run=dry_run,
             )
-    ## update default login shell env
-    change_login_shell(
-        shell=chosen.name,
-        dry_run=dry_run,
-    )
+    if set_login_shell:
+        ## update default login shell env
+        change_login_shell(
+            shell=chosen.name,
+            dry_run=dry_run,
+        )
     _log_message(
         log_messages.format_dry_run(
             message="Finished!",
@@ -209,6 +211,7 @@ def main():
     run(
         shell=profile.shell,
         dry_run=dry_run,
+        set_login_shell=profile.set_login_shell,
     )
 
 

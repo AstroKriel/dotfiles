@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import cast
 
 ## local
-from utils import log_messages, apply_shell_actions
+from utils import apply_shell_actions, log_messages
 
 ##
 ## === CONFIG
@@ -54,13 +54,49 @@ def link_all_rules(
 ##
 
 
+def remove_symlinks(
+    *,
+    dry_run: bool,
+) -> None:
+    log_messages.configure(write_to_file=not dry_run)
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started removing rule symlinks",
+            dry_run=dry_run,
+        ),
+    )
+    for target_path in sorted(TARGET_DIR.rglob("*.md")):
+        apply_shell_actions.remove_symlink(
+            target_path=target_path,
+            script_name=SCRIPT_NAME,
+            dry_run=dry_run,
+        )
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished removing rule symlinks",
+            dry_run=dry_run,
+        ),
+    )
+
+
 def run(
     *,
     dry_run: bool,
 ) -> None:
-    _log_message(f"Linking all rules from {RULES_DIR} to {TARGET_DIR}")
+    log_messages.configure(write_to_file=not dry_run)
+    _log_message(
+        log_messages.format_dry_run(
+            message="Started linking rules",
+            dry_run=dry_run,
+        ),
+    )
     link_all_rules(dry_run=dry_run)
-    _log_message("Done.")
+    _log_message(
+        log_messages.format_dry_run(
+            message="Finished linking rules",
+            dry_run=dry_run,
+        ),
+    )
 
 
 def main() -> None:
