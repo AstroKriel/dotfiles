@@ -8,6 +8,8 @@ Code should be self-documenting. A comment is an admission that the code alone i
 
 ## Docstrings
 
+Prose style follows `~/.rules/writing/docs.md`: short and direct, active voice, no filler words.
+
 Write docstrings for all public functions, methods, classes, and dataclasses. Docstrings are optional for private functions and methods.
 
 One-liners have the opening and closing `"""` on the same line. Multi-line docstrings open with `"""` and the text immediately on the first line; the closing `"""` sits on its own line:
@@ -23,6 +25,8 @@ One-liners have the opening and closing `"""` on the same line. Multi-line docst
 ```
 
 Opening sentence: imperative or declarative voice ("Compute X", "Return X"). Sentence case, ends with a period.
+
+Compound behaviour: join related clauses with `;` rather than starting a new sentence or using "and" / "where". Prefer a semicolon-joined one-liner over a multi-line paragraph unless the second clause genuinely requires its own sentence.
 
 Add a second paragraph only when the opening sentence leaves something genuinely unclear: edge case behaviour, what triggers a raise, a non-obvious side effect. 2-4 sentences max. Never restate what the type annotations already say.
 
@@ -59,6 +63,7 @@ Fields
 |---|---|
 | Names and values | backticks: `` `param_name` ``, `` `True` ``, `` `None` `` |
 | Inline math | code style: `` `y = a * x^b` `` |
+| Boolean returns | `` `True` iff <condition>. `` |
 | Types | never repeat in the docstring; the signature already has them |
 | Format | never use numpy/sphinx-style `Parameters:\n-----------` blocks |
 
