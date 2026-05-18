@@ -41,6 +41,27 @@ which one runs on a given machine.
 Both are injectable: by default each recomputes; a prebuilt artefact may be
 passed in instead, for tests, accountability, or speed.
 
+Serialised shapes over a two-concept fixture (`tmux`, `conky`), profile
+subscribing `tmux` only:
+
+```json
+// full_registry.json
+{
+  "conky": { "group": null, "needs": ["lua"], "links": ["conky.conf"] },
+  "tmux":  { "group": null, "needs": [],      "links": ["tmux.conf"] }
+}
+```
+
+```json
+// filtered_registry.json
+{
+  "tmux": { "group": null, "needs": [], "links": ["tmux.conf"] }
+}
+```
+
+Keys are sorted; `filtered_registry` is a strict subset with relationships
+intact. These literal files are the golden-test fixtures, not illustrations.
+
 ---
 
 ## Manifest parse, MAN
@@ -83,6 +104,85 @@ passed in instead, for tests, accountability, or speed.
 | FIL-5 | Same structure and relationships as `full_registry`: a subset, not a flattening. | n/a |
 | FIL-6 | Pure and deterministic given `(full_registry, profile)`; serialisable; injectable. | n/a |
 | FIL-7 | Filtering consults no host state. It raises only the host-free errors `SubscriptionError` and `ChoiceGroupError`; platform and manager availability hard-stops belong to resolve. | n/a |
+
+---
+
+## Examples
+
+Each example is written as the literal test fixture and its expected value, so
+the example is the acceptance test, not a separate illustration.
+
+MAN-3, the `kind` and `pkg` legality matrix:
+
+| `kind` | `pkg` present | Result |
+|---|---|---|
+| omitted | yes | valid (package install) |
+| omitted | no | `ManifestSchemaError` |
+| `config-only` | no | valid |
+| `config-only` | yes | `ManifestSchemaError` |
+| `script` | no | valid (expects `install.sh`) |
+| `script` | yes | `ManifestSchemaError` |
+
+MAN-4, an illegal `when` key:
+
+```toml
+[[install]]
+when = { platform = "macos", arch = "arm64" }   # `arch` not in {platform, manager}
+```
+
+```text
+-> ManifestSchemaError(path, "unknown when key: arch")
+```
+
+FUL-2, a duplicate concept key across groups:
+
+```text
+configs/tools/fd/_manifest.toml
+configs/extras/fd/_manifest.toml
+-> RegistryError("duplicate concept key: fd", [tools/fd, extras/fd])
+```
+
+FUL-5, an unknown `needs` target is recorded, not rejected:
+
+```text
+conky needs ["lua"]; no "lua" key in the tree
+-> full_registry builds successfully; "lua" recorded raw on conky
+```
+
+FIL-3, the `needs`-closure with the bare-package split:
+
+```text
+full_registry keys : { conky, zathura }     # no "lua" key
+profile subscribes : [conky]
+conky needs        : ["lua", "zathura"]
+
+"lua"     not a key -> bare package -> recorded, not added to membership
+"zathura" is a key  -> concept      -> added to filtered_registry (recurse)
+
+filtered_registry membership = { conky, zathura }
+```
+
+FIL-4, the choice group, inputs and expected error:
+
+```text
+shell-bash, shell-zsh both carry group = "shell"
+
+subscribe [shell-bash, shell-zsh]
+  -> ChoiceGroupError(group="shell", members=["shell-bash","shell-zsh"])
+
+subscribe [shell-zsh]
+  -> ok; shell-bash recorded for derived teardown
+```
+
+Error aggregation, two faults in one input, both reported:
+
+```text
+configs/tools/a/   missing _manifest.toml
+configs/tools/b/_manifest.toml   has when = { os = "linux" }
+
+-> [ ManifestMissingError(tools/a),
+     ManifestSchemaError(tools/b, "unknown when key: os") ]
+```
 
 ---
 

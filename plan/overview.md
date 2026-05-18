@@ -41,6 +41,11 @@ a hand-maintained central registry.
 | 14 | Managers are installable concepts, bootstrapped only if subscribed (see "Manager rules"). | Bootstrapping a package manager is a heavy action; it must be explicit intent, never a side effect. |
 | 15 | Choice groups: mutual exclusivity is declared, not inferred (see "Choice groups"). | Conflicts are explicit by declaration, never inferred from two concepts coinciding on a target. |
 | 16 | The global default manager ranking lives in one shared place, the capability-map module. | One ranking, not duplicated per profile. |
+| 17 | `needs` classification: a token names a concept if it is a key in `full_registry`, otherwise it is a bare package (see "Dependencies"). | One rule, no marker syntax; the registry is the single source of truth for what a concept is. |
+| 18 | Generated artefacts (`full_registry`, `filtered_registry`, `plan`) serialise as JSON. Hand-written manifests and profiles stay TOML. | Generated files want canonical, stable, diffable output; humans do not edit them. |
+| 19 | `full_registry` is committed as `registry.lock.json` at the repo root. `filtered_registry` and `plan` are gitignored, written under `build/` only with `--plan`, otherwise in-memory (see "Artefact format and tracking"). | The registry is deterministic from `configs/`, so a PR diff shows manifest changes; the other two depend on the host. |
+| 20 | The group set is fixed: `tools, editors, shell, extras, managers, rules`. `configs/managers/` is a real group; `rules` is folded into discovery, retiring the separate `link_rules` path. | One discovery mechanism for every kind of concept. |
+| 21 | Shell is modelled as `shell-common` (no group, always available) plus `shell-bash` and `shell-zsh` (both `group = "shell"`) (see "Groups and the shell model"). | The "remove the other shell" behaviour becomes ordinary choice-group teardown, not bespoke logic. |
 
 ---
 
@@ -63,6 +68,31 @@ platform; detection confirms which are actually present.
 > The one-avenue and `kind = "script"` cases stay non-negotiable because the
 > set has size one, so preference is moot.
 
+Worked example. A manifest, a system, a profile, then the chosen avenue:
+
+```toml
+# manifest avenues, in declared order
+[[install]]
+when = { manager = "brew" }
+pkg  = "fd"
+[[install]]
+when = { manager = "pacman" }
+pkg  = "fd"
+[[install]]
+when = { manager = "cargo" }
+pkg  = "fd-find"
+```
+
+```text
+detected present : [pacman, cargo]   (brew absent)
+profile          : prefer_managers = ["cargo"]
+```
+
+Resolution: capability removes the `brew` avenue (absent). The remaining set
+is `[pacman, cargo]`. `prefer_managers` orders `cargo` first. Chosen avenue:
+`cargo`, `pkg = "fd-find"`. Without the `prefer_managers` key the manifest
+order would stand and `pacman` would win.
+
 ---
 
 ## Availability
@@ -77,14 +107,44 @@ platform; detection confirms which are actually present.
 Available-everywhere is `config-only` with no `when`. A macOS-only config file
 is `config-only` with `when = { platform = "macos" }`.
 
+Contrastive pair:
+
+```toml
+# everywhere: config-only, no `when`
+[[install]]
+kind = "config-only"
+```
+
+```toml
+# macOS only: config-only, with `when`
+[[install]]
+when = { platform = "macos" }
+kind = "config-only"
+```
+
+The first resolves on every platform. The second resolves on macOS only;
+subscribed on Linux it produces `ResolutionError: only available on [macos]`.
+
 ---
 
 ## Dependencies
 
-| `needs` entry | Meaning |
-|---|---|
-| bare package (e.g. `lua`) | install only |
-| concept (e.g. `zathura`) | recurse: install and link that concept |
+Classification rule (#17): a `needs` token names a concept if it is a key in
+`full_registry`, otherwise it is a bare package. There is no marker syntax.
+
+| `needs` entry | Classified as | Meaning |
+|---|---|---|
+| `lua` (no such concept key) | bare package | install only |
+| `zathura` (a concept key) | concept | recurse: install and link that concept |
+
+Worked pair. The same `needs` token classified two ways by the same rule:
+
+```text
+full_registry keys : { ..., "zathura", ... }   # no "lua" key
+
+needs = ["lua"]      -> "lua" not a key      -> bare package -> install lua
+needs = ["zathura"]  -> "zathura" is a key   -> concept      -> install + link zathura
+```
 
 Resolution order is topological; cycles are a hard error.
 
@@ -104,6 +164,18 @@ profile must never assert a manager. It may only:
 The two keys stay separate: an ordered list tempts "unlisted means excluded",
 and silent exclusion by omission is the implicit behaviour this design
 rejects. With no keys, behaviour is pure detection.
+
+`prefer_managers` is inert when its target is absent:
+
+```text
+profile : prefer_managers = ["aur"]
+
+case A, aur present : detected [pacman, aur] -> reordered to [aur, pacman]
+case B, aur absent  : detected [pacman]      -> unchanged [pacman]
+```
+
+In case B the preference installs nothing; it only orders what detection
+already found.
 
 Managers are themselves concepts with a manifest (`[check]` plus a bootstrap
 `[[install]]`, usually `kind = "script"`). The profile gains a
@@ -125,6 +197,38 @@ A manifest may declare `group = "<name>"` (for example `shell`,
 group, otherwise `ResolutionError`. The unsubscribed siblings' teardown is
 derived. One mechanism covers both `bash` versus `zsh` (remove the other
 shell) and `pbs` versus `slurm` (same target).
+
+Worked pair, both manifests carrying `group = "shell"`:
+
+```text
+subscribe [shell-bash, shell-zsh]
+  -> ChoiceGroupError(group="shell", members=["shell-bash","shell-zsh"])
+
+subscribe [shell-zsh]
+  -> shell-zsh resolves; shell-bash recorded as a derived teardown target
+```
+
+---
+
+## Groups and the shell model
+
+The group set is fixed (#20): `tools, editors, shell, extras, managers,
+rules`. Discovery scans `configs/<group>/<concept>/` for exactly these.
+`configs/managers/` is a real group; `rules` is discovered like any other,
+retiring the separate `link_rules` path.
+
+Shell is modelled as three concepts (#21):
+
+| Concept | `group` | Availability |
+|---|---|---|
+| `shell-common` | none | always (the shared, shell-agnostic config) |
+| `shell-bash` | `shell` | when `bash` is the chosen shell |
+| `shell-zsh` | `shell` | when `zsh` is the chosen shell |
+
+`shell-common` is always in the filtered registry. `shell-bash` and
+`shell-zsh` are choice-group siblings, so subscribing one records the other
+for derived teardown; the old bespoke "back up the other shell's files"
+behaviour is now ordinary choice-group teardown.
 
 ---
 
@@ -158,6 +262,63 @@ passed in instead. This yields three properties:
 and descriptor, resolve. On `ResolutionError` it prints every error, exits
 non-zero, and applies nothing; otherwise it executes. `--plan` runs stages 1
 to 3 only.
+
+Worked set, three concepts: `conky` needs the bare package `lua`; `shell-bash`
+and `shell-zsh` carry `group = "shell"`. Profile subscribes `conky` and
+`shell-zsh`. The three artefacts side by side show why the registry family
+keeps relationships and the plan is flat:
+
+```json
+// full_registry.json  (every concept, relationships intact)
+{
+  "conky":      { "group": null,    "needs": ["lua"] },
+  "shell-bash": { "group": "shell", "needs": [] },
+  "shell-zsh":  { "group": "shell", "needs": [] }
+}
+```
+
+```json
+// filtered_registry.json  (subscribed, relationships still intact)
+{
+  "conky":     { "group": null,    "needs": ["lua"] },
+  "shell-zsh": { "group": "shell", "needs": [] },
+  "_teardown": ["shell-bash"]
+}
+```
+
+```json
+// plan.json  (flat ordered steps; relationships resolved away)
+{
+  "steps": [
+    { "action": "install", "pkg": "lua" },
+    { "action": "install", "concept": "conky" },
+    { "action": "link",    "concept": "conky" },
+    { "action": "install", "concept": "shell-zsh" },
+    { "action": "link",    "concept": "shell-zsh" },
+    { "action": "teardown","concept": "shell-bash" }
+  ]
+}
+```
+
+`filtered_registry` keeps `conky -> needs -> lua` and the `shell` group; the
+plan has linearised them into ordered steps with `lua` before `conky` and the
+choice-group teardown emitted.
+
+---
+
+## Artefact format and tracking
+
+Generated artefacts serialise as JSON (#18); hand-written manifests and
+profiles stay TOML. Tracking follows the intent-versus-fact split (#19):
+
+| Artefact | Path | Tracked | Rationale |
+|---|---|---|---|
+| `full_registry` | `registry.lock.json` (repo root) | yes | deterministic from `configs/`; a PR diff shows manifest changes, like `uv.lock` |
+| `filtered_registry` | `build/filtered_registry.json` | no | depends on the profile |
+| `plan` | `build/plan.json` | no | depends on the host |
+
+`filtered_registry` and `plan` are written under `build/` only when `--plan`
+is passed; otherwise they stay in-memory. `build/` is gitignored.
 
 ---
 
