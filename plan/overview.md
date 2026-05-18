@@ -31,11 +31,12 @@ forming the intent-versus-fact contrast that decision #13 already draws:
 | `config_` | declared intent | `_config_spec.toml`, `ConfigSpec`, `full_config_registry`, `filtered_config_registry`, `config_plan`, `config_registry.lock.json` |
 | `system_` | detected fact | `system_descriptor` |
 
-Action modules are verb-first then thing (`discover_config.py`,
-`detect_system.py`, `resolve_config.py`, `execute_config.py`). Data and type
-modules are noun-form (`config_spec.py`, `config_registry.py`,
-`config_plan.py`, `system_descriptor.py`). The per-concept file carries a
-leading underscore (`_config_spec.toml`): repo-private, and easy to glob.
+The engine package is `src/local_helpers/config_pipeline/`. Action modules
+are verb-first then thing (`discover_config.py`, `detect_system.py`,
+`resolve_config.py`, `execute_config.py`). Data and type modules are noun-form
+(`config_spec.py`, `config_registry.py`, `config_plan.py`,
+`system_descriptor.py`). The per-concept file carries a leading underscore
+(`_config_spec.toml`): repo-private, and easy to glob.
 
 ---
 
@@ -253,7 +254,7 @@ behaviour is now ordinary choice-group teardown.
 
 ## Pipeline architecture
 
-One engine in `src/local_helpers/pipeline/`. The per-kind setup scripts are
+One engine in `src/local_helpers/config_pipeline/`. The per-kind setup scripts are
 thin filters over it (`run(kinds=["tools"])`), not duplicated logic.
 
 Four stages, two serialisable artefacts crossing the seams:
