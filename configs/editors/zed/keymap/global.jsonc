@@ -9,6 +9,8 @@
       "super-alt-/": "project_panel::ToggleFocus",
       "super-alt-.": "git_panel::ToggleFocus",
       "super-alt-'": "agent::ToggleFocus",
+      "super-alt-v": "outline_panel::ToggleFocus",
+      "super-alt-d": "debug_panel::ToggleFocus",
       "super-alt-;": "terminal_panel::ToggleFocus",
       "super-alt-o": "go_to_line::Toggle",
       "super-alt-ctrl-'": "multi_workspace::ToggleWorkspaceSidebar",
