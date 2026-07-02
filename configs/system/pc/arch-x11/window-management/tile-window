@@ -1,9 +1,9 @@
 #!/bin/bash
 DIRECTION=$1
-WIDTH_RATIO=$2
+SIZE_RATIO=$2
 
-if [[ $DIRECTION != "left" && $DIRECTION != "right" ]] || [[ -z $WIDTH_RATIO ]]; then
-  echo "Usage: tile-window <left|right> <width_ratio>" >&2
+if [[ $DIRECTION != "left" && $DIRECTION != "right" && $DIRECTION != "top" && $DIRECTION != "bottom" ]] || [[ -z $SIZE_RATIO ]]; then
+  echo "Usage: tile-window <left|right|top|bottom> <size_ratio>" >&2
   exit 1
 fi
 
@@ -31,14 +31,23 @@ while IFS= read -r line; do
 done < <(xrandr | grep " connected")
 
 MONITOR_RIGHT=$(( MONITOR_LEFT_X + MONITOR_WIDTH ))
+MONITOR_BOTTOM=$(( MONITOR_TOP_Y + MONITOR_HEIGHT ))
 STRUT_TOP=0
 STRUT_BOTTOM=0
+STRUT_LEFT=0
+STRUT_RIGHT=0
 
 while read -r win_id; do
   strut=$(xprop -id "$win_id" _NET_WM_STRUT_PARTIAL 2>/dev/null)
   if [[ $strut =~ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+) ]]; then
+    strut_left=${BASH_REMATCH[1]}
+    strut_right=${BASH_REMATCH[2]}
     strut_top=${BASH_REMATCH[3]}
     strut_bottom=${BASH_REMATCH[4]}
+    strut_left_start=${BASH_REMATCH[5]}
+    strut_left_end=${BASH_REMATCH[6]}
+    strut_right_start=${BASH_REMATCH[7]}
+    strut_right_end=${BASH_REMATCH[8]}
     strut_top_start=${BASH_REMATCH[9]}
     strut_top_end=${BASH_REMATCH[10]}
     strut_bottom_start=${BASH_REMATCH[11]}
@@ -49,29 +58,52 @@ while read -r win_id; do
     if (( strut_bottom > 0 && strut_bottom_start < MONITOR_RIGHT && strut_bottom_end >= MONITOR_LEFT_X )); then
       (( strut_bottom > STRUT_BOTTOM )) && STRUT_BOTTOM=$strut_bottom
     fi
+    if (( strut_left > 0 && strut_left_start < MONITOR_BOTTOM && strut_left_end >= MONITOR_TOP_Y && strut_left > MONITOR_LEFT_X )); then
+      local_left=$(( strut_left - MONITOR_LEFT_X ))
+      (( local_left > STRUT_LEFT )) && STRUT_LEFT=$local_left
+    fi
+    if (( strut_right > 0 && strut_right_start < MONITOR_BOTTOM && strut_right_end >= MONITOR_TOP_Y )); then
+      (( strut_right > STRUT_RIGHT )) && STRUT_RIGHT=$strut_right
+    fi
   fi
 done < <(xprop -root _NET_CLIENT_LIST | grep -oP '0x[0-9a-f]+')
 
 USABLE_TOP=$(( MONITOR_TOP_Y + STRUT_TOP ))
+USABLE_LEFT=$(( MONITOR_LEFT_X + STRUT_LEFT ))
 USABLE_HEIGHT=$(( MONITOR_HEIGHT - STRUT_TOP - STRUT_BOTTOM ))
+USABLE_WIDTH=$(( MONITOR_WIDTH - STRUT_LEFT - STRUT_RIGHT ))
 
 NET_EXTENTS=$(xprop -id "$ACTIVE_WINDOW_ID" _NET_FRAME_EXTENTS 2>/dev/null)
 if [[ $NET_EXTENTS =~ ([0-9]+),\ ([0-9]+),\ ([0-9]+),\ ([0-9]+) ]]; then
+  FRAME_LEFT=${BASH_REMATCH[1]}
+  FRAME_RIGHT=${BASH_REMATCH[2]}
   FRAME_TOP=${BASH_REMATCH[3]}
   FRAME_BOTTOM=${BASH_REMATCH[4]}
 else
+  FRAME_LEFT=0
+  FRAME_RIGHT=0
   FRAME_TOP=0
   FRAME_BOTTOM=0
 fi
 
-TARGET_WIDTH=$((MONITOR_WIDTH * WIDTH_RATIO / 100))
-TARGET_HEIGHT=$(( USABLE_HEIGHT - FRAME_TOP - FRAME_BOTTOM ))
-TARGET_Y=$USABLE_TOP
-
-if [[ $DIRECTION == "left" ]]; then
-  TARGET_X=$MONITOR_LEFT_X
+if [[ $DIRECTION == "left" || $DIRECTION == "right" ]]; then
+  TARGET_WIDTH=$(( MONITOR_WIDTH * SIZE_RATIO / 100 ))
+  TARGET_HEIGHT=$(( USABLE_HEIGHT - FRAME_TOP - FRAME_BOTTOM ))
+  TARGET_Y=$USABLE_TOP
+  if [[ $DIRECTION == "left" ]]; then
+    TARGET_X=$MONITOR_LEFT_X
+  else
+    TARGET_X=$(( MONITOR_LEFT_X + MONITOR_WIDTH - TARGET_WIDTH ))
+  fi
 else
-  TARGET_X=$((MONITOR_LEFT_X + MONITOR_WIDTH - TARGET_WIDTH))
+  TARGET_WIDTH=$(( USABLE_WIDTH - FRAME_LEFT - FRAME_RIGHT ))
+  TARGET_HEIGHT=$(( USABLE_HEIGHT * SIZE_RATIO / 100 - FRAME_TOP - FRAME_BOTTOM ))
+  TARGET_X=$USABLE_LEFT
+  if [[ $DIRECTION == "top" ]]; then
+    TARGET_Y=$USABLE_TOP
+  else
+    TARGET_Y=$(( USABLE_TOP + USABLE_HEIGHT - USABLE_HEIGHT * SIZE_RATIO / 100 ))
+  fi
 fi
 
 xdotool windowmove "$ACTIVE_WINDOW_ID" "$TARGET_X" "$TARGET_Y"
