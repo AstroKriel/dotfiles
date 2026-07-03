@@ -42,17 +42,26 @@ Use **bold sub-headers** to break up longer descriptions. Common sub-headers:
 |---|---|
 | **Validation.** | convergence results or analytic comparisons confirming correct behaviour |
 | **Energy conservation.** | tests confirming energy is transferred correctly between components |
-| **Known issues.** | draft PRs: items that must be resolved before the PR is ready for review |
+| **Known issues.** | `[Feedback]`/`[Testing]` PRs: items that must be resolved before the PR is ready for review |
 
 - Wherever a test result is cited, include a figure; the caption or surrounding prose must state the test name, any non-default parameters, and the resolution used.
 - Equations follow the notation rules in [`writing/markdown.md`](../../../writing/markdown.md).
 
 ---
 
-## Draft vs ready
+## Title status tags
 
-- Open as a draft when the implementation is complete enough to share but has known issues to resolve before review; use a **Known issues.** sub-header in the description to list them explicitly.
-- Convert to ready for review once all known issues are resolved and the checklist is complete.
+Prefix the title with a stage tag to communicate progress on top of GitHub's own draft/ready toggle:
+
+| Tag | Meaning | GitHub state |
+|---|---|---|
+| `[WIP]` | still implementing; not yet shareable, even for early feedback | draft |
+| `[Feedback]` | shareable draft; seeking feedback on the approach before continuing | draft |
+| `[Testing]` | implementation is believed complete; running tests, tweaks may be called for based on tests | draft |
+| `[Review]` | all known issues resolved, CI green, ready for review | ready for review |
+
+- Convert from draft to ready for review only at `[Review]`.
+- Remove the tag entirely before merge; the title becomes the squashed commit message, so it must not carry a stage marker into `git log`.
 
 ---
 
