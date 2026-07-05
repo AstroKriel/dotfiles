@@ -33,6 +33,7 @@ class ConfigProfile:
     shell: tuple[str, ...] = ()
     managers: tuple[str, ...] = ()
 
+    @property
     def subscriptions(
         self,
     ) -> tuple[config_registry.ConceptKey, ...]:

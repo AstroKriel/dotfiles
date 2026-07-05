@@ -148,8 +148,8 @@ def _load_entries(
     return tuple(
         sorted(
             (
-                (key, _spec_from_jsonable(raw=cast(dict[str, object], raw)))
-                for key, raw in document.items()
+                (key, _spec_from_jsonable(raw_spec=cast(dict[str, object], raw_spec)))
+                for key, raw_spec in document.items()
             ),
             key=lambda item: item[0],
         )
@@ -158,70 +158,70 @@ def _load_entries(
 
 def _spec_from_jsonable(
     *,
-    raw: dict[str, object],
+    raw_spec: dict[str, object],
 ) -> config_spec.ConfigSpec:
     return config_spec.ConfigSpec(
-        name=cast(str, raw["name"]),
-        check=_check_from_jsonable(raw=cast("dict[str, object] | None", raw["check"])),
+        name=cast(str, raw_spec["name"]),
+        check=_check_from_jsonable(raw_check=cast("dict[str, object] | None", raw_spec["check"])),
         installs=tuple(
-            _install_from_jsonable(raw=cast(dict[str, object], install))
-            for install in cast(list[object], raw["installs"])
+            _install_from_jsonable(raw_install=cast(dict[str, object], raw_install))
+            for raw_install in cast(list[object], raw_spec["installs"])
         ),
         links=tuple(
-            _link_from_jsonable(raw=cast(dict[str, object], link))
-            for link in cast(list[object], raw["links"])
+            _link_from_jsonable(raw_link=cast(dict[str, object], raw_link))
+            for raw_link in cast(list[object], raw_spec["links"])
         ),
-        group=cast("str | None", raw["group"]),
-        needs=tuple(cast(list[str], raw["needs"])),
+        group=cast("str | None", raw_spec["group"]),
+        needs=tuple(cast(list[str], raw_spec["needs"])),
     )
 
 
 def _check_from_jsonable(
     *,
-    raw: dict[str, object] | None,
+    raw_check: dict[str, object] | None,
 ) -> config_spec.Check | None:
-    if raw is None:
+    if raw_check is None:
         return None
     return config_spec.Check(
-        command=cast("str | None", raw["command"]),
-        macos_app=cast("str | None", raw["macos_app"]),
-        file=cast("str | None", raw["file"]),
+        command=cast("str | None", raw_check["command"]),
+        macos_app=cast("str | None", raw_check["macos_app"]),
+        file=cast("str | None", raw_check["file"]),
     )
 
 
 def _install_from_jsonable(
     *,
-    raw: dict[str, object],
+    raw_install: dict[str, object],
 ) -> config_spec.InstallAvenue:
     return config_spec.InstallAvenue(
-        when=_when_from_jsonable(raw=cast("dict[str, object] | None", raw["when"])),
-        kind=cast("str | None", raw["kind"]),
-        pkg=cast("str | None", raw["pkg"]),
+        when=_when_from_jsonable(raw_when=cast("dict[str, object] | None", raw_install["when"])),
+        kind=cast("str | None", raw_install["kind"]),
+        pkg=cast("str | None", raw_install["pkg"]),
     )
 
 
 def _link_from_jsonable(
     *,
-    raw: dict[str, object],
+    raw_link: dict[str, object],
 ) -> config_spec.Link:
     return config_spec.Link(
-        when=_when_from_jsonable(raw=cast("dict[str, object] | None", raw["when"])),
-        source=cast(str, raw["source"]),
-        dir=cast(str, raw["dir"]),
-        name=cast(str, raw["name"]),
-        mode=cast(str, raw["mode"]),
+        when=_when_from_jsonable(raw_when=cast("dict[str, object] | None", raw_link["when"])),
+        source=cast(str, raw_link["source"]),
+        dir=cast(str, raw_link["dir"]),
+        name=cast(str, raw_link["name"]),
+        mode=cast(str, raw_link["mode"]),
     )
 
 
 def _when_from_jsonable(
     *,
-    raw: dict[str, object] | None,
+    raw_when: dict[str, object] | None,
 ) -> config_spec.When | None:
-    if raw is None:
+    if raw_when is None:
         return None
     return config_spec.When(
-        platform=cast("str | None", raw["platform"]),
-        manager=cast("str | None", raw["manager"]),
+        platform=cast("str | None", raw_when["platform"]),
+        manager=cast("str | None", raw_when["manager"]),
     )
 
 

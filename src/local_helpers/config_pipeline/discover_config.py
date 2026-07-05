@@ -16,7 +16,7 @@ from local_helpers.config_pipeline import errors
 ## === CONSTANTS
 ##
 
-## The group set is explicit, never inferred from the tree (`FUL-1`).
+## the group set is explicit, never inferred from the tree (`FUL-1`).
 CONFIG_GROUPS = ("tools", "editors", "shell", "extras", "managers", "rules")
 
 ##
@@ -42,7 +42,7 @@ def discover_full_config_registry(
     )
     collected_errors: list[errors.ConfigPipelineError] = []
     collected_errors.extend(
-        _duplicate_key_errors(
+        _find_duplicate_key_errors(
             discovered=discovered,
         )
     )
@@ -55,14 +55,19 @@ def discover_full_config_registry(
         except errors.ConfigSpecError as error:
             collected_errors.append(error)
             continue
-        ## A duplicate key is already reported above; keep the first parse so a
+        ## a duplicate key is already reported above; keep the first parse so a
         ## later collision does not overwrite it before the aggregate is raised.
         parsed.setdefault(key, spec)
     if collected_errors:
         raise errors.AggregatedConfigError(
             errors=tuple(collected_errors),
         )
-    entries = tuple(sorted(parsed.items(), key=lambda item: item[0]))
+    entries = tuple(
+        sorted(
+            parsed.items(),
+            key=lambda item: item[0],
+        )
+    )
     return config_registry.FullConfigRegistry(
         entries=entries,
     )
@@ -95,7 +100,7 @@ def _scan_concept_dirs(
     return tuple(discovered)
 
 
-def _duplicate_key_errors(
+def _find_duplicate_key_errors(
     *,
     discovered: tuple[tuple[config_registry.ConceptKey, Path], ...],
 ) -> tuple[errors.ConfigRegistryError, ...]:

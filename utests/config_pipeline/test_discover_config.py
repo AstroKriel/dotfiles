@@ -25,7 +25,7 @@ when = { manager = "pacman" }
 pkg  = "tmux"
 """
 
-## Concept-level `needs` with a target that is not itself a concept (`FUL-5`).
+## concept-level `needs` with a target that is not itself a concept (`FUL-5`).
 CONKY = """
 name = "Conky"
 needs = ["lua"]
@@ -243,7 +243,7 @@ class TestDiscover_Errors(unittest.TestCase):
             discover_config.discover_full_config_registry(
                 configs_root=configs_root,
             )
-        ## Aggregation reports every fault before exiting, not just the first.
+        ## aggregation reports every fault before exiting, not just the first.
         self.assertEqual(
             len(caught.exception.errors),
             2,

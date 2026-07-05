@@ -40,8 +40,8 @@ when = { manager = "pacman" }
 pkg  = "conky"
 """
 
-## The canonical serialisation of a minimal one-concept registry, keys sorted.
-## Pins the on-disk lock format so a change to it is a deliberate, visible diff.
+## the canonical serialisation of a minimal one-concept registry, keys sorted.
+## pins the on-disk lock format so a change to it is a deliberate, visible diff.
 GOLDEN_MINIMAL = """{
   "tmux": {
     "check": null,

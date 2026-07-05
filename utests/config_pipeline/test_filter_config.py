@@ -197,7 +197,7 @@ class TestFilter_Properties(unittest.TestCase):
             full_registry=full_registry,
             profile=config_profile.ConfigProfile(extras=("conky",)),
         )
-        ## Re-filtering the result (subscribing all its keys) yields the same set.
+        ## re-filtering the result (subscribing all its keys) yields the same set.
         again_full = config_registry.FullConfigRegistry(entries=once.entries)
         again = filter_config.filter_config_registry(
             full_registry=again_full,

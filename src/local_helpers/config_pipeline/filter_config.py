@@ -28,7 +28,7 @@ def filter_config_registry(
     (`FIL-4`), gathered and reported together (`ov#4`). Bare-package `needs`
     are recorded on their concept, never pulled in as members (`FIL-3`).
     """
-    subscriptions = profile.subscriptions()
+    subscriptions = profile.subscriptions
     collected_errors: list[errors.ConfigPipelineError] = []
     unknown_keys = tuple(key for key in subscriptions if key not in full_registry)
     if unknown_keys:
@@ -39,7 +39,7 @@ def filter_config_registry(
         )
     known_keys = tuple(key for key in subscriptions if key in full_registry)
     collected_errors.extend(
-        _choice_group_errors(
+        _find_choice_group_errors(
             subscribed=known_keys,
             full_registry=full_registry,
         )
@@ -48,7 +48,7 @@ def filter_config_registry(
         raise errors.AggregatedConfigError(
             errors=tuple(collected_errors),
         )
-    member_keys = _needs_closure(
+    member_keys = _compute_needs_closure(
         subscribed=subscriptions,
         full_registry=full_registry,
     )
@@ -68,7 +68,7 @@ def filter_config_registry(
 ##
 
 
-def _needs_closure(
+def _compute_needs_closure(
     *,
     subscribed: tuple[config_registry.ConceptKey, ...],
     full_registry: config_registry.FullConfigRegistry,
@@ -93,7 +93,7 @@ def _needs_closure(
     return members
 
 
-def _choice_group_errors(
+def _find_choice_group_errors(
     *,
     subscribed: tuple[config_registry.ConceptKey, ...],
     full_registry: config_registry.FullConfigRegistry,
