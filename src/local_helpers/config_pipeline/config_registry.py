@@ -23,14 +23,11 @@ ConceptKey: TypeAlias = str
 
 
 @dataclass(frozen=True)
-class FullConfigRegistry:
+class _ConfigRegistry:
     """
-    The whole `configs/` tree as a `concept_key -> ConfigSpec` map (`FUL`).
-
-    Keys are unique across groups (`FUL-2`) and `entries` are stored sorted by
-    key, so the registry is a deterministic function of the tree (`FUL-3`).
-    Relationships (`needs`, `group`) live on each `ConfigSpec`, kept raw
-    (`FUL-4`, `FUL-5`); this type does not flatten them.
+    Read-only, mapping-like access over sorted `concept_key -> ConfigSpec`
+    entries, shared by the full and filtered registries so they present the
+    same interface (`FIL-5`: a filtered registry is a subset, not a new shape).
     """
 
     entries: tuple[tuple[ConceptKey, config_spec.ConfigSpec], ...]
@@ -64,6 +61,29 @@ class FullConfigRegistry:
         self,
     ) -> int:
         return len(self.entries)
+
+
+@dataclass(frozen=True)
+class FullConfigRegistry(_ConfigRegistry):
+    """
+    The whole `configs/` tree as a `concept_key -> ConfigSpec` map (`FUL`).
+
+    Keys are unique across groups (`FUL-2`) and `entries` are stored sorted by
+    key, so the registry is a deterministic function of the tree (`FUL-3`).
+    Relationships (`needs`, `group`) live on each `ConfigSpec`, kept raw
+    (`FUL-4`, `FUL-5`); this type does not flatten them.
+    """
+
+
+@dataclass(frozen=True)
+class FilteredConfigRegistry(_ConfigRegistry):
+    """
+    A `FullConfigRegistry` restricted to a profile's subscriptions plus their
+    `needs`-closure over concepts (`FIL`).
+
+    Structurally identical to `FullConfigRegistry`: a strict subset with
+    relationships intact (`FIL-5`), entries sorted by key (`FIL-6`).
+    """
 
 
 ## } MODULE
