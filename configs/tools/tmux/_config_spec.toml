@@ -1,0 +1,18 @@
+name = "Tmux"
+
+[check]
+command = "tmux"
+
+[[install]]
+when = { manager = "brew" }
+pkg  = "tmux"
+[[install]]
+when = { manager = "pacman" }
+pkg  = "tmux"
+
+# The whole concept directory (tmux.conf, conf/, bin/) links to ~/.config/tmux.
+[[link]]
+source = "."
+dir    = "~/.config"
+name   = "tmux"
+mode   = "link"
