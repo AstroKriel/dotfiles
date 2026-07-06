@@ -72,7 +72,7 @@ class Test<Concept>_<Aspect>:
 
 ### Helpers
 
-Private helper functions for building test fixtures use a leading underscore: `_make_<fixture>()`.
+Private helper functions get a leading underscore, with a verb that names what they do: `_make_<fixture>()`, `_generate_<data>()`, `_evaluate_<formula>()` are common examples, though not an exhaustive list.
 
 ---
 
