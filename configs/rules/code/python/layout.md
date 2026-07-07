@@ -196,6 +196,8 @@ if __name__ == "__main__":
 
 ### Validation Test
 
+A validation test is a class, not a `main()` function; see [`testing.md`](testing.md) for the full structure.
+
 ```python
 ## { V-TEST
 
@@ -206,18 +208,29 @@ if __name__ == "__main__":
 ...
 
 ##
-## === CONVERGENCE TEST: <description>
+## === <DESCRIPTION> TEST
 ##
 
-def main() -> None:
-    ...
+class Test<Concept>:
+
+    def __init__(
+        self,
+    ):
+        ...
+
+    def run(
+        self,
+    ) -> None:
+        ...
 
 ##
 ## === ENTRY POINT
 ##
 
 if __name__ == "__main__":
-    main()
+    style_plots.set_theme()
+    test = Test<Concept>()
+    test.run()
 
 ## } V-TEST
 ```

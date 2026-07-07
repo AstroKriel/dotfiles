@@ -8,11 +8,7 @@ How to structure and run Python unit and validation tests.
 
 - Live under `utests/`, mirroring the source structure.
 - Run via pytest; test files are named `test_<module_name>.py`.
-- Organised into focused classes named after what they test.
-
-### TestCase (default)
-
-Use `unittest.TestCase` by default:
+- Organised into focused `unittest.TestCase` classes named after what they test.
 
 ```python
 class Test<Concept>_<Aspect>(unittest.TestCase):
@@ -22,73 +18,43 @@ class Test<Concept>_<Aspect>(unittest.TestCase):
     ): ...
 ```
 
-Assertion calls follow the same multi-line call site rule as regular function calls: one argument per line, trailing comma, even when the call would fit on one line. The value under test goes on its own first line so each assertion is easy to scan:
-
-```python
-self.assertEqual(
-    <result>,
-    <expected>,
-)
-
-self.assertTrue(
-    <condition>,
-)
-
-numpy.testing.assert_array_almost_equal(
-    <result>,
-    <expected>,
-)
-
-with self.assertRaises(
-    <ErrorType>,
-):
-    <module>.<function>(
-        <param>=<invalid_value>,
-    )
-```
-
-### Plain pytest
-
-Use plain pytest classes or functions when a pytest fixture is genuinely the better tool. The canonical case is `capsys` for stdout/stderr testing: it captures what the terminal receives regardless of how the code produces it, while mocking the output object is more fragile and implementation-specific.
-
-```python
-class Test<Concept>_<Aspect>:
-
-    def test_<behaviour>(
-        self,
-        <fixture>: pytest.<FixtureType>[str],
-    ) -> None:
-        ...
-        assert <condition>
-
-    def test_<behaviour>_raises(
-        self,
-    ) -> None:
-        with pytest.raises(
-            <ErrorType>,
-        ):
-            ...
-```
-
-### Helpers
-
-Private helper functions get a leading underscore, with a verb that names what they do: `_make_<fixture>()`, `_generate_<data>()`, `_evaluate_<formula>()` are common examples, though not an exhaustive list.
-
 ---
 
 ## Validation Tests (vtests)
 
-Validation tests live under `vtests/`, mirroring the source structure. Use them when a unit test is not practical: for example, testing numerical convergence, decomposition accuracy, or integrated behaviour across modules.
+- Live under `vtests/`, mirroring the source structure.
+- Use when a unit test is not practical: numerical convergence, decomposition accuracy, or integrated behaviour across modules.
+- Run via `uv run vtests/run_all.py`, which runs each `test_*.py` as a subprocess and passes or fails on its exit code.
+- Each is one `Test`-prefixed class, so a project can also collect them with pytest.
+- Every vtest saves one figure, inspected by eye alongside its pass/fail signal.
 
-- Not pytest-based; run via `uv run vtests/run_all.py`.
-- Do not use pytest to run vtests; it cannot collect them because vtest classes take `__init__` arguments.
-
-Each vtest is a standalone script with a `main()` function, discovered and run via `vtests/run_all.py`. Where possible, save visual output (plots, diagrams) alongside the test:
+`__init__` stores only tunable test parameters; `run` creates the figure and drives the checks, passing data explicitly to single-task helpers:
 
 ```python
-def main() -> None:
-    ## run validation
-    ...
-    ## save visual output
-    ...
+class Test<Concept>:
+
+    def __init__(
+        self,
+    ):
+        ## tunable, explicitly-typed test parameters
+        ...
+
+    def run(
+        self,
+    ) -> None:
+        ## generate the input dataset and initialise the figure
+        failed: list[str] = []
+        for <scenario-index>, <scenario-name> in enumerate(<scenarios>):
+            ## plot a diagnostic of the scenario
+            ## check if the scenario passes, and append its name if not
+            ...
+        ## save the figure before asserting, so a fail stays inspectable
+        assert not failed, f"failed: {failed}"
+        ## log the overall result
+
+
+if __name__ == "__main__":
+    Test<Concept>().run()
 ```
+
+> **Note:** a single-check vtest drops the loop and asserts directly.
