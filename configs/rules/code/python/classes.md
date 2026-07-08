@@ -48,3 +48,4 @@ class <EnumName>(Enum):
 - Use context managers (`__enter__` / `__exit__`) for resource lifecycle.
 - Use `@property` for attributes derived from existing state: no parameters, no side effects, cheap to compute; use `get_*` for operations that take parameters, involve I/O, or significant cost.
 - Method ordering: `__post_init__`, private helpers (`_`), `@property`, `@cached_property`, instance methods, `@classmethod`.
+- Store a collection of similar records as a `list` of `@dataclass(frozen=True)` instances.

@@ -28,7 +28,7 @@ class Test<Concept>_<Aspect>(unittest.TestCase):
 - Each is one `Test`-prefixed class, so a project can also collect them with pytest.
 - Every vtest saves one figure, inspected by eye alongside its pass/fail signal.
 
-`__init__` stores only tunable test parameters; `run` creates the figure and drives the checks, passing data explicitly to single-task helpers:
+`__init__` stores only tunable test parameters; `run` creates the figure and drives the checks, passing data explicitly to single-task helpers. A helper lives on the class only if it reads one of those parameters; otherwise it is a module-level function:
 
 ```python
 class Test<Concept>:
