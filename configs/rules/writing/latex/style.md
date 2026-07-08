@@ -10,6 +10,7 @@ LaTeX writing style, particularly for scientific notes and papers.
 |---|---|
 | No paragraph indentation | add `\setlength{\parindent}{0pt}` and `\setlength{\parskip}{6pt}` to the preamble |
 | No `\paragraph*{}` headings | fold the label into running prose instead |
+| Source indentation | 4 spaces per nesting level (never tabs); applies to environments, sections, and macro bodies |
 
 ---
 
@@ -42,11 +43,11 @@ Three-part hierarchy: `type:group:name`. The group is the context; the name is t
 |---|---|
 | Inline math | use `$ ... $` |
 | All display math | use `align` or `align*`; never `$$` or `equation` |
-| Unnumbered blocks | if no line in the block needs a label, use `align*` rather than `align` with `\nonumber` on every line |
+| Unnumbered blocks | if no line in the block needs a label, use `align*` rather than `align` with `\nonumber` on every line -- except in standalone notes (`notes/*.tex`), where every displayed equation gets a number regardless of whether it's referenced, since collaborators reviewing the derivation need to point at a specific step |
 | Roman (upright) text in math | use `\mathrm{}`; `{\rm ...}` is a deprecated plain TeX mode switch |
 | Exponentials | use `\exp(...)` rather than `e^{...}` |
 | Coordinate planes | write planes as `(x,y)` or `$(\mVectorUnit{e}_1,\mVectorUnit{e}_2)$`, not `x--y` or `x\text{-}y` |
-| Symbol case | lower-case for scalars and vectors (including placeholder/dummy variables); upper-case for rank-2 tensors and collections |
+| Symbol case | lower-case for scalar and vector fields (including placeholder/dummy variables); upper-case for rank-2+ tensor fields, e.g. the vector field $\mVector{F}$ should be written $\mVector{f}$ |
 | Equation layout (single equation) | LHS on its own line; `&= RHS` indented below; long RHS terms broken across lines, indented to show structure; `, \label{}` on its own final line |
 | Equation layout (multi-equation, with `\\`) | `, \label{}` must appear on the same source line as `\\`, not on a separate line; for short RHS append inline (`&= 0 , \label{...} \\`); for long RHS put on the last continuation line before `\\` |
 
