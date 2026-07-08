@@ -84,9 +84,10 @@ Always use strong, specific verb prefixes. Avoid weak or generic leading words t
 | Rule | Detail |
 |---|---|
 | Casing | `snake_case` exclusively, never camelCase |
-| Abbreviations | domain acronyms only: `mhd`, `cfl`, `eos`; never single-letter physics symbols (`magnetic_field` not `b`, `density` not `rho`) or shortened English words (`language` not `lang`, `index` not `idx`); exception: `num_` for a count (`num_<noun>`, not `number_<noun>`) |
+| Abbreviations | domain acronyms only: `mhd`, `cfl`, `eos`; never shortened English words (`decompose` not `decomp`, `index` not `idx`) |
+| Count prefix | `num_` is the exception to the abbreviations rule: `num_<noun>`, not `number_<noun>` |
 | Descriptive names | use qualified names that read as subscript notation: `<qualifier>_<noun>` |
-| Single-letter names | never; names must always indicate what is being worked with |
+| Single-letter names | never, except the physics shorthand in Mathematical Variables |
 | Directories | `directory` when only one in scope; `_dir` suffix when multiple: `source_dir`, `target_dir` |
 | Comprehension variables | prepend `_` if the name would conflict with an existing name in scope |
 | State predicates | `is_*` or `has_*` prefix: `is_loading`, `has_errors` |
