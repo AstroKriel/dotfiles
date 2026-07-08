@@ -26,12 +26,14 @@ The reference sheet: everything needed to start a session from scratch.
 | Section | Content |
 |---|---|
 | `## Instance` | Placeholder table for all account-specific values. Shared placeholders (`<username>`, `<home>`, `<repos>`) in one table; per-project storage paths under bold sub-labels (**`<project-code>:`**) with their own table. Name storage placeholders `<tier-project>` (e.g. `<scratch-<project-code>>`) so they are unambiguous when referenced elsewhere. Always include `<repos>`: the code checkout root, conventionally `~/repos/`. |
-| `## Login` | Sanitized connection snippet using `## Instance` placeholders. `~/.ssh/config` stays in the setup repo. |
+| `## Access` | Sanitized connection snippet using `## Instance` placeholders. `~/.ssh/config` stays in the setup repo. |
 | `## Storage` | Storage tiers mapped to `home`/`fast-storage`/`project` concepts. |
 | `## Software` | Non-standard module load sequences. Host-specific build steps as `### <codebase>` subsections. |
 | `## Minimal Job Script` | One inline job script. Submission files for actual runs live in the run directory. |
 | `## Codes` | Table of name, checkout path (using `<repos>`), and role. No remote URLs. Stub the section if no codes are installed yet. |
 | `## Hardware` | Specs and filesystems for a single node; move to `<node>.md` when nodes diverge. |
+
+> **Note:** these section titles are the baseline, not a closed set. `## Storage` may appear as `## Filesystems` and `## Hardware` as `## Machines` where that reads more naturally, and a cluster adds sections as it needs them (`## Scheduler`, `## Account`, `## Etiquette`, `## Support`).
 
 ---
 

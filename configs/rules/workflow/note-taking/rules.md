@@ -6,7 +6,7 @@ How to use, add to, and extend the `~/.rules/` system.
 
 ## What it is
 
-The canonical source is `<system-configs>/configs/rules/`. All `.md` files there are symlinked into `~/.rules/` (written `<rules>/` in cross-references throughout these files) by `uv run -m scripts.setup.rules_files` run from the SystemConfigs repo. Edit the source; never edit through a symlink.
+The canonical source is `<system-configs>/configs/rules/`. All `.md` files there are symlinked into `~/.rules/` (written `<rules>/` in cross-references throughout these files) by `uv run -m scripts.setup.rules_files` run from the SystemConfigs repo. Edit the source; never edit through a symlink. The one exception is the generated `README.md` index: `rules_index` writes it directly into `~/.rules/`, so it is a regular file, not a symlink.
 
 ---
 
@@ -14,7 +14,7 @@ The canonical source is `<system-configs>/configs/rules/`. All `.md` files there
 
 ```text
 <rules>/
-├── dev/  # conventions for producing code and scripts
+├── code/  # conventions for producing code and scripts
 │   ├── python/  # Python language bundle
 │   └── quokka/  # Quokka project bundle
 ├── writing/  # conventions for producing text

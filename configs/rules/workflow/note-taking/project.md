@@ -14,8 +14,8 @@ Covered by this file:
 |---|---|
 | Research projects (lead author) | `<project-notes>/research/lead-author/<project>/` |
 | Student supervision | `<project-notes>/research/student-projects/<student>/` |
-| Teaching projects | `<project-notes>/<teaching-project>/` |
-| Tools | `<project-notes>/<tool>/` |
+| Teaching projects | `<project-notes>/teaching/<teaching-project>/` |
+| Tools | `<project-notes>/tools/<tool>/` |
 
 ---
 
