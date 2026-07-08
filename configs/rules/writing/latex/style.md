@@ -42,8 +42,7 @@ Three-part hierarchy: `type:group:name`. The group is the context; the name is t
 | Rule | Detail |
 |---|---|
 | Inline math | use `$ ... $` |
-| All display math | use `align` or `align*`; never `$$` or `equation` |
-| Unnumbered blocks | if no line in the block needs a label, use `align*` rather than `align` with `\nonumber` on every line -- except in standalone notes (`notes/*.tex`), where every displayed equation gets a number regardless of whether it's referenced, since collaborators reviewing the derivation need to point at a specific step |
+| All display math | use `align`, numbering every equation even if unreferenced; never `$$` or `equation` |
 | Roman (upright) text in math | use `\mathrm{}`; `{\rm ...}` is a deprecated plain TeX mode switch |
 | Exponentials | use `\exp(...)` rather than `e^{...}` |
 | Coordinate planes | write planes as `(x,y)` or `$(\mVectorUnit{e}_1,\mVectorUnit{e}_2)$`, not `x--y` or `x\text{-}y` |
