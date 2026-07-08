@@ -8,7 +8,7 @@ How to open and describe pull requests against the Quokka `development` branch.
 
 ## Title
 
-Follow the PR title rules in [`workflow/git/commits.md`](../../git/commits.md): sentence case, imperative, no trailing period, under 72 characters.
+Follow the PR title rules in [`workflow/git/pull-requests.md`](../../git/pull-requests.md): sentence case, imperative, no trailing period, under 72 characters.
 
 ```
 Action <Component>: short detail
@@ -20,13 +20,22 @@ The title becomes the squashed commit message on merge, so it must be specific e
 
 ## Structure
 
-The GitHub PR template provides three top-level sections:
+The GitHub PR template provides three sections, always present:
 
 | Section | Role |
 |---|---|
 | `### Description` | What changed, why, and the reasoning behind design choices. |
 | `### Related issues` | Links to the proposal this PR implements and any it enables. |
 | `### Checklist` | Repo compliance items; includes the GPU test trigger. |
+
+Add situational `### ` sections after `### Description`, as they apply. Each is a top-level `### ` section, not a bold sub-header inside `### Description`:
+
+| Section | When to use |
+|---|---|
+| `### Validation` | convergence results or analytic comparisons confirming correct behaviour |
+| `### Energy conservation` | tests confirming energy is transferred correctly between components |
+| `### Known issues` | `[Feedback]`/`[Testing]` PRs: items that must be resolved before the PR is ready for review |
+| `### Request for Feedback` | `[Feedback]` PRs: specific questions on the approach you want reviewers to weigh in on |
 
 ---
 
@@ -36,14 +45,7 @@ The GitHub PR template provides three top-level sections:
 - Cover what changed, why, and the reasoning behind any non-obvious design choices: what you tried, what you found, and what tradeoffs you made.
 - Reviewers benefit from understanding the judgment, not just the outcome.
 
-Use **bold sub-headers** to break up longer descriptions. Common sub-headers:
-
-| Sub-header | When to use |
-|---|---|
-| **Validation.** | convergence results or analytic comparisons confirming correct behaviour |
-| **Energy conservation.** | tests confirming energy is transferred correctly between components |
-| **Known issues.** | `[Feedback]`/`[Testing]` PRs: items that must be resolved before the PR is ready for review |
-
+- Keep `### Description` to prose; break supporting material out into the situational `### ` sections listed under [Structure](#structure) (`### Validation`, `### Known issues`, etc.) rather than bold sub-headers within the description.
 - Wherever a test result is cited, include a figure; the caption or surrounding prose must state the test name, any non-default parameters, and the resolution used.
 - Equations follow the notation rules in [`writing/markdown.md`](../../../writing/markdown.md).
 
@@ -51,17 +53,16 @@ Use **bold sub-headers** to break up longer descriptions. Common sub-headers:
 
 ## Title status tags
 
-Prefix the title with a stage tag to communicate progress on top of GitHub's own draft/ready toggle:
+While the PR is a draft, prefix the title with a stage tag to communicate progress on top of GitHub's own draft/ready toggle. Every tagged stage is a draft:
 
-| Tag | Meaning | GitHub state |
-|---|---|---|
-| `[WIP]` | still implementing; not yet shareable, even for early feedback | draft |
-| `[Feedback]` | shareable draft; seeking feedback on the approach before continuing | draft |
-| `[Testing]` | implementation is believed complete; running tests, tweaks may be called for based on tests | draft |
-| `[Review]` | all known issues resolved, CI green, ready for review | ready for review |
+| Tag | Meaning |
+|---|---|
+| `[WIP]` | still implementing; not yet shareable, even for early feedback |
+| `[Feedback]` | shareable draft; seeking feedback on the approach before continuing |
+| `[Testing]` | implementation is believed complete; running tests, tweaks may be called for based on tests |
 
-- Convert from draft to ready for review only at `[Review]`.
-- Remove the tag entirely before merge; the title becomes the squashed commit message, so it must not carry a stage marker into `git log`.
+- Ready for review is the untagged state: when all known issues are resolved and CI is green, remove the stage tag entirely and flip the PR from draft to ready for review. A title with no tag is the signal that the code is ready to read.
+- Because the ready-for-review title already carries no tag, it doubles as the clean squashed commit message; no stage marker leaks into `git log`.
 
 ---
 

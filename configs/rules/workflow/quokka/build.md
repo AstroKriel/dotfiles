@@ -54,12 +54,10 @@ cmake -S "$SRC" -B "$BUILD" -G Ninja \
 
 Use git worktrees to work on multiple feature branches in parallel without switching branches or invalidating builds.
 
+Base-clone-on-default, one-worktree-per-branch, location, naming, and pull-before-forking follow [`workflow/git/worktrees.md`](../git/worktrees.md): quokka's default branch is `development`, so the base clone stays on it and worktrees live under `quokka-worktrees/<branch-slug>`. The rules below add quokka's submodule, extern, and build-tree specifics.
+
 | Rule | Detail |
 |---|---|
-| Main checkout on `development` | The primary checkout tracks `development`. Worktrees branch off from there. |
-| One worktree per feature branch | Create a worktree for each active branch; delete it when the branch is merged or shelved. |
-| Naming | Name each worktree after its branch with `/` replaced by `-`, placed as a sibling to the main checkout directory. Branch `<scope>/<type>/<name>` becomes `quokka-<scope>-<type>-<name>`. |
-| Pull before forking | Before creating a worktree, pull the source branch if it is a passive tracking branch (e.g. `development`). Skip this for active feature branches where the current state is intentional. |
 | Initialise submodules on creation | After `git worktree add`, run `git submodule update --init` inside the new worktree before building. The `--init` flag is required on any fresh worktree: submodule registration does not carry over from the main checkout automatically. Subsequent updates (e.g. after pulling a new pin) only need `git submodule update`. |
 | Extern drift | Each worktree has its own `extern/` working tree; submodule pins are per-branch. If a feature branch falls behind `development` on submodule pins, fix by merging or rebasing `development` into the feature branch so the pins come back into sync. |
 | Build directories | Each worktree has its own build tree. On local, build dirs live inside the worktree (`build/3d-release`, etc.). On HPC, source lives on quota-limited Ceph home; build dirs go on node-local scratch. See Build locations below. |
@@ -74,15 +72,15 @@ git pull
 Then create the worktree:
 
 ```bash
-git worktree add ../quokka-<branch-slug> <branch>
-cd ../quokka-<branch-slug>
+git worktree add ../quokka-worktrees/<branch-slug> <branch>
+cd ../quokka-worktrees/<branch-slug>
 git submodule update --init
 ```
 
 Remove a worktree when the branch is merged or shelved:
 
 ```bash
-git worktree remove ../quokka-<branch-slug>
+git worktree remove ../quokka-worktrees/<branch-slug>
 ```
 
 ### Build locations
@@ -100,8 +98,8 @@ ninja -C build/3d-release <ProblemName>
 **HPC:** source worktrees live on quota-limited home; build trees go on node-local scratch. Use explicit `-S`/`-B` to separate them. Toolchain flags vary per host; see host notes and the portable tool install block in Build Directories above:
 
 ```bash
-SRC=<repos>/quokka-<branch-slug>
-BUILD=<scratch>/$USER/quokka-<branch-slug>/build/<config>
+SRC=<repos>/quokka-worktrees/<branch-slug>
+BUILD=<scratch>/$USER/quokka-worktrees/<branch-slug>/build/<config>
 rm -f "$BUILD/CMakeCache.txt"
 cmake -S "$SRC" -B "$BUILD" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
@@ -111,7 +109,7 @@ cmake -S "$SRC" -B "$BUILD" -G Ninja \
 ninja -C "$BUILD" <ProblemName>
 ```
 
-`<repos>` and `<scratch>` are defined in `<project-notes>/hpcs/<host>/`. The worktree name (`quokka-<branch-slug>`) is the same in both cases; only the root path differs.
+`<repos>` and `<scratch>` are defined in `<project-notes>/hpcs/<host>/`. The worktree path (`quokka-worktrees/<branch-slug>`) is the same in both cases; only the root path differs.
 
 ---
 

@@ -1,6 +1,6 @@
 # Git: Commits
 
-Conventions for git commits, branch naming, and PR titles.
+Conventions for git commit messages: format, actions, scope, granularity, and presentation.
 
 ## Format
 
@@ -117,62 +117,3 @@ git commit -m "<type>(<other_file.py>): <description>."
 ## Git Helpers
 
 Use the `git_helpers` CLI (`<git-helpers>`) for git operations where a command exists. Fall back to raw `git` only when no equivalent command exists. Full reference: `<git-helpers>/README.md`.
-
----
-
-## Branch Naming
-
-```
-verb/short-description
-```
-
-For shared repos (multiple contributors), prepend a username:
-
-```
-username/verb/short-description
-```
-
-| Rule | Detail |
-|---|---|
-| Case | lowercase throughout |
-| Separators | `/` for namespaces, `-` for words within a namespace |
-| Length | max 50 characters |
-| Characters | alphanumeric, `-`, and `/` only |
-| Purpose | one branch per logical change |
-| Verbs | same as commits: `add`, `fix`, `refactor`, `update`, `extend`, `del`, etc. |
-| Avoid | dates, vague names (`wip`, `temp`, `fix-stuff`), and anything longer than needed |
-| Lifecycle | delete branches after merging; rebase onto `main` before opening a PR |
-
----
-
-## Pull Request Titles
-
-PR titles become the squash-merge commit subject. They appear in `git log --oneline`, `git blame`, and side-by-side diff views, so they are the durable subject line for a change.
-
-```
-Action: short detail
-```
-
-PR titles diverge from commit message style in three ways: sentence case (not lowercase), no trailing period, and no `(scope)` parens. The reason is rendering context: commit messages live mostly in `git log` (terse); PR titles also appear in GitHub lists and release notes where sentence case reads better.
-
-| Rule | Detail |
-|---|---|
-| Case | sentence case: first word capitalised; rest follows normal sentence rules |
-| Voice | imperative present: `Add`, `Fix`, `Update`, never `Adds` or `Added` |
-| Action vocabulary | same set as commits, expanded when an abbreviation reads awkwardly: `del` -> `Remove`, `config` -> `Configure`, `docs` -> `Document` |
-| Separator | `:` after the action; right side stays lowercase as continuation |
-| Multiple clauses | `;` between clauses; right clause stays lowercase |
-| Ending | no trailing period |
-| Length | target under 72 characters; hard cap 100 |
-| Scope | omit `(scope)` parens; the diff and PR description carry that |
-
-### Pull Request Title Examples
-
-```
-Add <feature>: <one-line description>
-Fix <component>: <what broke and how it is fixed>
-Refactor <module>: <structural change>
-Update <thing>: <what changed>
-Rename <dir>/: <naming change>
-Document <topic>: <what is documented>
-```

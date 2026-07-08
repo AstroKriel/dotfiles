@@ -8,12 +8,10 @@ Workflow conventions for developing Asgard Python packages.
 
 Use git worktrees to develop features without exposing half-finished code to downstream consumers.
 
+Base-clone-on-default, one-worktree-per-branch, location, naming, and pull-before-forking follow [`workflow/git/worktrees.md`](../git/worktrees.md): asgard's default branch is `main` (what downstream consumers in `mimir/` resolve to), so the base clone stays on it and worktrees live under `submodules/<package>-worktrees/<branch-slug>`. The rules below add asgard's per-worktree environment specifics.
+
 | Rule | Detail |
 |---|---|
-| Main checkout on `main` | The primary checkout tracks `main`; downstream consumers point at it and always see stable code. |
-| One worktree per feature branch | Create a worktree for each active branch; delete it when the branch is merged or shelved. |
-| Naming | Name each worktree after its branch with `/` replaced by `-`, placed as a sibling inside `submodules/`. Branch `<verb>/<name>` becomes `<package>-<verb>-<name>`. |
-| Pull before forking | Before creating a worktree, pull `main` so the branch starts from the latest stable state. |
 | Isolated environment | Each worktree has its own `.venv`; create and editable-install on creation. See [Environment](#environment) below. |
 | Trial scripts | Short-lived scratch scripts belong inside the feature worktree, not the main checkout. |
 
@@ -26,14 +24,14 @@ git pull
 Then create the worktree:
 
 ```bash
-git worktree add ../<package>-<branch-slug> -b <verb>/<name>
-cd ../<package>-<branch-slug>
+git worktree add ../<package>-worktrees/<branch-slug> -b <verb>/<name>
+cd ../<package>-worktrees/<branch-slug>
 ```
 
 Remove a worktree when the branch is merged or shelved:
 
 ```bash
-git worktree remove ../<package>-<branch-slug>
+git worktree remove ../<package>-worktrees/<branch-slug>
 ```
 
 ### Environment
@@ -41,7 +39,7 @@ git worktree remove ../<package>-<branch-slug>
 Each worktree has its own `.venv` so scripts and tests run against the feature branch code. `<branch-slug>` is the branch name with `/` replaced by `-` (e.g. `<verb>-<name>`).
 
 ```bash
-cd ../<package>-<branch-slug>
+cd ../<package>-worktrees/<branch-slug>
 uv venv
 uv pip install -e .
 ```
