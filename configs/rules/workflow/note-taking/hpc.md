@@ -33,8 +33,6 @@ The reference sheet: everything needed to start a session from scratch.
 | `## Codes` | Table of name, checkout path (using `<repos>`), and role. No remote URLs. Stub the section if no codes are installed yet. |
 | `## Hardware` | Specs and filesystems for a single node; move to `<node>.md` when nodes diverge. |
 
-> **Note:** these section titles are the baseline, not a closed set. `## Storage` may appear as `## Filesystems` and `## Hardware` as `## Machines` where that reads more naturally, and a cluster adds sections as it needs them (`## Scheduler`, `## Account`, `## Etiquette`, `## Support`).
-
 ---
 
 ## When something takes real work
