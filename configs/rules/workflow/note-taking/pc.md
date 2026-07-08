@@ -22,14 +22,19 @@ Both forms are distinct from HPC notes (see [`hpc.md`](hpc.md)): HPC notes recor
 
 ```text
 SystemNotes/<machine>/
-├── README.md          # machine name, OS, hardware summary, purpose
-├── setup.md           # installation steps: OS, packages, configs, services
-├── pending-issues.md  # open issues and unresolved configuration problems
-├── notes/             # distilled facts about how subsystems work on this machine
-│   └── <topic>.md     # one file per topic area; updated in place as understanding deepens
-└── debug-diary/       # retrospective entries for resolved issues
-    └── YYYY-MM-DD.md  # one file per resolved issue
+├── README.md          # machine name, purpose, pointer to each partition
+├── system-details.md  # hardware summary; omit for a single-OS machine and put it in README.md instead
+└── <partition>/        # one directory per OS partition; omit this level for a single-OS machine and nest everything below directly under <machine>/
+    ├── README.md          # partition overview; indexes the setup docs below once setup.md splits
+    ├── setup.md           # installation steps: OS, packages, configs, services
+    ├── pending-issues.md  # open issues and unresolved configuration problems
+    ├── notes/             # distilled facts about how subsystems work on this machine
+    │   └── <topic>.md     # one file per topic area; updated in place as understanding deepens
+    └── debug-diary/       # retrospective entries for resolved issues
+        └── YYYY-MM-DD.md  # one file per resolved issue
 ```
+
+Introduce the `<partition>/` level only when a machine hosts more than one OS install; a single-OS machine keeps the flat layout this replaced.
 
 | Belongs | Does not belong |
 |---|---|
@@ -69,6 +74,7 @@ SystemNotes/<machine>/
 ### setup.md
 
 - Update whenever a significant config change is made: a new service, a package upgrade that required intervention, or a config change with machine-specific implications.
+- Splits into a set of topic-named files (e.g. `arch-install.md`, `dev-tools.md`, `extras-<topic>.md`) when a single file grows unwieldy or the installation naturally separates into stages; the partition `README.md` indexes them, the same way a project `README.md` indexes a folder it has outgrown.
 - When a machine is retired: add a final `README.md` note with the retirement date and disposition.
 
 ### Research reference entry

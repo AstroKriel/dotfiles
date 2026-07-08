@@ -55,4 +55,6 @@ Each session file should open with the date and attendees, then follow the meeti
 - ...
 ```
 
+Section headings are illustrative, not fixed: use functional names that fit the discussion (`## Discussion`, `## Decisions`, `## Open Questions`) instead of literal `## Topic 1`/`## Topic 2` where that reads more naturally. A reference table or a link to a related thread or note belongs in a session file when it is itself something the meeting produced or drew on directly (e.g. a vocabulary mapping worked out together, a pointer to the thread a decision affects); it does not license restating pre-existing background the meeting did not generate.
+
 Keep entries factual. Record what was said and decided; do not editorialise. If a decision reached in a meeting becomes a binding convention, promote it to `<rules>/`.

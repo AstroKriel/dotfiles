@@ -75,16 +75,20 @@ The log is an append-only session trail: each file (`YYYY-MM-DD.md`) is a snapsh
 └── notes/     # reference material (project description, setup details, etc.)
 ```
 
-### notes/ and tasks/ pairing
+---
+
+## Tasks and Notes Pairing
+
+Applies wherever a project has a task list and a `notes/` directory: research (lead-author and student supervision) and teaching projects alike, not student supervision only. The task list is `tasks.md` before it splits, `tasks/<topic>.md` after.
 
 When a project grows a `tasks/` folder, the `notes/` folder grows a matching file for each topic. The two files for the same topic are complementary: `tasks/<topic>.md` holds only active and pending work; `notes/<topic>.md` holds the durable record of what exists or has been done.
 
 The lifecycle of a piece of work:
-1. It starts as a task in `tasks/<topic>.md`.
-2. When it completes, its record moves to `notes/<topic>.md`; the checkbox is removed, not just ticked.
-3. `tasks/<topic>.md` shrinks over time. `notes/<topic>.md` grows.
+1. It starts as a task in `tasks.md` (or `tasks/<topic>.md` once split).
+2. When it completes, its record moves to `notes/<topic>.md` (or the project's single `notes.md`-equivalent file before that splits); the entry is removed, not just marked done.
+3. The task list shrinks over time. `notes/` grows.
 
-A `tasks/<topic>.md` file that is nothing but ticked checkboxes is a sign the notes file is missing or out of date.
+A task list that is nothing but completed entries is a sign the notes file is missing or out of date.
 
 **What goes in `notes/<topic>.md`:**
 
@@ -95,7 +99,7 @@ A `tasks/<topic>.md` file that is nothing but ticked checkboxes is a sign the no
 
 **What stays in `tasks/<topic>.md`:**
 
-- Uncompleted checkboxes only. No reference material, no completed items, no storage layout docs.
+- Uncompleted items only. No reference material, no completed items, no storage layout docs.
 - A brief status line at the top noting current priority and what is blocked or in flight.
 
 ---
