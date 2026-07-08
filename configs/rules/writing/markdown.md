@@ -24,7 +24,9 @@ Conventions for formatting, structuring, and writing Markdown documentation.
 | Code, paths, commands, keys | always in backticks: `<command>`, `~/.config/<app>/<file>`, `<Modifier>+<Key>` |
 | Values and flags | backticks: `<bool>`, `--<flag>`, `<setting>=<value>` |
 | Emphasis | use **bold** for warnings and key terms; avoid italic |
-| Files in the same repo | use a relative Markdown link; display the path in backticks |
+| Same-repo file | Markdown link: href is the real relative path to the file; display text is the path rooted at the repo's placeholder, e.g. `` [`<rules>/<path>/<file>.md`](../<path>/<file>.md) `` |
+| Cross-repo file | plain backticks, no link; a relative href cannot resolve across git repos, e.g. `` `<project-notes>/<path>/<file>.md` `` |
+| Directory or concept, not a specific file | plain backticks, no link, e.g. `` `<rules>/` `` |
 
 ---
 
