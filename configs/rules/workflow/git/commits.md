@@ -1,14 +1,16 @@
 # Git: Commits
 
-Conventions for git commit messages: format, actions, scope, granularity, and presentation.
+Conventions for git commit messages: format, actions, scopes, granularity, and presentation.
 
 ## Format
 
+Commits are a single line only:
+
 ```
-action(scope): details.
+<action>-<scope>(<identifier>): <description>.
 ```
 
-One line only. No extended description below the subject.
+Every commit combines one <action> with one <scope>, joined by a hyphen. The identifier in parentheses is the literal name the scope points to: a function/class name for `fn`, a filename for `file`, a folder name for `folder`, a theme name for `theme`. Omit the parentheses entirely for `repo` level changes, since there is nothing to name.
 
 ---
 
@@ -18,32 +20,28 @@ Use these actions as the default vocabulary. Other verbs are permitted when none
 
 | Action | When |
 |---|---|
-| `add` | new functionality |
+| `del` | deleting something |
+| `add` | creating something new |
 | `fix` | bug fix |
-| `refactor` | restructuring without behaviour change |
-| `rename` | renaming files, functions, variables |
-| `del` | deleting code or files |
+| `revert` | undoing or rolling back a previous change on this branch; restoring prior behaviour that was intentionally changed away from |
 | `update` | changes to existing functionality |
-| `improve` | quality/clarity improvements |
-| `apply` | applying external changes (linting, formatting, style) |
-| `config` | config file changes |
-| `docs` | documentation only |
-| `test` | test additions or fixes |
-| `extend` | adding capability to existing functionality |
+| `refactor` | restructuring without behaviour change |
+| `rename` | renaming something |
 
 ---
 
-## Scope
+## Scopes
 
-Scope answers **where** the change is. Granularity depends on how localised the change is:
+Scope answers **at what granularity** the change happened. Every action pairs with one of these:
 
-| Situation | Scope |
+| Scope | What it names |
 |---|---|
-| One file, localised change | function or class name: `fn_name`, `ClassName` |
-| One file, broad change | filename with extension: `file_name.py` |
-| Many files, shared concept | concept name: `linting`, `type annotations`, `imports` |
-| Folder rename | folder name with trailing slash: `folder/` |
-| Repo-wide | omit scope entirely |
+| `param` | a single parameter, argument, or variable |
+| `fn` | a function or class |
+| `file` | a whole file |
+| `folder` | a whole folder/module |
+| `repo` | the whole repository |
+| `theme` | a shared theme spanning many files (e.g. linting, type annotations) |
 
 ---
 
@@ -73,12 +71,13 @@ Scope answers **where** the change is. Granularity depends on how localised the 
 These illustrate the message format and wording style only, not the full shell workflow:
 
 ```
-fix(<script>.py): <description of what was broken and how it is fixed>.
-refactor(<module>.py): <description of structural change>.
-fix(<function>): accept <type> for <param>; accept None for <param>.
-apply(linting): fix ruff and pyright warnings across src/.
-rename(<dir>/): <description of naming change>.
-add: initial repo structure.
+del-param(<function>): remove unused <param>.
+add-repo: <description of initial repo structure>.
+fix-fn(<function>): accept <type> for <param>; accept None for <param>.
+revert-theme(<theme>): drop <feature> that shipped only as a diagnostic.
+update-file(<file>.py): <description of a broad change within the file>.
+refactor-folder(<folder>/): <description of reorganisation across the folder>.
+rename-file(<file>.py): rename to <new_file>.py.
 ```
 
 ---
@@ -95,7 +94,7 @@ Single repository:
 ```bash
 cd <repo>
 git add <path/to/file.py>
-git commit -m "<type>(<file.py>): <description>."
+git commit -m "<action>-<scope>(<file.py>): <description>."
 ```
 
 Multiple repositories:
@@ -103,13 +102,13 @@ Multiple repositories:
 ```bash
 cd <repo-a>
 git add <path/to/file.py>
-git commit -m "<type>(<file.py>): <description>."
+git commit -m "<action>-<scope>(<file.py>): <description>."
 ```
 
 ```bash
 cd <repo-b>
 git add <path/to/other_file.py>
-git commit -m "<type>(<other_file.py>): <description>."
+git commit -m "<action>-<scope>(<other_file.py>): <description>."
 ```
 
 ---
