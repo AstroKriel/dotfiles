@@ -18,14 +18,14 @@ How to extract simulation output and diagnose failed Quokka runs.
 | Rule | Detail |
 |---|---|
 | Diagnostics first | The diagnostic commands are the primary interface with simulation data; use them before writing any custom extraction code. |
-| Plot on the host | When sim data lives on a remote host, run the diagnostic commands there. Copy only the derived outputs back. |
-| Post-analysis from derived | For comparisons or derived quantities, load the extracted JSON/CSV data file from `derived/`; do not re-read the plotfile. |
+| Plot on the host | When sim data lives on a remote host, run the diagnostic commands there. Copy only the diagnostics outputs back. |
+| Post-analysis from diagnostics | For comparisons or derived quantities, load the extracted JSON/CSV data file from `diagnostics/`; do not re-read the plotfile. |
 | Data over images | When `--save-data` has been run, all numerical conclusions must come from the saved data file. Do not read figure image files; figures are outputs for the user, not inputs for analysis. |
 
 **Extraction:**
 
 1. **Inspect.** Call `quokka-inspect-snapshot <plt_dir>` to confirm which field keys are available before running anything else.
-2. **Extract.** Run the appropriate plot command with `--save-data`. This writes the figure and data to the sim's `derived/` subdirectory. Raw plotfiles stay on the cluster or in `/tmp/`; only derived products are committed.
+2. **Extract.** Run the appropriate plot command with `--save-data`. This writes the figure and data to the sim's `diagnostics/` subdirectory. Raw plotfiles stay on the cluster or in `/tmp/`; only diagnostics products are committed.
 3. **Sanity-check.** Run `quokka-plot-vi-evolution` to check volume-integrated energy and momentum before extracting detailed field data.
 
 ---
@@ -72,7 +72,7 @@ How to extract simulation output and diagnose failed Quokka runs.
 
 ### Triage sequence
 
-**1. Check for output.** Look for plotfiles in `plotfiles/`. If none exist, go to [No output](#no-output).
+**1. Check for output.** Look for plotfiles in `snapshots/`. If none exist, go to [No output](#no-output).
 
 **2. Plot what ran.** Run diagnostic commands on the HPC, directing output to a new `tmp/` subdirectory:
 
