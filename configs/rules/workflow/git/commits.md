@@ -10,7 +10,7 @@ Commits are a single line only:
 <action>-<scope>(<identifier>): <description>.
 ```
 
-Every commit combines one <action> with one <scope>, joined by a hyphen. The identifier in parentheses is the literal name the scope points to: a function/class name for `fn`, a filename for `file`, a folder name for `folder`, a theme name for `theme`. Omit the parentheses entirely for `repo` level changes, since there is nothing to name.
+Every commit combines one <action> with one <scope>, joined by a hyphen. The identifier in parentheses is the literal name the scope points to: a function/class name for `fn`, a filename for `file` or `content`, a folder name for `folder`, a theme name for `theme`. Omit the parentheses entirely for `repo` level changes, since there is nothing to name.
 
 ---
 
@@ -38,7 +38,8 @@ Scope answers **at what granularity** the change happened. Every action pairs wi
 |---|---|
 | `param` | a single parameter, argument, or variable |
 | `fn` | a function or class |
-| `file` | a whole file |
+| `file` | a whole file, when it is created, deleted, renamed, or restored |
+| `content` | broad edits inside a file that do not change its existence (touches many functions/sections at once) |
 | `folder` | a whole folder/module |
 | `repo` | the whole repository |
 | `theme` | a shared theme spanning many files (e.g. linting, type annotations) |
@@ -75,7 +76,7 @@ del-param(<function>): remove unused <param>.
 add-repo: <description of initial repo structure>.
 fix-fn(<function>): accept <type> for <param>; accept None for <param>.
 revert-theme(<theme>): drop <feature> that shipped only as a diagnostic.
-update-file(<file>.py): <description of a broad change within the file>.
+update-content(<file>.py): <description of a broad change within the file>.
 refactor-folder(<folder>/): <description of reorganisation across the folder>.
 rename-file(<file>.py): rename to <new_file>.py.
 ```
