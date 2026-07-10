@@ -29,8 +29,8 @@ AMReX exposes many parameters and often multiple ways to achieve the same thing.
 | `amr.blocking_factor_x` | `16` | See MPI decomposition below. |
 | `amr.max_grid_size` | `128` | See MPI decomposition below. |
 | `do_reflux` | `0` | Disable for single-level runs. |
-| `do_subcycle` | `0` | Disable for single-level runs. |
-| `plotfile_prefix` | `"plotfiles/plt"` | Output path prefix for plotfiles; defaults to `plt` in the run working directory if absent. |
+| `do_subcycle` | `0` | Disable for single-level runs; also required off with any physical diffusion (e.g. `mhd.resistivity`); see Resistivity. |
+| `plotfile_prefix` | `"snapshots/plt"` | Output path prefix for plotfiles; defaults to `plt` in the run working directory if absent. |
 
 **`hydro`:**
 
@@ -88,6 +88,7 @@ Enable with `mhd.resistivity = <eta>`. The parabolic timestep limit is enforced 
 
 | Rule | Detail |
 |---|---|
+| No AMR subcycling with physical diffusion | Set `do_subcycle = 0` whenever `mhd.resistivity != 0`; Quokka aborts otherwise ("AMR subcycling is not supported with nonzero resistivity"). This holds for any physical diffusion term, so a future hydro viscosity carries the same restriction: subcycled parabolic operators need diffusive refluxing and time-interpolated coarse-fine boundary data, which is not implemented. |
 | No resistivity in Richardson convergence tests | `FastWaveConvergence` and `SlowWaveConvergence` abort if `mhd.resistivity != 0`. Resistivity validation uses `AlfvenWaveLinear`. |
 | Reference input | `inputs/AlfvenWaveLinear_resistive.toml` (eta=0.01, grid-aligned, FelkerStone2017 + LondrilloDelZanna2004). |
 | Analytic reference | Amplitude decays as `exp(-gamma*t)` where `gamma = eta*k^2/2`. Velocity lags B by `phi = arctan(gamma/omega_real)`. |
