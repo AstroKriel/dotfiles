@@ -148,8 +148,10 @@ Quokka maps onto the standard project layout from [`workflow/remote-work/hpc.md`
 | Concept | Quokka name | Notes |
 |---|---|---|
 | `<sim-inputs>` | `<problem>.toml` | TOML input file for the problem |
-| `<sim-outputs>` | `plotfiles/` | AMReX HDF5 plotfiles |
-| `<derived>` | `derived/` | Extracted data from `ww-quokka-sims` |
+| `<sim-outputs>` | `snapshots/` | AMReX HDF5 plotfiles |
+| `<derived>` | `diagnostics/` | Extracted data from `ww-quokka-sims` |
+
+Checkpoints (restart files, not analysis output) get their own `checkpoints/` folder, separate from `<sim-outputs>`; there is no generic-concept equivalent for this in [`workflow/remote-work/hpc.md`](../remote-work/hpc.md), it is Quokka-specific.
 
 ```text
 <concept>/<sim-name>/
@@ -158,14 +160,16 @@ Quokka maps onto the standard project layout from [`workflow/remote-work/hpc.md`
 │   └── extract.sh
 ├── <problem>.toml
 ├── logs/
-├── plotfiles/
-└── derived/
+├── snapshots/
+├── checkpoints/
+└── diagnostics/
 ```
 
-Point AMReX output to `plotfiles/` in the run TOML:
+Point AMReX output to `snapshots/` and `checkpoints/` in the run TOML:
 
 ```toml
-plotfile_prefix = "plotfiles/plt"
+plotfile_prefix = "snapshots/plt"
+checkpoint_prefix = "checkpoints/chk"
 ```
 
 AMReX profiling output (`ProfData_*`) lands in the working directory; with `--chdir`/`-d` set to the run directory, this goes to the run root rather than `logs/`.
@@ -173,7 +177,7 @@ AMReX profiling output (`ProfData_*`) lands in the working directory; with `--ch
 | Script | Purpose |
 |---|---|
 | `jobs/sim.sh` | Run the Quokka executable with the problem TOML |
-| `jobs/extract.sh` | Run `ww-quokka-sims` diagnostics; output goes to `derived/` |
+| `jobs/extract.sh` | Run `ww-quokka-sims` diagnostics; output goes to `diagnostics/` |
 
 For short-lived trial runs (testing a parameter, trialing a scheme), use `sims/<purpose>/<problem>/` under the worktree rather than a full `<concept>/<sim-name>/` directory. See [`workflow/quokka/testing.md`](testing.md) for the layout convention.
 
@@ -181,5 +185,6 @@ For short-lived trial runs (testing a parameter, trialing a scheme), use `sims/<
 
 - **Verbose output:** always set `amr.v = 1`. This enables FOFC firing counts, retry events, and other internal solver diagnostics that are silent at the default `amr.v = 0`.
 - **Plotfiles:** always set `plottime_interval = <interval>`. Write snapshots at regular intervals so the evolution can be inspected, not just the outcome. A run that crashes with no plotfiles leaves nothing to analyse.
+- **Checkpoints:** set `checkpointtime_interval = <interval>` and `checkpoint_prefix = "checkpoints/chk"` for jobs that may run close to the partition's wall-time limit, so the job can be resubmitted with `restartfile = <checkpoint-name>` instead of restarting from scratch. See [`workflow/remote-work/hpc.md`](../remote-work/hpc.md) for the general rule.
 - **Pass TOML as a relative path:** always pass the input file as a bare filename (`sim_params.toml`), not an absolute path, and set the working directory to the run directory before invoking the binary (`cd $RUNDIR` in PBS/SLURM scripts; `--chdir` in SLURM). AMReX ParmParse treats any command-line token containing `=` as an inline key=value pair. Absolute paths through directories named with `key=value` segments (e.g. `ncells=1024-hyper=1e-3`) crash the parser silently with misleading errors about missing definitions.
 - **Profiling:** AMReX's TinyProfiler defaults to enabled (`tiny_profiler.enabled = true`, and Quokka's `CMakeLists.txt` forces `AMReX_TINY_PROFILE ON`, so the instrumentation is always compiled in). It prints a full per-region time breakdown at finalize, including communication routines (e.g. `FillBoundary_*`), aggregated across MPI ranks. This is the only way to measure actual comm-vs-compute overhead; the always-printed "Performance figure-of-merit" (Mupdates/s) is throughput only, no breakdown. Do not set it in a TOML: the value never varies, so declaring it adds nothing a reader doesn't already get from this default.
