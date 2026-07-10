@@ -39,16 +39,25 @@ Production and campaign machines are a separate category, not a testing tier.
 
 ## Before pushing
 
-| Rule | Detail |
-|---|---|
-| Always run with MPI | Always prefix the executable with `mpirun -n <N>`, where `<N>` is the core count for the current machine (see machine notes). Running single-proc inflates wall time by the full rank count and defeats the time budget. |
-| Test the changed-area | A problem that exercises the modified code. For MHD changes, `SlowWaveConvergence` is the primary correctness probe (compressive; couples all MHD modes; most sensitive to solver defects). `AlfvenWaveLinearConvergence` is a quicker smoke check and the vehicle for induction/resistivity validation. |
-| Test unrelated-areas | A problem outside the modified code (`HydroBlast3D` or `RadMarshak` for MHD changes); confirms no unintended breakage elsewhere. |
-| Test on CPU and GPU | Run the pre-push tests on both a CPU build and a GPU build before opening a PR. This is mandatory for any change that touches device code (flux, reconstruction, electromotive force [EMF], Riemann, or time-stepping kernels): changes may pass on CPU, but fail on GPU through lambda-capture errors, managed-memory races, or device-side asserts, so CPU-only validation is insufficient whenever the change could affect GPU execution. The GPU build belongs to the `cluster` tier when the `local` machine has no usable GPU. |
-| Time budget | Keep the `local` and `cluster` pre-PR runs to a fast sanity gate (tests and resolutions finishing within ~5 min); the `continuous integration` tier exercises far finer levels. |
-| Resolution scope | Limit convergence sweeps to `nx_max = 512` on the `local` and `cluster` tiers: high enough to confirm 2nd order convergence and catch the onset of degradation (the plain piecewise-parabolic method [PPM] stops converging by nx=256-512 on the slow wave), but low enough for quick validation. High resolutions (e.g. up to `nx_max = 2048`) are confirmed by the `continuous integration` tier. |
-
 General principle: [`workflow/git/review-branch.md`](../git/review-branch.md).
+
+### MPI rank count
+
+Always prefix the executable with `mpirun -n <N>`, where `<N>` is ~80% of the physical core count for the current machine (see machine notes). Use physical cores only, not hyperthreads: pass `--use-hwthread-cpus` only when the machine notes confirm the core count was obtained via `nproc` (which includes hyperthreads). Running single-proc inflates wall time by the full rank count and defeats the time budget.
+
+> **Note (local only):** Run tests one at a time. Launching multiple MPI jobs concurrently saturates all cores and can crash the system.
+
+### Test coverage
+
+- **Changed area:** A problem that exercises the modified code. For MHD changes, `SlowWaveConvergence` is the primary correctness probe (compressive; couples all MHD modes; most sensitive to solver defects). `AlfvenWaveLinearConvergence` is a quicker smoke check and the vehicle for induction/resistivity validation.
+- **Unrelated area:** A problem outside the modified code (`HydroBlast3D` or `RadMarshak` for MHD changes); confirms no unintended breakage elsewhere.
+- **CPU and GPU:** Run on both a CPU build and a GPU build before opening a PR. This is mandatory for any change that touches device code (flux, reconstruction, EMF, Riemann, or time-stepping kernels): changes may pass on CPU but fail on GPU through lambda-capture errors, managed-memory races, or device-side asserts. The GPU build belongs to the `cluster` tier when the `local` machine has no usable GPU.
+
+### Time budget and resolution scope
+
+Keep `local` and `cluster` pre-PR runs to a fast sanity gate (tests finishing within ~5 min); the `continuous integration` tier exercises far finer levels.
+
+Limit convergence sweeps to `nx_max = 512` on `local` and `cluster`: high enough to confirm 2nd-order convergence and catch the onset of degradation (PPM stops converging by nx=256–512 on the slow wave), but low enough for quick validation. High resolutions (up to `nx_max = 2048`) are confirmed by `continuous integration`.
 
 ---
 
@@ -92,6 +101,8 @@ cd sims/<purpose>/<ProblemName> && mpirun -n <N> ./<ProblemName> inputs.toml
 
 - `local`: 64 cells in active dims. `OrszagTang` becomes `64x64x8` (~3 min; nx^3 scaling from the reference 128^2 run of ~20 min). `SlowWaveConvergence` caps the sweep at `setup.nx_max=128`.
 - `cluster`: reference `n_cell` from the table above.
+
+**Plotfiles:** Always set `plotfile_interval` to a positive value in smoke test TOMLs. This keeps output available for diagnostic plots after the run completes. `plotfile_interval = -1` is not permitted in smoke tests. Set `plotfile_prefix = "snapshots/plt"` so AMReX writes plotfiles under a `snapshots/` subdirectory of the run directory.
 
 ---
 
