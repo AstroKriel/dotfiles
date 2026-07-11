@@ -86,7 +86,13 @@ The repo template checklist:
 - [ ] I have added a link to any related issues (if applicable; see above).
 - [ ] I have read the [Contributing Guide](https://github.com/quokka-astro/quokka/blob/development/CONTRIBUTING.md).
 - [ ] I have added tests for any new physics that this PR adds to the code.
-- [ ] *(For quokka-astro org members)* I have manually triggered the GPU tests with the magic comment `/azp run`.
+- [ ] *(For quokka-astro org members)* I have triggered GPU tests for changed problems with `/azp run quick` and `/azp run rocm-quick`, or `/azp run` if this PR changes base modules affecting multiple problems.
 
-- The tests item applies when the PR adds a new physical process; not to infrastructure or harness changes.
-- After opening the PR, post `/azp run` as a comment to trigger the GPU test pipeline.
+The tests item applies when the PR adds a new physical process; not to infrastructure or harness changes.
+
+### GPU test triggers
+
+Two tiers of GPU CI can be triggered as PR comments; the merge queue always runs the full suite automatically before merging regardless of what was triggered manually, and a failure there bounces the PR back to draft and requires re-approval after the fix, so triggering the right tier yourself ahead of time avoids that cycle.
+
+- **`/azp run quick` and `/azp run rocm-quick`** (default): build and run, on GPU, only the test problems whose source under `src/problems` changed in the PR. Finishes in under 10 minutes. If the PR touches no `src/problems` files, they have nothing to build; make a dummy problem-file change to trigger them, then revert it before merging if not otherwise needed.
+- **`/azp run`** (~120 min): the full GPU suite across every problem. Reserve this for PRs that change a base/shared module outside `src/problems` (e.g. `QuokkaSimulation.hpp`, `mhd_system.hpp`, `physics_info.hpp`) that other problems depend on — `quick` can't see that blast radius, since it only rebuilds problems whose own files changed, not problems that merely depend on the shared code touched.
