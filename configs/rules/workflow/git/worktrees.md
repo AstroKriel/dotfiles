@@ -16,6 +16,7 @@ Group a codebase's worktrees under a single `<codebase>-worktrees/` directory si
 | Rule | Detail |
 |---|---|
 | Base clone on default branch | the base clone stays on the default branch (`main`, `development`, ...); worktrees branch off from there |
+| Base clone stays clean | never build, edit, or run experiments directly in the base clone, even for throwaway work with no intent to commit; use a worktree instead, e.g. a `tmp/<name>` branch for non-committal exploration (see [`workflow/git/branches.md`](branches.md)) |
 | One worktree per feature branch | create a worktree for each active feature branch; remove it when the branch is merged or shelved |
 | Location | worktrees live under `<codebase>-worktrees/`, a sibling of the base clone |
 | Naming | name each worktree after its branch with `/` replaced by `-`: branch `<verb>/<name>` becomes `<codebase>-worktrees/<verb>-<name>` |

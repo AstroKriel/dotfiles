@@ -54,7 +54,7 @@ cmake -S "$SRC" -B "$BUILD" -G Ninja \
 
 Use git worktrees to work on multiple feature branches in parallel without switching branches or invalidating builds.
 
-Base-clone-on-default, one-worktree-per-branch, location, naming, and pull-before-forking follow [`workflow/git/worktrees.md`](../git/worktrees.md): quokka's default branch is `development`, so the base clone stays on it and worktrees live under `quokka-worktrees/<branch-slug>`. The rules below add quokka's submodule, extern, and build-tree specifics.
+Base-clone-on-default, base-clone-stays-clean, one-worktree-per-branch, location, naming, and pull-before-forking follow [`workflow/git/worktrees.md`](../git/worktrees.md): quokka's default branch is `development`, so the base clone stays on it and worktrees live under `quokka-worktrees/<branch-slug>`. The rules below add quokka's submodule, extern, and build-tree specifics.
 
 | Rule | Detail |
 |---|---|
@@ -62,6 +62,7 @@ Base-clone-on-default, one-worktree-per-branch, location, naming, and pull-befor
 | Extern drift | Each worktree has its own `extern/` working tree; submodule pins are per-branch. If a feature branch falls behind `development` on submodule pins, fix by merging or rebasing `development` into the feature branch so the pins come back into sync. |
 | Build directories | Each worktree has its own build tree. On local, build dirs live inside the worktree (`build/3d-release`, etc.). On HPC, source lives on quota-limited Ceph home; build dirs go on node-local scratch. See Build locations below. |
 | Trial run data | Short-lived `sims/` runs belong inside the feature worktree, not the main checkout. |
+| Ad hoc verification | Even a one-off build or a local source edit made only to check something, with no commit planned, belongs in a `tmp/<name>` worktree, never the base clone. |
 
 If the source branch is a passive tracking branch (e.g. `development`), pull before creating the worktree. Skip this for active feature branches where the current state is intentional.
 
