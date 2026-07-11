@@ -51,6 +51,16 @@ Add situational `### ` sections after `### Description`, as they apply. Each is 
 
 ---
 
+## Validation
+
+- Name the exact test and configuration run: `<problem>`, resolution, and any non-default parameters, per the figure-caption rule under [Description](#description).
+- Prefer a plot over a quoted number for quantitative results: a bare number in prose is unverifiable and reads as padding, while a plot carries its own evidence.
+- When validating a mechanism rather than measuring a quantity, describe the workflow instead: what was compared against what, and why the result rules out other explanations. That narrative is what earns confidence.
+- Where practical, show the check has discriminating power: a before/after comparison, or a negative control where reverting the fix makes the check fail.
+- Flag validation gaps instead of leaving them unaddressed: state what wasn't tested and why.
+
+---
+
 ## Title status tags
 
 While the PR is a draft, prefix the title with a stage tag to communicate progress on top of GitHub's own draft/ready toggle. Every tagged stage is a draft:
