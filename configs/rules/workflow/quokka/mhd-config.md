@@ -25,10 +25,10 @@ AMReX exposes many parameters and often multiple ways to achieve the same thing.
 | Parameter | Recommended | Notes |
 |---|---|---|
 | `amr.n_cell` | int array | Number of cells per dimension. Sets resolution; `dx` follows from domain size. |
-| `amr.max_level` | `0` | Single-level for most MHD tests. |
+| `amr.max_level` | `0` | Single-level for most MHD tests. See [Multi-level AMR](#multi-level-amr) if raising this. |
 | `amr.blocking_factor_x` | `16` | See MPI decomposition below. |
 | `amr.max_grid_size` | `128` | See MPI decomposition below. |
-| `do_reflux` | `0` | Disable for single-level runs. |
+| `do_reflux` | `0` | Disable for single-level runs; must be `1` for MHD once `amr.max_level > 0`, see [Multi-level AMR](#multi-level-amr). |
 | `do_subcycle` | `0` | Disable for single-level runs; also required off with any physical diffusion (e.g. `mhd.resistivity`); see Resistivity. |
 | `plotfile_prefix` | `"snapshots/plt"` | Output path prefix for plotfiles; defaults to `plt` in the run working directory if absent. |
 
@@ -108,6 +108,17 @@ This allows AMReX to split a 512-cell domain into up to 32 boxes.
 
 ---
 
+## Multi-level AMR
+
+Setting `amr.max_level > 0` adds a constraint beyond the MPI-decomposition sizing above: Quokka's own startup check (`amrex::ProperlyNested` in `simulation.hpp`) aborts ("Grids not properly nested!") if `amr.blocking_factor_*` is too small, independent of the single-box ghost-cell concern below.
+
+- **`do_reflux` must be `1` for MHD, not `0`:** the `EdgeFluxRegister` coarse-fine EMF correction that keeps `div(B)` consistent across refinement boundaries (see GitHub issue quokka-astro/quokka#530) is entirely gated behind `do_reflux != 0` (`QuokkaSimulation::advanceSingleTimestepAtLevel`). Copying `do_reflux = 0` from the single-level convention above silently disables this correction: the run looks fine at first, then catastrophically diverges (density collapsing towards zero, velocity exploding past `1e30`) the moment a refined feature actually crosses a coarse-fine boundary, reproducibly at the same location and time regardless of EMF scheme or reconstruction order. Quokka's own working AMR+MHD test (`inputs/MHDBlast.toml`) sets `do_reflux = 1` for exactly this reason; a uniform-grid (`amr.max_level = 0`) run of the same problem is unaffected, which is the fastest way to confirm this is the cause before spending time elsewhere (buffer tuning, EMF scheme, reconstruction order all failed to fix it; `do_reflux = 1` did).
+- **Blocking factor floor:** the abort message suggests `blocking_factor >= ceil(nghost_cc, ref_ratio) * ref_ratio`, but this understates the real minimum: `blocking_factor = 8` failed empirically for a `Quokka2026` run (`nghost_cc = 7`, formula gives `8`). `16` is the smallest value confirmed to work; use it as the default floor for any `amr.max_level > 0` run regardless of EMF scheme.
+- **`max_grid_size` must stay a multiple of `blocking_factor`:** same AMReX-wide rule as the single-level case, but now bounded below by the floor above; this caps how many boxes (and therefore MPI ranks) a given resolution can support once AMR is on.
+- **More ranks needs more domain cells, not a smaller blocking factor:** once `blocking_factor` is at the floor, the only way to add boxes is to add `amr.n_cell`. That roughly multiplies total compute cost, so it is not a reliable way to reduce wall-clock; a small AMR test problem may simply have a low MPI-rank ceiling.
+
+---
+
 ## Minimum cell count
 
-The hydro stencil uses `nghost = 4`. A single-box periodic grid below 8 cells per dim has opposite-side ghosts overlapping inside the valid region. Use at least 8 cells per dim under periodic boundary conditions.
+The hydro stencil uses `nghost = 4` as a baseline; MHD adds `nghost_Riemann` on top (`nghost_cc = nghost_Riemann + 4`), which depends on `mhd.emf_compute_scheme`: `3` for `Quokka2026`, otherwise `1` (`LondrilloDelZanna2004` averaging) or `2` (`Balsara2025` averaging) via `mhd.emf_averaging_scheme`. A single-box periodic grid below 8 cells per dim has opposite-side ghosts overlapping inside the valid region. Use at least 8 cells per dim under periodic boundary conditions.
