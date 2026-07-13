@@ -3,3 +3,4 @@ background-opacity = 0.95
 copy-on-select = clipboard
 macos-option-as-alt = true
 font-feature = "-calt, -liga, -dlig"
+mouse-scroll-multiplier = precision:3,discrete:3
