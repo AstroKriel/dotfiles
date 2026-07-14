@@ -49,6 +49,8 @@ Three-part hierarchy: `type:group:name`. The group is the context; the name is t
 | Symbol case | lower-case for scalar and vector fields (including placeholder/dummy variables); upper-case for rank-2+ tensor fields, e.g. the vector field $\mVector{F}$ should be written $\mVector{f}$ |
 | Equation layout (single equation) | LHS on its own line; `&= RHS` indented below; long RHS terms broken across lines, indented to show structure; `, \label{}` on its own final line |
 | Equation layout (multi-equation, with `\\`) | `, \label{}` must appear on the same source line as `\\`, not on a separate line; for short RHS append inline (`&= 0 , \label{...} \\`); for long RHS put on the last continuation line before `\\` |
+| Tensor dot-product conventions | when defining a rank-2+ tensor via component notation, state at first use which index is contracted from which side of a dot product, e.g. `dotting from the left contracts <j>, leaves <i> free`; pick one convention per document and apply it consistently everywhere the tensor is dotted with a vector |
+| Bracket hierarchy | square brackets mark a differential operator (`nabla`, `D_t`, `partial_<i>`, a directional-derivative operator like `(<a> . nabla)`) acting on the whole enclosed multi-term group; round brackets are plain algebraic/coefficient grouping |
 
 Single-equation example:
 ```latex
@@ -72,6 +74,12 @@ Multi-equation example:
         , \label{eqn:group:name-b}
 \end{align}
 ```
+
+---
+
+## Explanatory Prose
+
+Lean toward direct, declarative derivation steps (`<X> gives...`, `substituting <Y>...`) over commentary. A conversational aside can be worth it at a document's hardest step, but only when it teaches the reader something not already visible in the equation.
 
 ---
 
