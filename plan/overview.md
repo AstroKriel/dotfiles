@@ -3,6 +3,12 @@
 Decision record for the dynamic config-registry and install-planning refactor.
 Status: agreed, not built. Branch: `add/dynamic-registry`.
 
+Branch scope: this branch delivers implementation-order steps 1-3 only
+(schema, backfill, `resolve_config`, `--plan`). Steps 4-6, covering the
+`scripts/setup/*` cutover, the extras and managers directory restructuring,
+and `--bootstrap`, are follow-up work; re-scope those against `main` at the
+time, not against this snapshot.
+
 ---
 
 ## Problem
@@ -52,7 +58,7 @@ are verb-first then thing (`discover_config.py`, `detect_system.py`,
 | 6 | Actions are `install`, `render`, `link` or `copy`, `post-hook`. `check` is a gate, not an action. Teardown is derived, never declared. | These four cover every behaviour already in `scripts/setup/`. |
 | 7 | One config spec per concept, with a `[[link]]` list of 1..N entries. `install`, `check`, `needs` are stated once. | The unit needing link metadata is a link; duplicating install across files would drift. |
 | 8 | `config-only` is not the same as available-everywhere (see "Availability"). | "Needs an install action" and "where available" are independent axes. |
-| 9 | Extras become concept directories (`configs/extras/<concept>/`), subscribed by key, not file path. | Extras, tools, and editors become the same kind of thing; this is the biggest refactor. |
+| 9 | Extras become concept directories, subscribed by key, not file path. The target layout is stale here: written against `configs/extras/{arch-x11,hpc,macos,pc}/`, which `main` has since renamed to `configs/system/pc/<platform>/<concept>/` plus a separate `configs/workarounds/` source root (see "Still open"). Re-derive the concept-directory shape against whatever `main` looks like when this step starts. | Extras, tools, and editors become the same kind of thing; this is the biggest refactor. |
 | 10 | `when` is limited to `{platform, manager}`. The long tail uses one `kind = "script"` avenue. | An arbitrary predicate set becomes an imperative DSL by accident. |
 | 11 | `needs` distinguishes a bare package from a concept (see "Dependencies"). | A bare package is installed; a concept is installed and linked. |
 | 12 | Avenues key on manager, not OS. | The manager is always the discriminator; per-distro differences are different `pkg` per avenue. |
@@ -560,12 +566,12 @@ name   = "conky.conf"
 
 ## Implementation order
 
-1. Schema plus backfill of one or two concepts. No behaviour change.
-2. Pure `resolve_config` plus the `system_descriptor` type plus the profile-by-platform golden tests.
-3. `--plan`: detect system, resolve, print the plan or hard-stop. Dry-run only.
-4. Replace the hardcoded registries with directory discovery.
-5. Restructure extras into concept directories.
-6. Optional `--bootstrap`: execute a validated plan; idempotent via `[check]`.
+1. Schema plus backfill of one or two concepts. No behaviour change. (done, `add/dynamic-registry`)
+2. Pure `resolve_config` plus the `system_descriptor` type plus the profile-by-platform golden tests. (`add/dynamic-registry`)
+3. `--plan`: detect system, resolve, print the plan or hard-stop. Dry-run only. (`add/dynamic-registry`)
+4. Replace the hardcoded registries with directory discovery. (follow-up branch)
+5. Restructure extras into concept directories. (follow-up branch; re-derive against `main`'s current `configs/system/pc/<platform>/<concept>/` plus `configs/workarounds/` layout, not the `configs/extras/` shape this doc originally assumed)
+6. Optional `--bootstrap`: execute a validated plan; idempotent via `[check]`. (follow-up branch; `executor.md` not yet drafted)
 
 ---
 
@@ -576,6 +582,7 @@ name   = "conky.conf"
 | `--bootstrap` execution policy: run installs and manager bootstrap, or only print commands? | print-only default, execute opt-in per platform (bootstrap-ability itself is settled by #14) |
 | A config spec that must force its avenue order regardless of profile `prefer_managers` (broken formula, mandatory script). Needs a per-avenue binding flag. | deferred until a real case appears (#5 covers it via a set of one today) |
 | `render` declaration mechanism: explicit `[render]` table versus convention-discovered. Output location is settled by #6 (in-repo, committed). | decide at the second render case |
+| Privileged, sudo-deployed installs: the legacy `ExtraConfig` now carries `required_platforms` and `requires_sudo` (system-path targets needing sudo to symlink), plus a separate `configs/workarounds/` source root. Neither axis exists in the `[check]`/`[[install]]`/`[[link]]` schema. | settle before step 5 starts; likely a `requires_sudo` key on `[[link]]` or `[[install]]`, and a decision on whether `workarounds/` is its own group or folds into `extras` |
 
 > Profile format migration (extras path to key, new manager keys) is an
 > implementation note, not a design item: the parser must detect old-style
