@@ -42,22 +42,24 @@ Choose where data or scratch work goes based on its scope and intended lifespan:
 | `/tmp/` | reboot-ephemeral | shell pipes, one-shot outputs; fine to lose on reboot |
 | `~/tmp/` | indefinite | personal operational scratch; survives reboots but has no project or scientific home |
 | `freyja` | until formalised | prototyping with intent to open a mimir project |
-| `<project>/scratch/` | project lifetime | data belonging to an active mimir project |
+| `<project>/<category>/dev/` | project lifetime | data belonging to an active mimir project |
 
-### Project scratch: `scratch/`
+### Project dev: `<category>/dev/`
 
-Untracked and mixed data for an active project lives under `scratch/` at the project root. Thread subfolder names mirror `<project-notes>/threads/`:
+Untracked, in-development data for an active project lives under a `dev/` subfolder inside each relevant top-level category, not at the project root:
 
 ```text
 <project>/
-└── scratch/
-    ├── <thread>.gitignored/   # untracked
-    └── <thread>/              # tracked (small reference files, configs)
+├── datasets/
+│   └── dev/   # untracked
+├── figures/
+│   └── dev/   # untracked
+└── scripts/
+    └── dev/   # tracked; work-in-progress scripts, not data
 ```
 
-- Add `*.gitignored` to the project's `.gitignore`. The suffix on each folder makes its tracking status self-labelling.
-- `scratch/` itself is tracked. It appears in git only once a non-gitignored item or `.gitkeep` exists inside it.
-- Data not tied to any thread goes in `scratch/misc.gitignored/`.
+- Add `datasets/dev/` and `figures/dev/` to the project's `.gitignore`; `scripts/dev/` stays tracked since it holds code, not data.
+- Name subfolders inside a `dev/` directly for what they contain (a dataset name, a diagnostic being developed, etc.) -- no further nesting convention required.
 
 ### Scratch folder structure: `/tmp/` and `~/tmp/`
 
