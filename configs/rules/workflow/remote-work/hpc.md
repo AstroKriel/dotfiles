@@ -16,6 +16,29 @@ When working on a specific cluster, resolve these concepts from the cluster note
 
 ---
 
+## Home Repo Layout
+
+`<repos>` always resolves to `~/repos`: a fixed convention, not cluster-specific vocabulary to redefine per cluster note.
+
+Checkouts split by type, the same two names on every cluster:
+
+| Type | Holds | Examples |
+|---|---|---|
+| `sim-codes/` | Simulation codebases: compiled, built, and run to produce data | `quokka`, `pencil-code` |
+| `python-analysis/` | Python packages for diagnostics, plotting, and post-processing | `ww-quokka-sims`, `jormi` |
+
+```text
+~/repos/
+├── sim-codes/
+│   └── <code>/
+└── python-analysis/
+    └── <package>/
+```
+
+Git worktrees follow the same sibling convention as local machines (see [`<rules>/workflow/git/worktrees.md`](../git/worktrees.md)): `sim-codes/<code>-worktrees/<branch-slug>/` sits alongside `sim-codes/<code>/`.
+
+---
+
 ## Onboarding a New Cluster
 
 When access to a new cluster is gained:
@@ -26,6 +49,7 @@ When access to a new cluster is gained:
 4. Survey the module environment: compiler toolchain, MPI, HDF5/parallel I/O stack
 5. Submit a minimal test job to verify scheduling and I/O work
 6. Record the storage tier paths and working module stack in the cluster `README.md`
+7. Write the same tier paths to `~/storage_paths.txt` on the cluster, for quick lookup
 
 ---
 
@@ -35,7 +59,7 @@ Directives are scheduler-specific (SLURM uses `#SBATCH`, PBS uses `#PBS`); check
 
 **Naming:** `<project>-<descriptor>`, short enough to read in the queue.
 
-**Working directory:** set explicitly to the run directory using `--chdir` (SLURM) or `-d` (PBS). Do not rely on submission directory or home directory defaults.
+**Working directory:** invoke the submission command (`sbatch`/`qsub`) from inside the sim's own directory, or set the working directory explicitly to it with `--chdir` (SLURM) or `-d` (PBS). The scheduler drops stdout/stderr logs wherever the working directory resolves to (PBS's `-l wd`, for instance, uses wherever `qsub` was called from); submitting from anywhere else (home, a shared scripts folder) scatters logs away from the run they belong to, with no way to tie them back together later. Never rely on submission directory or home directory defaults without checking where that actually resolves to.
 
 **Module loading:** always `module purge` before loading. Pin the full module string (name and version) from the cluster `README.md` and use it verbatim across all jobs for that cluster. Log any version changes in `log.md`.
 
@@ -61,27 +85,41 @@ Before relying on a module-provided binary for a build tool (e.g., make, ninja, 
 
 ## Run Directory Layout
 
-Simulations go under `<fast-storage>/<science-project>/`. Resolve `<fast-storage>` from the cluster's `## Instance` section before acting; on clusters with multiple allocation projects it maps to a project-specific placeholder (e.g. `<scratch-jh2>`), giving a full path of `<scratch-jh2>/<science-project>/`. Note that `<science-project>` is the research project name (e.g. `mhd-turbulence`), not an allocation project code.
+`home` holds only version-controlled source checkouts, nothing else. Everything memory- or storage-heavy (builds, sim data, logs) lives on `<fast-storage>`, scoped under the science project it belongs to. Something with no owning project doesn't get a permanent home at all; see "Builds under active development" below.
+
+Simulations go under `<fast-storage>/<science-project>/<codebase>/`. Resolve `<fast-storage>` from the cluster's `## Instance` section before acting; on clusters with multiple allocation projects it maps to a project-specific placeholder (e.g. `<scratch-jh2>`), giving a full path of `<scratch-jh2>/<science-project>/<codebase>/`. Note that `<science-project>` is the research project name (e.g. `mhd-turbulence`), not an allocation project code.
+
+The `<codebase>` level applies even when a project currently uses only one code: it keeps the shape consistent if a second code is ever added, and gives a project-owned build a natural home next to the data it produced (see "Builds under active development" below). A project using two codes gets two clean subtrees instead of concepts and sim names interleaved from both.
 
 Sim directories are grouped by scientific concept; each sim directory is self-contained (no symlinks) so it can be moved or archived without breaking.
+
+A sim's home is always `sims/<concept>/<sim-name>/`: a superseded attempt and a baseline still cited in the analysis both live there, distinguished only by a `<sim-name>` that says what each one is (e.g. `1024-baseline-plm-ppm`). A run that stops being needed for anything gets deleted from that path, not relocated to a separate archive tier.
 
 | Concept | Role | Name defined by |
 |---|---|---|
 | `<sim-inputs>` | Config and input files the simulation reads | Code rules |
+| `<sim-executable>` | Copy of the built binary the sim was run with (out-of-source builds only) | Code rules |
 | `<sim-outputs>` | Raw output written by the simulation | Code rules |
 | `<derived>` | Reduced data from analysis tools; what gets transferred locally | Code rules |
 
 ```text
 <project>/
-├── <concept>/
-│   └── <sim-name>/
-│       ├── jobs/
-│       ├── <sim-inputs>
-│       ├── logs/
-│       ├── <sim-outputs>/
-│       └── <derived>/
+├── <codebase>/
+│   ├── sims/
+│   │   └── <concept>/
+│   │       └── <sim-name>/
+│   │           ├── jobs/
+│   │           ├── <sim-inputs>
+│   │           ├── <sim-executable>
+│   │           ├── logs/
+│   │           ├── <sim-outputs>/
+│   │           └── <derived>/
+│   └── builds/
+│       └── <branch-slug>/<config>/
 └── tmp/
 ```
+
+`jobs/` and `logs/` live inside each `<sim-name>/`, never in a shared location: submit every job from inside that sim's own directory (see "Working directory" above) so the scheduler's logs land there automatically, co-located with the run they belong to.
 
 `tmp/` follows the same concept and naming conventions as `~/tmp/` in [`<rules>/workflow/asgard/project.md`](../asgard/project.md), but on remote systems it lives under `<fast-storage>/<project>/`, not under `~`. Placing it on `home` consumes the small quota and causes usage spikes.
 
@@ -107,14 +145,17 @@ Each project's notes declare where its data and builds live on each cluster, in 
 
 ### Builds under active development
 
-When a codebase is under active development, builds and runs nest one level deeper, by thread (the project's `threads/`), so each build is tied to the branch for its thread:
+Where a build lives depends on one question: does this work belong to a specific science project, or is it codebase development/maintenance with no project attached?
 
-- For out-of-source build systems (e.g. CMake), one source checkout is kept and each thread's build tree lives under the thread on `fast-storage`, configured against that source on the thread's branch.
-- For codes where the build is the run directory (compile-time grid or modules baked in per run), each run directory is its own build, grouped by thread.
+- **No owning project** (a feature branch or a bug fix: work that's bound for the codebase itself, not for a specific paper or investigation): the build lives under `<codebase>/threads/<branch-slug>/build/<config>`, scoped to the branch alone. This is ephemeral scaffolding, not data, so it never gets a permanent reserved directory: create it when the thread starts, delete it the moment the thread is shelved or merged. Validation/smoke sims for that thread live alongside the build, under `<codebase>/threads/<branch-slug>/sims/<purpose>/<problem>/` on `fast-storage`, never inside the source worktree on `home`.
+- **Belongs to a project**: the build lives under `<project>/<codebase>/builds/<branch-slug>/<config>/` instead, named to match the source worktree's branch-slug exactly. Keep only what's currently needed: a sim already logs its own build provenance internally, so the build tree isn't the record of what produced a given result; once a build is superseded or no longer needed, delete it.
 
-- A single source checkout is on one branch at a time; a thread's build is valid only while that branch is checked out.
-- A thread's build and runs are deleted once the thread is shelved or merged.
-- A matured project that pins a code version replaces the rolling per-thread builds with one frozen build at the pinned commit.
+Either way:
+
+- For out-of-source build systems (e.g. CMake), one source checkout is kept and each build tree lives on `fast-storage`, configured against that source on the relevant branch. Once a sim's build is ready to run, copy the built executable into the sim's own directory as `<sim-executable>`: the sim then stays self-contained and movable even after the originating build tree is superseded or deleted.
+- For codes where the build is the run directory (compile-time grid or modules baked in per run), each run directory is its own build, grouped the same way.
+- A single source checkout is on one branch at a time; a build is valid only while that branch is checked out.
+- A matured project that pins a code version replaces a rolling build with one frozen build at the pinned commit, still under the project's own `builds/`.
 
 ---
 
